@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "table-proof",
+  "label": "Mesa de prueba headless",
+  "kind": "table",
+  "units": "meters",
+  "dimensions": [1.2, 0.75, 0.7],
+  "parameters": {
+    "topThickness": 0.04,
+    "legWidth": 0.06,
+    "legInset": 0.06
+  },
+  "material": {
+    "baseColor": "#98704d",
+    "roughness": 0.55
+  },
+  "source": {
+    "url": null,
+    "description": "Fixture sintético para probar generación por job. No reproduce un producto comercial.",
+    "dimensionalStatus": "estimated"
+  }
+}

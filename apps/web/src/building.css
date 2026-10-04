@@ -1,0 +1,191 @@
+.building-workspace { grid-template-columns: minmax(0, 1fr) 304px; }
+.building-workspace .building-viewport { min-height: 620px; height: calc(100dvh - 208px); }
+.building-workspace .solar-inspector { min-height: 620px; height: calc(100dvh - 208px); max-height: calc(100dvh - 208px); padding: 24px 22px; }
+.building-location { display: flex; flex-direction: column; gap: 7px; color: #4a5c45; text-shadow: 0 1px 8px #f9faf6; }
+.building-location .eyebrow { font-size: 9px; }
+.building-location strong { font-size: 17px; letter-spacing: -.025em; font-weight: 580; }
+.building-location small { font-size: 10px; color: #6e7d67; }
+.building-viewport-top { align-items: flex-start; }
+.view-buttons .camera-reset { font-size: 17px; padding: 3px 8px; border-left: 1px solid #dce2d6; border-radius: 0; }
+.building-moment-tag { position: absolute; top: 111px; left: 22px; display: flex; align-items: center; gap: 9px; color: #6d775f; background: #fffef6df; border: 1px solid #f3f1e2; padding: 9px 12px; border-radius: 6px; pointer-events: none; z-index: 30; }
+.building-moment-tag svg { width: 22px; color: #ab8847; }
+.building-moment-tag > span { display: flex; flex-direction: column; gap: 3px; font-size: 9px; }
+.building-moment-tag b { font-size: 14px; letter-spacing: .015em; font-weight: 550; font-variant-numeric: tabular-nums; }
+.building-moment-tag small { font-size: 9px; font-weight: 400; color: #90967e; }
+.building-viewport .scene-guide > span { display: flex; align-items: center; gap: 6px; font-size: 10px; }
+.target-key, .neighbor-key { width: 7px; height: 7px; display: inline-block; border-radius: 2px; background: #cabd9a; }
+.neighbor-key { background: #abb4a1; margin-left: 8px; }
+.building-layers { gap: 12px; }
+.building-layers label { min-height: 19px; }
+.solar-heading .eyebrow { color: #9c895f; font-size: 9px; }
+.solar-inspector .solar-heading h2 { font-size: 25px; letter-spacing: -.04em; line-height: 1.18; font-weight: 530; text-transform: none; margin: 10px 0; color: #3d503c; }
+.solar-heading p { margin: 0; font-size: 11px; line-height: 1.7; color: #829077; }
+.sun-status { margin: 20px 0; display: flex; gap: 9px; align-items: center; padding: 10px 11px; border-radius: 6px; background: #f5f0e4; color: #887143; }
+.sun-status-icon { width: 25px; height: 25px; display: block; flex-shrink: 0; }
+.sun-status-icon svg { width: 100%; height: 100%; }
+.sun-status > div { display: flex; flex-direction: column; gap: 4px; }
+.sun-status strong { font-size: 10px; font-weight: 550; }
+.sun-status span:not(.sun-status-icon) { font-size: 9px; color: #9c9076; }
+.sun-status-night { background: #eef0ed; color: #727f7a; }
+.sun-status-night span:not(.sun-status-icon) { color: #8a948f; }
+.solar-date-control { display: flex; flex-direction: column; gap: 9px; }
+.solar-date-control label, .solar-time-heading label { font-size: 10px; font-weight: 550; color: #5e6d53; }
+.solar-date-control input { background: #fcfcf8; color: #56664d; border: 1px solid #dce2d5; width: 100%; min-height: 41px; padding: 9px 10px; border-radius: 5px; font-size: 12px; color-scheme: light; }
+.season-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin: 9px 0 23px; }
+.season-presets button { background: #f6f6f0; border: 1px solid transparent; border-radius: 5px; color: #6e7b63; padding: 8px 0; font-size: 8px; min-height: 41px; }
+.season-presets button small { display: block; color: #9aa18f; font-size: 8px; margin-top: 4px; }
+.season-presets button:hover { background: #eff2e8; }
+.season-presets button[aria-pressed=true] { border-color: #cbd6bd; background: #eaf0e1; color: #526945; }
+.solar-time-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.solar-time-heading > span { font-size: 8px; color: #8e9883; }
+.solar-clock-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin: 7px 0 5px; }
+.solar-clock-row input { width: 177px; max-width: calc(100% - 50px); padding: 0; background: transparent; border: 0; font-size: 34px; font-weight: 430; letter-spacing: -.055em; color: #3d503c; font-variant-numeric: tabular-nums; color-scheme: light; }
+.solar-clock-row input::-webkit-calendar-picker-indicator { width: 14px; margin: 0; padding: 0; opacity: .35; }
+.day-play { display: grid; place-items: center; width: 39px; height: 39px; border: 1px solid #657b54; border-radius: 50%; background: #60764f; color: #fffdf6; flex-shrink: 0; }
+.day-play:hover { background: #4c633d; }
+.day-play.playing { background: #eee8d8; border-color: #dacaa8; color: #8a7140; }
+.day-play svg { width: 13px; height: 13px; fill: currentColor; }
+.solar-time-slider { display: block; width: 100%; accent-color: #8a956b; height: 23px; margin: 0; cursor: ew-resize; }
+.time-scale { display: flex; justify-content: space-between; font-size: 8px; color: #98a08d; margin-top: 1px; font-variant-numeric: tabular-nums; }
+.playback-caption { display: flex; justify-content: space-between; font-size: 8px; color: #7f8d72; margin-top: 10px; gap: 8px; }
+.playback-caption span { color: #a1a793; }
+.solar-time-note { color: #94764c; font-size: 10px; line-height: 1.6; margin: 9px 0 0; }
+.sun-readings { display: grid; grid-template-columns: 1fr 1fr; padding: 20px 0 18px; border-bottom: 1px solid #e6eade; margin-top: 15px; border-top: 1px solid #e6eade; }
+.sun-readings > div + div { padding-left: 20px; border-left: 1px solid #e6eade; }
+.sun-readings > div > span { display: block; font-size: 9px; color: #8a967e; margin-bottom: 6px; }
+.sun-readings strong { font-size: 27px; font-weight: 470; letter-spacing: -.04em; color: #52664a; font-variant-numeric: tabular-nums; }
+.sun-readings strong small { font-size: 11px; margin-left: 1px; color: #94a087; letter-spacing: 0; font-weight: 400; }
+.sun-readings p { font-size: 8px; color: #9aa38f; margin: 5px 0 0; }
+.day-summary { padding-top: 18px; }
+.day-summary-heading { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.day-summary h3 { font-size: 9px; font-weight: 550; margin: 0; color: #77876b; }
+.day-summary-heading > span { font-size: 8px; color: #a19068; white-space: nowrap; }
+.solar-chart { margin-top: 5px; }
+.solar-chart svg { display: block; width: 100%; height: auto; }
+.solar-chart > div { display: flex; justify-content: space-between; font-size: 8px; color: #a3aa96; margin-top: -2px; }
+.sunrise-sunset { display: grid; grid-template-columns: 1fr 1.2fr 1fr; margin-top: 14px; gap: 6px; align-items: center; }
+.sunrise-sunset > :last-child { text-align: right; }
+.sunrise-sunset span { display: block; font-size: 8px; color: #97a089; margin-bottom: 5px; }
+.sunrise-sunset strong { color: #66775b; font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sunrise-sunset button { border: 0; background: #f6f6ef; padding: 8px 3px; border-radius: 4px; text-align: center; }
+.sunrise-sunset button:hover { background: #eef2e5; }
+.building-evidence { margin-top: 22px; }
+.building-evidence summary { min-height: 22px; color: #7e8e71; font-size: 10px; }
+.building-evidence a { color: #587747; text-underline-offset: 3px; }
+.building-evidence p { color: #8b967d; }
+.building-footer { gap: 16px; }
+.building-footer p { max-width: none; }
+.building-footer > a { margin-left: auto; color: #7d8c6f; font-size: 10px; text-decoration: none; white-space: nowrap; }
+.building-footer > a:hover { text-decoration: underline; }
+.building-viewport.is-night .building-location { text-shadow: 0 1px 8px #fff; }
+
+@media (max-width: 1120px) {
+  .building-workspace { grid-template-columns: minmax(0, 1fr) 278px; gap: 12px; padding: 0 15px; }
+  .building-workspace .solar-inspector { padding: 22px 17px; }
+  .building-viewport-top { flex-wrap: wrap; gap: 13px; }
+  .building-viewport-bottom { align-items: flex-start; flex-direction: column-reverse; gap: 13px; }
+  .building-location strong { font-size: 15px; }
+  .building-moment-tag { top: 136px; }
+}
+@media (max-width: 760px) {
+  .building-workspace { grid-template-columns: 1fr; gap: 12px; padding: 0 10px; }
+  .building-workspace .building-viewport { min-height: 500px; height: 62dvh; max-height: 740px; }
+  .building-workspace .solar-inspector { min-height: 0; height: auto; max-height: none; padding: 23px; }
+  .solar-inspector .solar-heading h2 { font-size: 27px; }
+  .solar-heading p br { display: none; }
+  .solar-heading h2 br { display: none; }
+  .season-presets button { font-size: 10px; min-height: 46px; }
+  .season-presets button small { font-size: 9px; }
+  .solar-time-heading > span, .time-scale, .playback-caption, .day-summary-heading > span { font-size: 9px; }
+  .solar-chart { max-height: 122px; }
+  .solar-chart svg { max-height: 105px; width: 100%; }
+  .building-layers label { min-height: 23px; }
+  .building-viewport-top { flex-wrap: nowrap; }
+  .building-moment-tag { top: 116px; }
+  .building-footer { padding: 16px 21px; }
+  .building-footer p { width: 100%; font-size: 10px; }
+}
+@media (max-width: 450px) {
+  .building-workspace { padding: 0 7px; }
+  .building-viewport-top { flex-wrap: wrap; gap: 10px; }
+  .building-location strong { font-size: 14px; }
+  .building-location .eyebrow { font-size: 8px; }
+  .building-viewport .view-buttons button { min-height: 31px; }
+  .building-moment-tag { left: auto; right: 12px; top: 152px; padding: 7px 9px; }
+  .building-layers { gap: 12px; padding: 8px 10px; }
+  .building-layers label { font-size: 10px; }
+  .building-layers input { width: 14px; height: 14px; }
+  .building-viewport .scene-guide > span { font-size: 9px; }
+  .building-workspace .solar-inspector { padding: 22px 18px; }
+}
+
+.building-scene-surface { width: 100%; height: 100%; }
+.building-model-label { display: block; text-align: center; font-size: 10px; font-weight: 650; white-space: nowrap; padding: 7px 10px; border-radius: 5px; background: #fffdf4e8; box-shadow: 0 2px 10px #37472c12; border: 1px solid #d7d6be; color: #536447; }
+.building-model-label small { display: block; font-size: 8px; font-weight: 400; margin-top: 3px; color: #899178; }
+.cardinal-label { font-size: 12px; color: #7d8877; font-weight: 550; text-shadow: 0 1px 5px #fff; }
+.cardinal-north { color: #a16e51; font-weight: 750; }
+.sun-position-label { display: block; transform: translateY(-25px); font-size: 10px; white-space: nowrap; background: #fff8de; color: #9a7738; padding: 4px 7px; border-radius: 4px; }
+
+/* The same solar controls drive the exterior and the apartment. */
+.apartment-workspace { grid-template-columns: minmax(0, 1fr) 304px; }
+.apartment-workspace .apartment-inspector { padding: 22px 20px; }
+.apartment-viewport .apartment-moment-tag { top: 78px; }
+.apartment-context-toggle { position: absolute; top: 81px; right: 22px; z-index: 30; display: flex; align-items: center; gap: 7px; min-height: 37px; padding: 8px 11px; border: 1px solid #d7dfce; border-radius: 5px; background: #fffef7eb; color: #637457; font-size: 10px; }
+.apartment-context-toggle > span { font-size: 17px; line-height: 1; }
+.apartment-context-toggle[aria-pressed=true] { background: #e8efde; border-color: #b9c8aa; color: #49613b; }
+.apartment-context-toggle:hover { background: #edf2e5; }
+.apartment-location-card { padding-bottom: 23px; margin-bottom: 22px; border-bottom: 1px solid #e5e9dc; }
+.apartment-location-card .eyebrow { font-size: 8px; color: #8c896c; }
+.apartment-location-card h2 { font-size: 20px; text-transform: none; letter-spacing: -.03em; color: #43553b; font-weight: 550; margin: 9px 0; }
+.apartment-location-card p { font-size: 11px; line-height: 1.75; color: #738467; margin: 0 0 12px; }
+.apartment-location-card p small { font-size: 9px; color: #a28f6c; }
+.building-section-options { display: grid; grid-template-columns: .9fr 1.1fr 1fr; gap: 3px; padding: 3px; border-radius: 5px; background: #eff1e9; }
+.building-section-options button { padding: 9px 3px; border: 0; border-radius: 4px; color: #829176; font-size: 9px; background: transparent; }
+.building-section-options button[aria-pressed=true] { background: #fffefa; color: #4d6340; box-shadow: 0 1px 5px #3541390c; }
+.apartment-locate { display: block; padding: 10px 0; margin: 2px 0 5px; border: 0; background: transparent; color: #728664; font-size: 10px; text-align: left; }
+.apartment-locate:hover { color: #3e5c2e; }
+.apartment-enter { display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 11px 12px; border: 1px solid #647b55; border-radius: 5px; background: #647b55; color: #fffefa; font-size: 10px; text-align: left; gap: 7px; }
+.apartment-enter:hover { background: #4f683e; }
+.apartment-enter span { font-size: 15px; }
+.apartment-key { width: 7px; height: 7px; display: inline-block; border-radius: 2px; background: #e7a552; margin-left: 8px; }
+.solar-room-focus h2 { font-size: 9px; margin-bottom: 10px; }
+.solar-room-focus > div { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.solar-room-focus button { border: 1px solid #e0e6d7; border-radius: 5px; background: #f8f9f3; color: #7a8a6d; font-size: 10px; padding: 9px 5px; }
+.solar-room-focus button:hover { background: #edf2e5; }
+.solar-room-focus button[aria-pressed=true] { border-color: #becfb0; background: #eaf0e2; color: #4f663f; }
+.solar-room-focus p { color: #939d87; font-size: 10px; line-height: 1.6; margin: 10px 0 0; }
+.solar-interior-note { background: #f4f5ed; border-radius: 5px; padding: 12px; margin-top: 21px; }
+.solar-interior-note strong { color: #758468; font-size: 10px; font-weight: 550; }
+.solar-interior-note p { margin: 5px 0 0; color: #919b85; font-size: 9px; line-height: 1.7; }
+.apartment-inspector .evidence-notes a { color: #60784e; text-underline-offset: 3px; }
+@media (max-width: 1120px) {
+  .apartment-workspace { grid-template-columns: minmax(0, 1fr) 278px; }
+  .apartment-workspace .apartment-inspector { padding: 20px 17px; }
+}
+@media (max-width: 900px) {
+  .apartment-viewport .viewport-top { flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+  .apartment-viewport .apartment-moment-tag { top: 120px; }
+  .apartment-context-toggle { top: 122px; }
+}
+@media (max-width: 760px) {
+  .apartment-workspace { grid-template-columns: 1fr; }
+  .apartment-workspace .apartment-inspector { padding: 22px; }
+  .apartment-viewport .viewport-top { flex-wrap: nowrap; }
+  .apartment-viewport .apartment-moment-tag { top: 78px; left: 12px; right: auto; }
+  .apartment-context-toggle { top: 81px; right: 12px; }
+  .building-section-options button, .solar-room-focus button { min-height: 39px; font-size: 10px; }
+  .apartment-location-card p, .apartment-enter { font-size: 11px; }
+  .apartment-locate { min-height: 36px; }
+}
+@media (max-width: 450px) {
+  .apartment-viewport .viewport-top { flex-wrap: wrap; gap: 12px; }
+  .apartment-viewport .apartment-moment-tag { top: 107px; }
+  .apartment-context-toggle { top: 108px; }
+  .apartment-moment-tag { padding: 7px 9px; }
+  .apartment-workspace .apartment-inspector { padding: 22px 18px; }
+  .apartment-viewport .scene-guide > span { font-size: 10px; }
+}
+.solar-room-focus .apartment-orientation { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 10px; padding-top: 10px; }
+.apartment-orientation span { display: flex; flex-direction: column; gap: 4px; font-size: 9px; color: #929b84; }
+.apartment-orientation b { font-size: 10px; font-weight: 550; color: #778568; }
+.apartment-orientation small { display: block; width: 100%; color: #a4967b; font-size: 8px; margin-top: 1px; }

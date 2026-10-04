@@ -1,0 +1,11 @@
+{
+  "name": "@t3-designer/asset-schema",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "lint": "eslint .", "typecheck": "tsc --noEmit", "test": "node --test tests/*.test.ts" },
+  "dependencies": { "zod": "^4.6.5" },
+  "devDependencies": { "@types/node": "^24.13.6" }
+}

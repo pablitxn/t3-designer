@@ -1,0 +1,7 @@
+/* No preflight: the public demo keeps its existing base styles. */
+@layer theme, utilities;
+@import 'tailwindcss/theme.css' layer(theme) prefix(tw);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(tw);
+@source './';
+@source '../editor/';
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));

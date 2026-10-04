@@ -1,0 +1,214 @@
+{
+  "status": "passed",
+  "assetCount": 18,
+  "totalTriangles": 137380,
+  "totalBytes": 9266588,
+  "checks": [
+    "exact declared metric bounds",
+    "floor origin",
+    "centered horizontally",
+    "identity node transforms",
+    "textures embedded",
+    "no cameras"
+  ],
+  "assets": [
+    {
+      "id": "fridge-freezer",
+      "bounds": [
+        0.5999999940395355,
+        1.8499999046325684,
+        0.6400049924850464
+      ],
+      "triangles": 3136,
+      "bytes": 181776,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "washing-machine",
+      "bounds": [
+        0.6000000238418579,
+        0.8500000238418579,
+        0.5999999940395355
+      ],
+      "triangles": 8980,
+      "bytes": 428164,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "oven-cooktop",
+      "bounds": [
+        0.6000000238418579,
+        0.8799999952316284,
+        0.6000026762485504
+      ],
+      "triangles": 11144,
+      "bytes": 447848,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "microwave",
+      "bounds": [
+        0.47999995946884155,
+        0.2900000214576721,
+        0.3799999952316284
+      ],
+      "triangles": 5580,
+      "bytes": 338892,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "extractor-hood",
+      "bounds": [
+        0.6000000238418579,
+        0.6499999761581421,
+        0.47999998927116394
+      ],
+      "triangles": 4332,
+      "bytes": 292384,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "boiler",
+      "bounds": [
+        0.3999999910593033,
+        0.75,
+        0.30000001192092896
+      ],
+      "triangles": 3676,
+      "bytes": 169120,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "base-cabinet",
+      "bounds": [
+        0.6000000238418579,
+        0.9000000357627869,
+        0.6000025868415833
+      ],
+      "triangles": 3564,
+      "bytes": 389104,
+      "embeddedTextures": 2
+    },
+    {
+      "id": "sink-cabinet",
+      "bounds": [
+        0.9000000357627869,
+        1.0500038862228394,
+        0.6000049114227295
+      ],
+      "triangles": 8096,
+      "bytes": 621684,
+      "embeddedTextures": 2
+    },
+    {
+      "id": "wall-cabinet",
+      "bounds": [
+        0.800000011920929,
+        0.699999988079071,
+        0.32000496983528137
+      ],
+      "triangles": 2188,
+      "bytes": 235356,
+      "embeddedTextures": 1
+    },
+    {
+      "id": "bathroom-vanity",
+      "bounds": [
+        0.6000000238418579,
+        0.8800042867660522,
+        0.5000022053718567
+      ],
+      "triangles": 4068,
+      "bytes": 288504,
+      "embeddedTextures": 1
+    },
+    {
+      "id": "toilet",
+      "bounds": [
+        0.3799999952316284,
+        0.7800014615058899,
+        0.6499999761581421
+      ],
+      "triangles": 5112,
+      "bytes": 160568,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "radiator",
+      "bounds": [
+        0.9000000059604645,
+        0.6000000238418579,
+        0.10000000149011612
+      ],
+      "triangles": 18076,
+      "bytes": 1212684,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "towel-rail",
+      "bounds": [
+        0.45000000298023224,
+        0.699999988079071,
+        0.09999890998005867
+      ],
+      "triangles": 3700,
+      "bytes": 155096,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "glass-block-screen",
+      "bounds": [
+        0.800000011920929,
+        2.0999999046325684,
+        0.07999999821186066
+      ],
+      "triangles": 40796,
+      "bytes": 3139964,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "shower-tray",
+      "bounds": [
+        0.800000011920929,
+        0.12000000476837158,
+        0.800000011920929
+      ],
+      "triangles": 3012,
+      "bytes": 202796,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "electrical-panel",
+      "bounds": [
+        0.3799999952316284,
+        0.5199999809265137,
+        0.09000000357627869
+      ],
+      "triangles": 9852,
+      "bytes": 689024,
+      "embeddedTextures": 0
+    },
+    {
+      "id": "wall-mirror",
+      "bounds": [
+        1.2000000476837158,
+        1,
+        0.03500000014901161
+      ],
+      "triangles": 376,
+      "bytes": 109768,
+      "embeddedTextures": 1
+    },
+    {
+      "id": "low-table",
+      "bounds": [
+        0.6499999761581421,
+        0.48000001907348633,
+        0.6500000059604645
+      ],
+      "triangles": 1692,
+      "bytes": 203856,
+      "embeddedTextures": 1
+    }
+  ]
+}

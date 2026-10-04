@@ -1,0 +1,47 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [
+    "tsconfig.base.json",
+    "eslint.config.js"
+  ],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": [
+        "^build",
+        "typecheck"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "env": [
+        "VITE_UMAMI_SCRIPT_URL",
+        "VITE_UMAMI_HOST_URL",
+        "VITE_UMAMI_WEBSITE_ID",
+        "VITE_UMAMI_ALLOWED_HOSTNAME"
+      ]
+    },
+    "@t3-designer/api#build": {
+      "dependsOn": ["typecheck"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "outputs": []
+    }
+  }
+}

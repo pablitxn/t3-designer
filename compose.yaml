@@ -1,0 +1,70 @@
+name: t3-local
+services:
+  web:
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        WEB_MODE: full
+    ports:
+      - "127.0.0.1:${T3_WEB_PORT:-8080}:8080"
+    environment:
+      T3_API_UPSTREAM: api:8787
+    depends_on:
+      api:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+  api:
+    # Blender's pinned Linux distribution is x64; Docker Desktop may emulate it.
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      NODE_ENV: development
+      T3_LOCAL_CONTAINER: "true"
+      T3_API_HOST: 0.0.0.0
+      T3_API_PORT: "8787"
+      T3_PUBLIC_URL: http://127.0.0.1:${T3_WEB_PORT:-8080}
+      T3_DATABASE_URL: postgresql://t3:${T3_POSTGRES_PASSWORD:?Run pnpm local:setup first}@db:5432/t3
+      T3_AUTH_SECRET: ${T3_AUTH_SECRET:?Run pnpm local:setup first}
+      T3_GENERATION_ENABLED: ${T3_GENERATION_ENABLED:-false}
+      T3_INFERENCE_PROVIDER: openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      T3_OPENAI_MODEL: ${T3_OPENAI_MODEL:-gpt-5.4}
+      T3_BILLING_MODE: disabled
+      T3_LIBRARY_MAX_MIB: ${T3_LIBRARY_MAX_MIB:-1536}
+    volumes:
+      - workshop:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: t3
+      POSTGRES_DB: t3
+      POSTGRES_PASSWORD: ${T3_POSTGRES_PASSWORD:?Run pnpm local:setup first}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U t3 -d t3"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  database:
+  workshop:

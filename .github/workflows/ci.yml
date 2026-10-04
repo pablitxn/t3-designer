@@ -1,0 +1,30 @@
+name: Portable application checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable && corepack prepare pnpm@12.7.0 --activate
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm audit:history
+      - run: pnpm check
+      - run: pnpm build:full
+      - run: pnpm --filter @t3-designer/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e:fast
+      - run: pnpm test:analytics
+      - run: pnpm test:accounts
+      - run: pnpm test:demo

@@ -1,0 +1,204 @@
+/* Shared settings tokens; the existing light workspace palette stays intact. */
+:root {
+  color-scheme: light;
+  --settings-bg: #fffefa;
+  --settings-surface: #f0f3eb;
+  --settings-text: #354139;
+  --settings-muted: #66755f;
+  --settings-border: #dce2d6;
+  --settings-accent: #506e40;
+  --settings-accent-soft: #e8efde;
+  --settings-shadow: 0 24px 90px #25321c2e;
+  --settings-overlay: #25321c66;
+}
+
+/* UI only: canvas materials, solar lighting, maps and evidence images keep
+   their physical colours. Screen scoping also keeps printed dossiers light. */
+@media screen {
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    color: #e2e9de;
+    background: #171e19;
+    --settings-bg: #222c24;
+    --settings-surface: #2b362b;
+    --settings-text: #e2e9de;
+    --settings-muted: #adbba4;
+    --settings-border: #45523f;
+    --settings-accent: #b1cf95;
+    --settings-accent-soft: #35482b;
+    --settings-shadow: 0 24px 90px #0009;
+    --settings-overlay: #0a110bc4;
+    --ui-hover: #35422f;
+    --ui-warm: #d3ba83;
+    --ui-warm-surface: #393324;
+
+    :is(button, input, select, a, summary):focus-visible {
+      outline-color: var(--settings-accent);
+    }
+
+    .workspace-loading, .eyebrow, .stage-label, .area-stat > span,
+    .app-footer, .footer-label, .wall-height span,
+    .building-footer > a { color: var(--settings-muted); }
+    .area-stat { border-color: var(--settings-border); }
+    .estimate-badge { color: var(--ui-warm); background: var(--ui-warm-surface); }
+    .workspace-switcher, .inspector-tabs, .building-section-options {
+      background: var(--settings-surface);
+    }
+    .workspace-switcher button, .inspector-tabs button,
+    .building-section-options button { color: var(--settings-muted); }
+    .workspace-switcher button[aria-pressed=true],
+    .inspector-tabs button[aria-pressed=true],
+    .building-section-options button[aria-pressed=true] {
+      color: var(--settings-text);
+      background: var(--settings-accent-soft);
+      box-shadow: 0 1px 5px #0002;
+    }
+    .workspace-switcher button span { color: var(--ui-warm); }
+    .viewport { border-color: var(--settings-border); background: #1b241d; }
+    .viewport:has(.canvas-fallback):not(:has(canvas)) :is(.model-caption, .version, .scene-guide, .scene-guide > small,
+      .building-location, .building-location .eyebrow, .building-location small) {
+      color: var(--settings-muted); text-shadow: none;
+    }
+    .viewport:has(.canvas-fallback):not(:has(canvas)) .version { border-color: var(--settings-border); }
+    .inspector { background: var(--settings-bg); border-color: var(--settings-border); }
+    .inspector :is(p, small, summary, label), .inspector h2,
+    .inspector-tabs span, .room-nav i, .room-nav small, .asset-row small,
+    .finish, .finish small, .evidence-notes, .asset-details p span,
+    .solar-time-heading > span, .time-scale, .playback-caption,
+    .playback-caption span, .sun-readings > div > span,
+    .sun-readings strong small, .day-summary h3, .solar-chart > div,
+    .sunrise-sunset span, .solar-interior-note strong,
+    .apartment-orientation span, .apartment-orientation b {
+      color: var(--settings-muted);
+    }
+    .solar-inspector .solar-heading h2, .solar-clock-row input,
+    .sun-readings strong, .sunrise-sunset strong,
+    .apartment-location-card h2, .asset-details h2 {
+      color: var(--settings-text);
+    }
+    .inspector a, .apartment-locate { color: var(--settings-accent); }
+    .apartment-locate:hover { color: var(--settings-text); }
+    .room-nav, .asset-row { color: var(--settings-muted); border-color: var(--settings-border); }
+    .room-nav:hover, .asset-row:hover { background: var(--ui-hover); }
+    .room-nav.selected, .asset-row.selected {
+      color: var(--settings-accent); background: var(--settings-accent-soft);
+    }
+    .asset-details, .solar-interior-note { background: var(--settings-surface); }
+    .asset-details > small, .asset-details .asset-evidence,
+    .solar-heading .eyebrow, .day-summary-heading > span,
+    .inspector .solar-time-note, .apartment-location-card p small,
+    .apartment-orientation small { color: var(--ui-warm); }
+    .evidence-notes, .sun-readings, .sun-readings > div + div,
+    .apartment-location-card { border-color: var(--settings-border); }
+    .view-buttons, .display-options, .building-moment-tag, .apartment-context-toggle {
+      background: #222c24f0; border-color: var(--settings-border);
+    }
+    .view-buttons button, .display-options label, .apartment-context-toggle {
+      color: var(--settings-text);
+    }
+    .view-buttons .camera-reset { border-color: var(--settings-border); }
+    .view-buttons button:hover, .apartment-context-toggle:hover { background: var(--ui-hover); }
+    .view-buttons button:active, .view-buttons button[aria-pressed=true],
+    .apartment-context-toggle[aria-pressed=true] {
+      background: var(--settings-accent-soft); color: var(--settings-accent);
+    }
+    .apartment-context-toggle[aria-pressed=true] { border-color: var(--settings-accent); }
+    .display-options input, .solar-time-slider { accent-color: var(--settings-accent); }
+    .building-moment-tag, .building-moment-tag svg { color: var(--ui-warm); }
+    .building-moment-tag small { color: var(--settings-muted); }
+    .sun-status { color: var(--ui-warm); background: var(--ui-warm-surface); }
+    .sun-status span:not(.sun-status-icon) { color: var(--ui-warm); }
+    .sun-status-night { color: #b9c7c4; background: #2c3936; }
+    .sun-status-night span:not(.sun-status-icon) { color: #adbbb7; }
+    .solar-date-control input { background: var(--settings-surface); color: var(--settings-text); border-color: var(--settings-border); }
+    .solar-date-control input, .solar-clock-row input { color-scheme: dark; }
+    .season-presets button, .solar-room-focus button, .sunrise-sunset button {
+      background: var(--settings-surface); color: var(--settings-muted); border-color: var(--settings-border);
+    }
+    .season-presets button:hover, .solar-room-focus button:hover,
+    .sunrise-sunset button:hover { background: var(--ui-hover); }
+    .season-presets button[aria-pressed=true], .solar-room-focus button[aria-pressed=true] {
+      background: var(--settings-accent-soft); color: var(--settings-accent); border-color: #718660;
+    }
+    .day-play.playing { background: var(--ui-warm-surface); color: var(--ui-warm); border-color: #776540; }
+
+    .dossier, .dossier-dialog {
+      --d-ink: var(--settings-text);
+      --d-muted: var(--settings-muted);
+      --d-line: var(--settings-border);
+      --d-paper: var(--settings-bg);
+      --d-soft: var(--settings-surface);
+      color: var(--settings-text);
+    }
+    .dossier *, .dossier-dialog * { border-color: var(--settings-border); }
+    .dossier :is(p, small, dt, figcaption, caption),
+    .dossier-dialog :is(p, small, dt),
+    .dossier-kicker, .dossier-hero-meta, .dossier-card-eyebrow,
+    .dossier-stats > button > span, .dossier-stats button > div,
+    .dossier-sidebar nav button, .dossier-search, .dossier-search input::placeholder,
+    .dossier-card-foot, .dossier-address-detail > span,
+    .dossier-field-label, .dossier-fact-value > span, .dossier-scope, .dossier-plan-card figcaption > span,
+    .dossier-source-links button > span, .dossier-surfaces thead th,
+    .dossier-surfaces td > span, .dossier-observation-room,
+    .dossier-energy-types span, .dossier-source-number,
+    .dossier-source-publisher, .dossier-question-index,
+    .dossier-linked-facts h3 > span, .dossier-footer {
+      color: var(--settings-muted);
+    }
+    .dossier-intro h2 > span, .dossier a, .dossier-source-links button,
+    .dossier-stats button > div > span, .dossier-model-links button > svg,
+    .dossier-source-card-footer { color: var(--settings-accent); }
+    .dossier .dossier-text-button, .dossier .dossier-print { color: var(--settings-accent) !important; }
+    .dossier .dossier-text-button:hover { color: var(--settings-text) !important; }
+    .dossier-stats > button:hover, .dossier-sidebar nav button:hover,
+    .dossier-model-links button:hover { background: var(--ui-hover); color: var(--settings-text); }
+    .dossier-sidebar nav button[aria-current=page] {
+      background: var(--settings-accent-soft); color: var(--settings-accent);
+    }
+    .dossier-search:focus-within { border-color: var(--settings-accent); outline-color: var(--settings-accent-soft); }
+    .dossier-address-card, .dossier-model-links button, .dossier-plan-card,
+    .dossier-building-lead, .dossier-energy-intro, .dossier-library-note,
+    .dossier-source-symbol, .dossier-questions-intro, .dossier-needed,
+    .dossier-empty, .dossier-icon-button, .dossier-dialog-symbol {
+      background: var(--settings-surface); color: var(--settings-muted);
+    }
+    .dossier-source-card:hover { border-color: #718660; box-shadow: 0 5px 14px #0002; }
+    .dossier-status, .status-reported, .status-observed {
+      background: var(--settings-accent-soft); color: #c0d2ae;
+    }
+    .status-derived { background: #293b43; color: #afcbd6; }
+    .status-estimated, .status-pending, .dossier-sidebar nav button small,
+    .dossier-note, .dossier-energy-icon { background: var(--ui-warm-surface); color: var(--ui-warm); }
+    .dossier-note h4, .dossier-note p, .dossier-note-icon,
+    .dossier-note > button, .dossier-linked-facts .dossier-review-note { color: var(--ui-warm); }
+    .dossier-live-dot { box-shadow: 0 0 0 4px var(--settings-accent-soft); }
+    .dossier-map-label, .dossier-map-coordinates, .dossier-building-map > span {
+      background: #222c24ee; color: var(--settings-text); border-color: var(--settings-border);
+    }
+    .dossier-map-label div > span { color: var(--settings-muted); }
+    .dossier-plan-card img { mix-blend-mode: normal; background: #f2f3e9; border-radius: 3px; }
+    .dossier-button { background: var(--settings-bg); color: var(--settings-accent); border-color: var(--settings-border); }
+    .dossier-button.primary { background: #647c4f; color: #fffef9; border-color: #647c4f; }
+    .dossier-dialog { background: var(--settings-bg); border-color: var(--settings-border); box-shadow: var(--settings-shadow); }
+    .dossier-dialog::backdrop { background: var(--settings-overlay); }
+
+    .privacy-controls, .privacy-page { color: var(--settings-text); }
+    .privacy-text-button, .privacy-page a { color: var(--settings-accent); }
+    .privacy-text-button:hover { color: var(--settings-text); }
+    .privacy-banner, .privacy-preference { background: var(--settings-surface); border-color: var(--settings-border); }
+    .privacy-dialog, .privacy-dialog-header, .privacy-close, .privacy-choices button {
+      background: var(--settings-bg); color: var(--settings-text); border-color: var(--settings-border);
+    }
+    .privacy-dialog { box-shadow: var(--settings-shadow); }
+    .privacy-dialog::backdrop { background: var(--settings-overlay); }
+    .privacy-close:hover, .privacy-choices button:hover { background: var(--ui-hover); }
+    .privacy-choices button:active { background: var(--settings-accent-soft); }
+    .privacy-status { color: var(--ui-warm); }
+    .privacy-pending { background: var(--ui-warm-surface); border-color: #776540; }
+    .privacy-dialog-body .privacy-version, .privacy-page .privacy-page-date,
+    .privacy-page .privacy-version { color: var(--settings-muted); }
+    .privacy-page-index { border-color: var(--settings-border); }
+    .privacy-controls :is(button, a):focus-visible,
+    .privacy-page :is(a, h1):focus-visible { outline-color: var(--settings-accent); }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "strandmon-nordvalla-dark-gray-draft",
+  "label": "STRANDMON Nordvalla gris oscuro · borrador de reconstrucción",
+  "kind": "wingback-chair",
+  "units": "meters",
+  "dimensions": [0.82, 1.01, 0.96],
+  "parameters": {"seatDimensions": [0.49, 0.45, 0.54]},
+  "material": {"baseColor": "#626466", "roughness": 0.88},
+  "source": {
+    "url": "https://www.ikea.com/es/es/p/strandmon-sillon-orejero-nordvalla-gris-oscuro-20343224/",
+    "description": "Reconstrucción paramétrica observando fotos oficiales. Envolvente publicada de 82 × 101 × 96 cm; proporciones no publicadas, perfiles, color y tejido inferidos. No es CAD ni un modelo oficial de IKEA.",
+    "dimensionalStatus": "manufacturer-specified",
+    "retrievedAt": "2026-10-03",
+    "measurementPolicy": "source-text-provisional",
+    "conflicts": [{
+      "field": "seatDimensions",
+      "textWidthHeightDepth": [0.49, 0.45, 0.54],
+      "illustrationWidthHeightDepth": [0.50, 0.43, 0.54],
+      "description": "La tabla y el diagrama de la misma ficha discrepan en ancho y altura de asiento. El borrador usa provisionalmente la tabla, sin resolver la discrepancia."
+    }],
+    "references": [
+      "https://www.ikea.com/es/es/images/products/strandmon-sillon-orejero-nordvalla-gris-oscuro__0325432_pe517964_s5.jpg?f=xl",
+      "https://www.ikea.com/es/es/images/products/strandmon-sillon-orejero-nordvalla-gris-oscuro__0836847_pe596292_s5.jpg?f=xl",
+      "https://www.ikea.com/es/es/images/products/strandmon-sillon-orejero-nordvalla-gris-oscuro__1494736_pe1004875_s5.jpg?f=u",
+      "https://www.ikea.com/es/es/images/products/strandmon-sillon-orejero-nordvalla-gris-oscuro__1494738_pe1004873_s5.jpg?f=u",
+      "https://www.ikea.com/es/es/images/products/strandmon-sillon-orejero-nordvalla-gris-oscuro__0963366_pe808498_s5.jpg?f=u"
+    ]
+  }
+}

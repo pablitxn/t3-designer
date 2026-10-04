@@ -1,0 +1,360 @@
+{
+  "version": 1,
+  "units": "metres",
+  "up": "+Y",
+  "front": "+Z",
+  "license": "MIT",
+  "assets": [
+    {
+      "id": "fridge-freezer",
+      "label": "Réfrigérateur congélateur inox",
+      "url": "/models/current/fridge-freezer.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 1.85,
+        "z": 0.64
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-06",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "washing-machine",
+      "label": "Lave-linge frontal",
+      "url": "/models/current/washing-machine.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.85,
+        "z": 0.6
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "oven-cooktop",
+      "label": "Four encastré et plaque vitrocéramique",
+      "url": "/models/current/oven-cooktop.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.88,
+        "z": 0.6
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-08",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "microwave",
+      "label": "Micro-ondes noir",
+      "url": "/models/current/microwave.glb",
+      "dimensions": {
+        "x": 0.48,
+        "y": 0.29,
+        "z": 0.38
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-08",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "extractor-hood",
+      "label": "Hotte cheminée inox",
+      "url": "/models/current/extractor-hood.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.65,
+        "z": 0.48
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-08",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "boiler",
+      "label": "Chaudière murale blanche",
+      "url": "/models/current/boiler.glb",
+      "dimensions": {
+        "x": 0.4,
+        "y": 0.75,
+        "z": 0.3
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-08",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "base-cabinet",
+      "label": "Meuble bas chêne et plan noir",
+      "url": "/models/current/base-cabinet.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.9,
+        "z": 0.6
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-08",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "sink-cabinet",
+      "label": "Meuble évier inox et égouttoir",
+      "url": "/models/current/sink-cabinet.glb",
+      "dimensions": {
+        "x": 0.9,
+        "y": 1.05,
+        "z": 0.6
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-06",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "wall-cabinet",
+      "label": "Meuble haut chêne à deux portes",
+      "url": "/models/current/wall-cabinet.glb",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.7,
+        "z": 0.32
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-06",
+        "photo-11"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "bathroom-vanity",
+      "label": "Vasque inox sur plan bois",
+      "url": "/models/current/bathroom-vanity.glb",
+      "dimensions": {
+        "x": 0.6,
+        "y": 0.88,
+        "z": 0.5
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "toilet",
+      "label": "WC au sol avec réservoir",
+      "url": "/models/current/toilet.glb",
+      "dimensions": {
+        "x": 0.38,
+        "y": 0.78,
+        "z": 0.65
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-03"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "radiator",
+      "label": "Radiateur blanc à éléments verticaux",
+      "url": "/models/current/radiator.glb",
+      "dimensions": {
+        "x": 0.9,
+        "y": 0.6,
+        "z": 0.1
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-10",
+        "photo-07"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "towel-rail",
+      "label": "Sèche-serviettes blanc",
+      "url": "/models/current/towel-rail.glb",
+      "dimensions": {
+        "x": 0.45,
+        "y": 0.7,
+        "z": 0.1
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "glass-block-screen",
+      "label": "Paroi en pavés de verre",
+      "url": "/models/current/glass-block-screen.glb",
+      "dimensions": {
+        "x": 0.8,
+        "y": 2.1,
+        "z": 0.08
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "shower-tray",
+      "label": "Receveur de douche carré",
+      "url": "/models/current/shower-tray.glb",
+      "dimensions": {
+        "x": 0.8,
+        "y": 0.12,
+        "z": 0.8
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "electrical-panel",
+      "label": "Tableau électrique à deux rangées",
+      "url": "/models/current/electrical-panel.glb",
+      "dimensions": {
+        "x": 0.38,
+        "y": 0.52,
+        "z": 0.09
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-04"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "wall-mirror",
+      "label": "Grand miroir de salle de bain",
+      "url": "/models/current/wall-mirror.glb",
+      "dimensions": {
+        "x": 1.2,
+        "y": 1.0,
+        "z": 0.035
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "photo-02"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    },
+    {
+      "id": "low-table",
+      "label": "Petite table carrée en bois",
+      "url": "/models/current/low-table.glb",
+      "dimensions": {
+        "x": 0.65,
+        "y": 0.48,
+        "z": 0.65
+      },
+      "dimensionalStatus": "estimated",
+      "evidence": [
+        "video-04@00:44"
+      ],
+      "source": "Original Blender reconstruction from supplied photographs",
+      "authoringScene": "T3 · Current-state asset library",
+      "front": "+Z",
+      "origin": "floor-center",
+      "notes": "Apariencia observada; dimensiones nominales por verificar."
+    }
+  ]
+}

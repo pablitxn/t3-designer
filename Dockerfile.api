@@ -1,0 +1,86 @@
+# Preserve the workspace layout: its packages export TypeScript source and Node
+# follows pnpm's workspace links outside node_modules before stripping types.
+# Same Node 24/linux-amd64 base already pinned by the quality job.
+ARG NODE_IMAGE=node:24-bookworm@sha256:5a750d3be5e5c80275f8c9a5367c3aed99c2875656590c8d0701c7ee687f5f0a
+ARG NODE_RUNTIME_IMAGE=node:24-bookworm-slim@sha256:5cbc7caba8c2c0f0bca675d1b61b9f2857e1cf1853c6164ee9dd409501a936e7
+FROM ${NODE_IMAGE} AS dependencies
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@12.7.0 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages/asset-schema/package.json packages/asset-schema/package.json
+COPY packages/scene-schema/package.json packages/scene-schema/package.json
+COPY packages/geometry/package.json packages/geometry/package.json
+RUN pnpm --filter @t3-designer/api... install --prod --frozen-lockfile --ignore-scripts
+
+# Official Blender 5.2.2 LTS, matching the authored recipes and local renderer.
+# Download tools/archive stay in this stage; the pinned checksum is checked
+# before extraction. The deployment/image contract is deliberately linux/amd64.
+FROM ${NODE_RUNTIME_IMAGE} AS blender
+RUN test "$(dpkg --print-architecture)" = amd64 \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+    && curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+       https://download.blender.org/release/Blender5.2/blender-5.2.2-linux-x64.tar.xz \
+       --output /tmp/blender.tar.xz \
+    && echo '84098912789dc450e95697c4184fb8a90acbe5111c2ba4aede3fecb57806a168  /tmp/blender.tar.xz' | sha256sum --check --strict \
+    && mkdir /opt/blender \
+    && tar -xJf /tmp/blender.tar.xz --strip-components=1 -C /opt/blender \
+    && rm /tmp/blender.tar.xz
+
+# Only shared libraries required by the headless renderer; no build toolchain,
+# browser, remote shell, generated Python code or operator auth files are shipped.
+FROM ${NODE_RUNTIME_IMAGE}
+ARG OCI_REVISION=dev
+ARG OCI_SOURCE=""
+LABEL org.opencontainers.image.title="T3 Designer API" \
+      org.opencontainers.image.source="${OCI_SOURCE}" \
+      org.opencontainers.image.revision="${OCI_REVISION}"
+WORKDIR /app
+ENV NODE_ENV=production \
+    T3_API_HOST=127.0.0.1 \
+    T3_API_PORT=8787 \
+    T3_ACCOUNT_DATA_DIR=/data/accounts \
+    T3_ASSET_DATA_DIR=/data/assets \
+    T3_GENERATION_ENABLED=false \
+    T3_BILLING_MODE=disabled \
+    BLENDER_BIN=/opt/blender/blender \
+    PYTHONDONTWRITEBYTECODE=1
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libx11-6 libxxf86vm1 libxfixes3 libxi6 libxkbcommon0 libsm6 libice6 libgl1 libegl1 libxrender1 libdbus-1-3 libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=blender /opt/blender /opt/blender
+RUN /opt/blender/blender --background --factory-startup --version
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=dependencies /app/packages/asset-schema/node_modules ./packages/asset-schema/node_modules
+COPY --from=dependencies /app/packages/scene-schema/node_modules ./packages/scene-schema/node_modules
+COPY package.json ./package.json
+COPY apps/api/package.json apps/api/package.json
+COPY apps/api/src/ apps/api/src/
+COPY apps/web/package.json apps/web/package.json
+COPY apps/web/src/lib/solar.ts apps/web/src/lib/solar-snapshot.ts apps/web/src/lib/
+COPY packages/geometry/package.json packages/geometry/package.json
+COPY packages/geometry/src/ packages/geometry/src/
+COPY packages/asset-schema/package.json packages/asset-schema/package.json
+COPY packages/asset-schema/src/ packages/asset-schema/src/
+COPY packages/scene-schema/package.json packages/scene-schema/package.json
+COPY packages/scene-schema/src/ packages/scene-schema/src/
+COPY assets/scenes/t3-project.json assets/scenes/t3-project.json
+COPY scripts/ci/smoke-api-runtime.mjs scripts/ci/smoke-api-runtime.mjs
+COPY scripts/ci/smoke-blender-runtime.mjs scripts/ci/smoke-blender-runtime.mjs
+COPY scripts/blender/generate_asset.py scripts/blender/procedural_recipe.py scripts/blender/strandmon_recipe.py scripts/blender/upholstery.py scripts/blender/validate_assets.py scripts/blender/
+# The pure solar module is shared with the frontend and imports scene-schema.
+# Reuse the already installed workspace dependency without frontend packages.
+RUN mkdir -p /data/accounts /data/assets /app/apps/web/node_modules \
+    && ln -s /app/apps/api/node_modules/@t3-designer /app/apps/web/node_modules/@t3-designer \
+    && chown -R 1000:1000 /data
+USER 1000:1000
+EXPOSE 8787
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
+  CMD node --input-type=module -e "import { get } from 'node:http'; const request = get({ hostname: '127.0.0.1', port: process.env.T3_API_PORT || '8787', path: '/api/live', headers: { Host: new URL(process.env.T3_PUBLIC_URL).host } }, (response) => { response.resume(); process.exit(response.statusCode === 200 ? 0 : 1); }); request.setTimeout(2500, () => { request.destroy(); process.exit(1); }); request.on('error', () => process.exit(1));"
+# Native TypeScript execution matches the tested package start command. No dist
+# is generated by the API's typecheck-only build. Renderer input is validated JSON.
+ENTRYPOINT ["node"]
+CMD ["apps/api/src/index.ts"]

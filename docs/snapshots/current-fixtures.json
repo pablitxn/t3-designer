@@ -1,0 +1,555 @@
+{
+  "assets": [
+    {
+      "id": "fridge-freezer",
+      "label": "Heladera / freezer",
+      "url": "/models/current/fridge-freezer.glb",
+      "dimensions": [
+        0.6,
+        1.85,
+        0.64
+      ],
+      "evidence": "P06 / P11 · acero inoxidable, dos puertas",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "washing-machine",
+      "label": "Lavarropas frontal",
+      "url": "/models/current/washing-machine.glb",
+      "dimensions": [
+        0.6,
+        0.85,
+        0.6
+      ],
+      "evidence": "P02 · frontal blanco bajo mesada",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "oven-cooktop",
+      "label": "Horno y placa",
+      "url": "/models/current/oven-cooktop.glb",
+      "dimensions": [
+        0.6,
+        0.88,
+        0.6
+      ],
+      "evidence": "P08 / V02 · horno negro y placa de cuatro zonas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "microwave",
+      "label": "Microondas",
+      "url": "/models/current/microwave.glb",
+      "dimensions": [
+        0.48,
+        0.29,
+        0.38
+      ],
+      "evidence": "P08 / P11 · negro, sobre mesada",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "extractor-hood",
+      "label": "Campana extractora",
+      "url": "/models/current/extractor-hood.glb",
+      "dimensions": [
+        0.6,
+        0.65,
+        0.48
+      ],
+      "evidence": "P08 · campana y chimenea de acero",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "boiler",
+      "label": "Caldera mural",
+      "url": "/models/current/boiler.glb",
+      "dimensions": [
+        0.4,
+        0.75,
+        0.3
+      ],
+      "evidence": "P06 / P11 · carcasa blanca",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "base-cabinet",
+      "label": "Mueble bajo de cocina",
+      "url": "/models/current/base-cabinet.glb",
+      "dimensions": [
+        0.6,
+        0.9,
+        0.6
+      ],
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "sink-cabinet",
+      "label": "Mueble con pileta y escurridor",
+      "url": "/models/current/sink-cabinet.glb",
+      "dimensions": [
+        0.9,
+        1.05,
+        0.6
+      ],
+      "evidence": "P06 / P11 · una pileta de acero",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "wall-cabinet",
+      "label": "Alacena",
+      "url": "/models/current/wall-cabinet.glb",
+      "dimensions": [
+        0.8,
+        0.7,
+        0.32
+      ],
+      "evidence": "P06 / P11 · roble, dos hojas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "bathroom-vanity",
+      "label": "Vanitory y lavabo",
+      "url": "/models/current/bathroom-vanity.glb",
+      "dimensions": [
+        0.6,
+        0.88,
+        0.5
+      ],
+      "evidence": "P02 · un lavabo circular de acero; el segundo es un reflejo",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "toilet",
+      "label": "Inodoro",
+      "url": "/models/current/toilet.glb",
+      "dimensions": [
+        0.38,
+        0.78,
+        0.65
+      ],
+      "evidence": "P03 / V04 · cerámica blanca",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "radiator",
+      "label": "Radiador",
+      "url": "/models/current/radiator.glb",
+      "dimensions": [
+        0.9,
+        0.6,
+        0.1
+      ],
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "towel-rail",
+      "label": "Toallero radiador",
+      "url": "/models/current/towel-rail.glb",
+      "dimensions": [
+        0.45,
+        0.7,
+        0.1
+      ],
+      "evidence": "P02 · blanco, visible en espejo",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "glass-block-screen",
+      "label": "Mampara de ladrillos de vidrio",
+      "url": "/models/current/glass-block-screen.glb",
+      "dimensions": [
+        0.8,
+        2.1,
+        0.08
+      ],
+      "evidence": "P02 / V04 · bloques translúcidos",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "shower-tray",
+      "label": "Receptor de ducha",
+      "url": "/models/current/shower-tray.glb",
+      "dimensions": [
+        0.8,
+        0.12,
+        0.8
+      ],
+      "evidence": "V04 03s · receptor elevado blanco",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "electrical-panel",
+      "label": "Tablero eléctrico",
+      "url": "/models/current/electrical-panel.glb",
+      "dimensions": [
+        0.38,
+        0.52,
+        0.09
+      ],
+      "evidence": "P04 · sobre paso entrada–living",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "low-table",
+      "label": "Mesa baja de madera",
+      "url": "/models/current/low-table.glb",
+      "dimensions": [
+        0.65,
+        0.48,
+        0.65
+      ],
+      "evidence": "V04 44s · junto al acceso al balcón",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "wall-mirror",
+      "label": "Espejo de baño",
+      "url": "/models/current/wall-mirror.glb",
+      "dimensions": [
+        1.2,
+        1,
+        0.035
+      ],
+      "evidence": "P02 · sobre lavabo y lavarropas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "k-fridge",
+      "assetId": "fridge-freezer",
+      "roomId": "kitchen",
+      "label": "Heladera / freezer",
+      "position": [
+        1.7700000000000002,
+        0.015,
+        7.888181818181817
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P06 / P11 · acero inoxidable, dos puertas",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "k-sink",
+      "assetId": "sink-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble con pileta y escurridor",
+      "position": [
+        0.4,
+        0.015,
+        7.35
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P06 / P11 · una pileta de acero",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-oven",
+      "assetId": "oven-cooktop",
+      "roomId": "kitchen",
+      "label": "Horno y placa",
+      "position": [
+        1.06,
+        0.015,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 / V02 · horno negro y placa de cuatro zonas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-drawers",
+      "assetId": "base-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble bajo de cocina",
+      "position": [
+        1.67,
+        0.015,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-south-cabinet",
+      "assetId": "base-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble bajo de cocina",
+      "position": [
+        1.02,
+        0.015,
+        7.928181818181817
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-microwave",
+      "assetId": "microwave",
+      "roomId": "kitchen",
+      "label": "Microondas",
+      "position": [
+        1.67,
+        0.925,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 / P11 · negro, sobre mesada",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "k-hood",
+      "assetId": "extractor-hood",
+      "roomId": "kitchen",
+      "label": "Campana extractora",
+      "position": [
+        1.06,
+        1.52,
+        6.681818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 · campana y chimenea de acero",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-boiler",
+      "assetId": "boiler",
+      "roomId": "kitchen",
+      "label": "Caldera mural",
+      "position": [
+        0.49,
+        1.2,
+        6.601818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P06 / P11 · carcasa blanca",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-upper",
+      "assetId": "wall-cabinet",
+      "roomId": "kitchen",
+      "label": "Alacena",
+      "position": [
+        0.25,
+        1.48,
+        7.35
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P06 / P11 · roble, dos hojas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-washer",
+      "assetId": "washing-machine",
+      "roomId": "bathroom",
+      "label": "Lavarropas frontal",
+      "position": [
+        1.08,
+        0.015,
+        4.9772727272727275
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · frontal blanco bajo mesada",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-vanity",
+      "assetId": "bathroom-vanity",
+      "roomId": "bathroom",
+      "label": "Vanitory y lavabo",
+      "position": [
+        1.03,
+        0.015,
+        5.587272727272728
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · un lavabo circular de acero; el segundo es un reflejo",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-shower",
+      "assetId": "shower-tray",
+      "roomId": "bathroom",
+      "label": "Receptor de ducha",
+      "position": [
+        1.7300000000000002,
+        0.015,
+        5.911818181818182
+      ],
+      "rotation": 0,
+      "evidence": "V04 03s · receptor elevado blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-glass",
+      "assetId": "glass-block-screen",
+      "roomId": "bathroom",
+      "label": "Mampara de ladrillos de vidrio",
+      "position": [
+        0.9,
+        0.015,
+        6.141818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P02 / V04 · bloques translúcidos",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-towel",
+      "assetId": "towel-rail",
+      "roomId": "bathroom",
+      "label": "Toallero radiador",
+      "position": [
+        2.0900000000000003,
+        0.5,
+        5.057272727272728
+      ],
+      "rotation": -1.5707963267948966,
+      "evidence": "P02 · blanco, visible en espejo",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-mirror",
+      "assetId": "wall-mirror",
+      "roomId": "bathroom",
+      "label": "Espejo de baño",
+      "position": [
+        0.7949999999999999,
+        0.98,
+        5.282272727272727
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · sobre lavabo y lavarropas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "wc-toilet",
+      "assetId": "toilet",
+      "roomId": "wc",
+      "label": "Inodoro",
+      "position": [
+        0.36,
+        0.015,
+        5.330606060606061
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P03 / V04 · cerámica blanca",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "living-radiator",
+      "assetId": "radiator",
+      "roomId": "living",
+      "label": "Radiador",
+      "position": [
+        2.31,
+        0.18,
+        5.53
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "living-table",
+      "assetId": "low-table",
+      "roomId": "living",
+      "label": "Mesa baja de madera",
+      "position": [
+        5.101698113207548,
+        0.015,
+        7.718181818181817
+      ],
+      "rotation": 0,
+      "evidence": "V04 44s · junto al acceso al balcón",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "entry-electrics",
+      "assetId": "electrical-panel",
+      "roomId": "entrance",
+      "label": "Tablero eléctrico",
+      "position": [
+        2.0700000000000003,
+        2.07,
+        4.04
+      ],
+      "rotation": -1.5707963267948966,
+      "evidence": "P04 · sobre paso entrada–living",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "bedroom-1-radiator",
+      "assetId": "radiator",
+      "roomId": "bedroom-1",
+      "label": "Radiador",
+      "position": [
+        2.1845552560646904,
+        0.14,
+        0.16
+      ],
+      "rotation": 0,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "bedroom-2-radiator",
+      "assetId": "radiator",
+      "roomId": "bedroom-2",
+      "label": "Radiador",
+      "position": [
+        5.358840970350405,
+        0.14,
+        0.16
+      ],
+      "rotation": 0,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    }
+  ]
+}

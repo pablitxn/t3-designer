@@ -1,0 +1,15 @@
+#!/bin/sh
+# Opt-in hook: copy this to the common Git directory's hooks/pre-push.
+# The trusted scanner lives beside shared hooks, outside every worktree.
+set -eu
+common_git_dir=$(git rev-parse --path-format=absolute --git-common-dir)
+scanner="$common_git_dir/privacy-guard/audit_public_history.mjs"
+if [ ! -r "$scanner" ]; then
+  echo 'Publication history guard is missing; push rejected.' >&2
+  exit 1
+fi
+if [ -z "${T3_PRIVACY_POLICY_FILE:-}" ] && { [ -e "$common_git_dir/privacy-guard/policy.json" ] || [ -L "$common_git_dir/privacy-guard/policy.json" ]; }; then
+  T3_PRIVACY_POLICY_FILE="$common_git_dir/privacy-guard/policy.json"
+  export T3_PRIVACY_POLICY_FILE
+fi
+exec node "$scanner" --pre-push

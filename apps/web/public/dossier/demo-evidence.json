@@ -1,0 +1,395 @@
+{
+  "formatVersion": 1,
+  "datasetKind": "generalized-demo",
+  "reviewedAt": "2026-10-04",
+  "purpose": "Illustrative model values and methodology, not official property evidence.",
+  "geolocation": {
+    "latitude": 48,
+    "longitude": -4,
+    "timeZone": "Europe/Paris",
+    "note": "Approximate regional solar origin only. This is not a surveyed location or an official property record."
+  },
+  "attribution": "Adapted from © IGN · BD TOPO / BAN · DGFiP cadastre · RNB — Licence Ouverte 2.0; local geometry retained, identifiers and geolocation generalized",
+  "values": {
+    "official-address": {
+      "value": "T3 · Demonstration apartment",
+      "status": "estimated",
+      "scope": "Dirección"
+    },
+    "ban-address-id": {
+      "value": "demo-site-001",
+      "status": "estimated",
+      "scope": "Dirección"
+    },
+    "address-point": {
+      "value": "48,0 · −4,0",
+      "unit": "°",
+      "status": "estimated",
+      "scope": "Dirección"
+    },
+    "rnb-id": {
+      "value": "demo-reference-001",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "ign-id": {
+      "value": "demo-building-001",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "parcel-id": {
+      "value": "DEMO 001",
+      "status": "estimated",
+      "scope": "Parcela"
+    },
+    "parcel-area": {
+      "value": "1.192",
+      "numericValue": 1192,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Parcela"
+    },
+    "bdnb-group": {
+      "value": "demo-group-001",
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "construction-year": {
+      "value": "1956",
+      "numericValue": 1956,
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "dwelling-count": {
+      "value": "30",
+      "numericValue": 30,
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "building-footprint": {
+      "value": "475",
+      "numericValue": 475,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "building-height": {
+      "value": "15,5",
+      "numericValue": 15.5,
+      "unit": "m",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "building-mean-height": {
+      "value": "16",
+      "numericValue": 16,
+      "unit": "m",
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "ground-altitudes": {
+      "value": "8,8 / 8,8",
+      "unit": "m",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "roof-altitudes": {
+      "value": "24,3 / 25,1",
+      "unit": "m",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "roof-range": {
+      "value": "0,8",
+      "numericValue": 0.8,
+      "unit": "m",
+      "status": "derived",
+      "scope": "Edificio"
+    },
+    "building-storeys": {
+      "value": "5",
+      "numericValue": 5,
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "source-accuracy": {
+      "value": "3 m / 2,5 m",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "wall-material": {
+      "value": "BETON - PIERRE",
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "roof-material": {
+      "value": "ZINC ALUMINIUM",
+      "status": "estimated",
+      "scope": "Grupo BDNB"
+    },
+    "ign-record-updated": {
+      "value": "04/10/2026",
+      "status": "estimated",
+      "scope": "Edificio"
+    },
+    "apartment-carrez": {
+      "value": "49,18",
+      "numericValue": 49.18,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Departamento"
+    },
+    "room-area-bedroom-1": {
+      "value": "11,81",
+      "numericValue": 11.81,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-bedroom-2": {
+      "value": "9,32",
+      "numericValue": 9.32,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-living": {
+      "value": "16,39",
+      "numericValue": 16.39,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-entrance": {
+      "value": "2,26",
+      "numericValue": 2.26,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-wc": {
+      "value": "0,87",
+      "numericValue": 0.87,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-bathroom": {
+      "value": "3,21",
+      "numericValue": 3.21,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-kitchen": {
+      "value": "4,26",
+      "numericValue": 4.26,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "room-area-closet": {
+      "value": "1,06",
+      "numericValue": 1.06,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Estancia"
+    },
+    "apartment-area-sum": {
+      "value": "49,18",
+      "numericValue": 49.18,
+      "unit": "m²",
+      "status": "derived",
+      "scope": "Departamento"
+    },
+    "balcony-area": {
+      "value": "1,26",
+      "numericValue": 1.26,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Balcón"
+    },
+    "basement-area": {
+      "value": "8,54",
+      "numericValue": 8.54,
+      "unit": "m²",
+      "status": "estimated",
+      "scope": "Cave"
+    },
+    "floor-plan": {
+      "value": "3.er piso ilustrativo",
+      "status": "estimated",
+      "scope": "Departamento"
+    },
+    "floor-model": {
+      "value": "3.er piso estimado",
+      "status": "estimated",
+      "scope": "Departamento"
+    },
+    "living-orientation": {
+      "value": "Suroeste · 210,79°",
+      "status": "estimated",
+      "scope": "Departamento"
+    },
+    "ceiling-height": {
+      "value": "2,70",
+      "numericValue": 2.7,
+      "unit": "m",
+      "status": "estimated",
+      "scope": "Departamento"
+    },
+    "apartment-dpe": {
+      "value": "Pendiente de identificar",
+      "status": "pending",
+      "scope": "Departamento"
+    },
+    "actual-energy-use": {
+      "value": "Sin facturas incorporadas",
+      "status": "pending",
+      "scope": "Departamento"
+    },
+    "energy-cost": {
+      "value": "Sin datos incorporados",
+      "status": "pending",
+      "scope": "Departamento"
+    },
+    "legal-lots": {
+      "value": "Documentación pendiente",
+      "status": "pending",
+      "scope": "Departamento"
+    },
+    "risks": {
+      "value": "Consulta específica pendiente",
+      "status": "pending",
+      "scope": "Parcela"
+    },
+    "planning": {
+      "value": "Zonificación por cotejar",
+      "status": "pending",
+      "scope": "Parcela"
+    }
+  },
+  "sources": [
+    {
+      "id": "ban",
+      "title": "Ubicación de demostración",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Origen solar regional aproximado. No representa una dirección postal ni el emplazamiento de un inmueble.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "rnb",
+      "title": "Identidad de demostración",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Identificadores locales de ejemplo; no permiten consultar un edificio real en un registro.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "cadastre",
+      "title": "Parcela de demostración",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Geometría local y superficie ilustrativa conservadas para comparar parcela, huella e interior.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "ign",
+      "title": "Geometría de contexto",
+      "publisher": "IGN · BD TOPO / T3 Designer",
+      "kind": "model",
+      "description": "Geometría adaptada de datos abiertos, con identificadores y geolocalización generalizados. Se conserva la atribución; no es un registro oficial del sitio de ejemplo.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "url": "https://geoservices.ign.fr/bdtopo",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "bdnb",
+      "title": "Características de ejemplo",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Valores demostrativos de antigüedad, materiales y viviendas, conservados para explicar las escalas del expediente.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "plan",
+      "title": "Plano del modelo",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Plano renderizado desde la geometría pública. Las superficies son valores de ejemplo; no es un certificado ni una transcripción de un diagnóstico.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/apartment-plan.png"
+    },
+    {
+      "id": "visual",
+      "title": "Inventario visual del modelo",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Descripción de elementos visibles en la reconstrucción. Los documentos y archivos audiovisuales originales no forman parte de este expediente público.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/reference-evidence.md"
+    },
+    {
+      "id": "model",
+      "title": "Supuestos de la reconstrucción",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Dimensiones, altura, orientación y emplazamiento son supuestos de demostración. La geometría y los cálculos siguen siendo reproducibles.",
+      "date": "2026-10-04",
+      "label": "Modelo de demostración · 04/10/2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "ademe",
+      "title": "Método para verificar un DPE",
+      "publisher": "ADEME · Service Public",
+      "kind": "official-guide",
+      "description": "Guía para un expediente real: un diagnóstico requiere documentos propios y no se infiere de esta demostración.",
+      "date": "2026-10-04",
+      "label": "Método de investigación",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/R67366"
+    },
+    {
+      "id": "georisques",
+      "title": "Método de consulta de riesgos",
+      "publisher": "Géorisques",
+      "kind": "official-guide",
+      "description": "Guía general. No se emite una conclusión de riesgos para el escenario de demostración.",
+      "date": "2026-10-04",
+      "label": "Método de investigación",
+      "url": "https://www.georisques.gouv.fr/information-des-acquereurs-et-locataires"
+    },
+    {
+      "id": "planning",
+      "title": "Método de consulta urbanística",
+      "publisher": "Géoportail de l’urbanisme",
+      "kind": "official-guide",
+      "description": "Consulta de planes y reglamentos para un futuro expediente autorizado. La demo no identifica una parcela real.",
+      "date": "2026-10-04",
+      "label": "Método de investigación",
+      "url": "https://www.geoportail-urbanisme.gouv.fr/"
+    },
+    {
+      "id": "copropriete",
+      "title": "Documentos de la copropriété",
+      "publisher": "Service Public",
+      "kind": "official-guide",
+      "description": "Guía general para distinguir edificio, propiedad y lotes. No se incluyen contratos privados en el ejemplo.",
+      "date": "2026-10-04",
+      "label": "Método de investigación",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2604"
+    }
+  ]
+}

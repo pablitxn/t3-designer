@@ -1,0 +1,25 @@
+export default {
+  eyebrow: 'Du produit au modèle', title: 'Des objets avec une histoire.',
+  description: 'Explorez trois meubles IKEA déjà passés par l’atelier : leurs modèles, dimensions et versions enregistrées. La bibliothèque de démonstration est ouverte à tous.',
+  badge: 'Bibliothèque de la démo', library: 'Objets de démonstration',
+  create: '+ Créer un objet', signIn: 'Se connecter pour créer',
+  accountTitle: 'Votre prochain objet commence ici.',
+  accountHelp: 'Connectez-vous pour créer des objets, enregistrer de nouvelles versions et utiliser votre bibliothèque dans vos propres projets. La génération consomme les crédits de votre compte.',
+  curated: 'Sélection publique de l’atelier · 3 octobre 2026. Ce sont des approximations indépendantes, pas des modèles officiels IKEA.',
+  history: 'Historique enregistré', historyHelp: 'Chaque entrée correspond à une version enregistrée. Les corrections restantes sont indiquées à côté du modèle.',
+  generated: 'Créé le', front: 'Face', side: 'Profil', perspective: 'Perspective',
+  draftHelp: 'Les dimensions extérieures proviennent de la fiche produit archivée. La forme, les détails et les matériaux nécessitent encore une vérification visuelle.',
+  measurements: 'Fiche IKEA consultée le 3 octobre 2026',
+  correction: 'Nouvelle correction nécessaire', correctionHelp: 'L’examen visuel de cette version relève encore des différences dans l’assise, le volume du dossier et la jonction avec le piètement. Ce modèle n’est pas considéré comme une réplique fidèle.',
+  items: {
+    strandmon: { variant: 'Fauteuil à oreilles · Nordvalla gris foncé', description: 'Dossier haut, cinq boutons et pieds en bois. Le revêtement et les contours du fauteuil sont approximatifs.', evidence: '82 × 101 × 96 cm hors tout. La fiche archivée indique une assise de 49 × 54 cm à 45 cm du sol ; un écart avec le dessin restait à vérifier.' },
+    dyvlinge: { variant: 'Fauteuil pivotant · Kelinge beige', description: 'Assise basse, dossier incliné et piètement à cinq branches. Comparez le premier brouillon à la deuxième version, avec rembourrage et velours côtelé procédural.', evidence: '63 × 68 × 75 cm hors tout. La fiche archivée indique une assise de 63 × 47 cm à 43 cm du sol. Les proportions internes sont déduites des références.' },
+    fagelfjallet: { variant: 'Cadre de lit · Blanc cassé', description: 'Cadre de lit avec tête et pied à panneaux. Matelas, sommier et linge de lit ne sont pas inclus ; les détails décoratifs sont approximatifs.', evidence: '152 × 101 × 207 cm hors tout. Les 140 × 200 cm de la variante désignent le matelas, pas les dimensions extérieures du lit.' },
+  },
+  versions: {
+    'strandmon-v1': 'Brouillon enregistré avec le profil à oreilles et les dimensions extérieures du produit.',
+    'dyvlinge-v1': 'Premier brouillon aux volumes simplifiés, sans texture de velours côtelé. Les photos n’ont pas pu être consultées pendant cette génération.',
+    'dyvlinge-v2': 'Deuxième version avec coussins, boutons et velours côtelé procédural. Trois itérations de révision enregistrées ; des différences visuelles persistent.',
+    'fagelfjallet-v1': 'Premier brouillon du cadre à partir des dimensions et de la description archivées. Photos non consultées pendant la génération.',
+  },
+} as const

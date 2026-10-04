@@ -1,0 +1,82 @@
+import { expect, test } from '@playwright/test'
+
+test.use({ locale: 'es-AR', timezoneId: 'America/Argentina/Buenos_Aires' })
+
+async function openEnergy(page: import('@playwright/test').Page) {
+  await page.goto('/#building')
+  await page.getByRole('button', { name: 'Energía solar', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Un techo que genera energía.', exact: true })).toBeVisible()
+}
+
+test('building energy works without WebGL, shares the solar clock and saves only on request', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await openEnergy(page)
+  await expect(page.locator('.canvas-fallback')).toContainText('WebGL')
+  await page.locator('#solar-date').fill('2026-12-21')
+  await expect(page.getByLabel('Fecha del estudio', { exact: true })).toHaveValue('2026-12-21')
+  await page.getByRole('slider', { name: /^Hora local/ }).press('Home')
+  await expect(page.locator('#solar-time')).toHaveValue('00:00')
+  await page.getByRole('tab', { name: 'Paneles', exact: true }).click()
+  const count = page.getByLabel(/^Cantidad de paneles/)
+  await count.fill('4'); await count.press('Tab')
+  await expect(page.getByText('Cambios sin guardar.', { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => localStorage.getItem('t3-designer.building-energy.v1'))).toBeNull()
+  await page.getByRole('button', { name: 'Guardar escenario en este navegador', exact: true }).click()
+  await expect(page.getByText('Escenario guardado en este navegador.', { exact: true })).toBeVisible()
+  await page.reload()
+  await page.getByRole('button', { name: 'Energía solar', exact: true }).click()
+  await page.getByRole('tab', { name: 'Paneles', exact: true }).click()
+  await expect(page.getByLabel(/^Cantidad de paneles/)).toHaveValue('4')
+  await page.getByLabel(/^Cantidad de paneles/).fill('0'); await page.getByLabel(/^Cantidad de paneles/).press('Tab')
+  await expect(page.getByText('Agregá paneles para explorar la producción y el retorno de inversión.', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Descartar cambios', exact: true }).click()
+  await expect(page.getByLabel(/^Cantidad de paneles/)).toHaveValue('4')
+  expect(errors).toEqual([])
+})
+
+test('roof capacity constrains output and malformed browser scenarios recover safely', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t3-designer.building-energy.v1', '{'))
+  await openEnergy(page)
+  await expect(page.getByText('El escenario guardado no es válido. Se cargó el ejemplo.', { exact: true })).toBeVisible()
+  await page.getByRole('tab', { name: 'Paneles', exact: true }).click()
+  const count = page.getByLabel(/^Cantidad de paneles/)
+  await count.fill('1000'); await count.press('Tab')
+  await expect(page.getByText('Algunos paneles solicitados no entran. Los resultados usan la cantidad ubicada.', { exact: true })).toBeVisible()
+  await page.getByRole('tab', { name: 'Inversión', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Poné la inversión en perspectiva', exact: true })).toBeVisible()
+  await page.getByLabel(/^Costo de instalación completa/).fill('1000000000')
+  await page.getByLabel(/^Costo de instalación completa/).press('Tab')
+  await expect(page.getByText('Fuera del período', { exact: true })).toBeVisible()
+})
+
+test('the solar study is usable on a narrow screen and translated in French', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.addInitScript(() => localStorage.setItem('t3-designer.language', 'fr'))
+  await page.goto('/#building')
+  await page.getByRole('button', { name: 'Énergie solaire', exact: true }).click()
+  await page.getByRole('tab', { name: 'Année', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Le rythme des saisons', exact: true })).toBeVisible()
+  await page.getByRole('tab', { name: 'Consommation', exact: true }).click()
+  await expect(page.getByLabel(/^Consommation électrique annuelle/)).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true)
+  await page.getByRole('tab', { name: 'Consommation', exact: true }).press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'Investissement', exact: true })).toBeFocused()
+})
+
+test('inspecting a climate input preserves source data and out-of-range dates cannot crash the study', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await openEnergy(page)
+  const original = await page.locator('#solar-date').inputValue()
+  await page.getByLabel('Fecha del estudio', { exact: true }).fill('2101-01-01')
+  await page.getByLabel('Fecha del estudio', { exact: true }).press('Tab')
+  await expect(page.locator('#solar-date')).toHaveValue(original)
+  await page.getByRole('tab', { name: 'Año', exact: true }).click()
+  await page.locator('summary').filter({ hasText: 'Hipótesis climáticas' }).click()
+  const month = page.getByRole('spinbutton', { name: /^enero/ })
+  await month.focus(); await month.press('Tab')
+  await expect(page.getByRole('link', { name: 'Ejemplo regional generalizado · basado en NASA POWER, 2001–2020', exact: true })).toBeVisible()
+  await expect(page.getByText('Cambios sin guardar.', { exact: true })).toHaveCount(0)
+  expect(errors).toEqual([])
+})

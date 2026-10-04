@@ -1,0 +1,29 @@
+{
+  "name": "@t3-designer/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --watch src/index.ts",
+    "start": "node --env-file-if-exists=../../.env src/index.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "account": "node --env-file-if-exists=../../.env src/account-cli.ts"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "0.156.1",
+    "@t3-designer/asset-schema": "workspace:*",
+    "@t3-designer/scene-schema": "workspace:*",
+    "better-auth": "1.7.7",
+    "kysely": "0.29.6",
+    "pg": "8.23.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.6",
+    "@types/pg": "8.23.1"
+  }
+}

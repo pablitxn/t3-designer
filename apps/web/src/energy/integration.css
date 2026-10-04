@@ -1,0 +1,19 @@
+.building-study-switcher { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 14px; }
+.building-study-switcher button, .building-energy-savebar button { font: inherit; font-size: 12px; border: 1px solid var(--settings-border, #dce1d3); border-radius: 8px; padding: 9px 15px; color: var(--settings-muted, #68765d); background: var(--settings-bg, #fffefa); cursor: pointer; }
+.building-study-switcher button[aria-pressed=true], .building-energy-savebar .is-primary { color: var(--settings-accent, #4a6540); background: var(--settings-accent-soft, #edf1e5); border-color: var(--settings-accent, #688253); }
+.building-study-switcher button:focus-visible, .building-energy-savebar button:focus-visible { outline: 2px solid var(--settings-accent, #688253); outline-offset: 3px; }
+.building-energy-savebar button:disabled { cursor: default; opacity: .55; }
+.building-energy-intro { margin-bottom: 23px; border-bottom: 1px solid var(--settings-border, #e0e4d9); padding-bottom: 20px; }
+.building-energy-intro h2 { margin: 14px 0; font-size: 25px; line-height: 1.15; letter-spacing: -.7px; font-weight: 500; color: var(--settings-text, #44583b); }
+.building-energy-intro p { font-size: 12px; line-height: 1.65; color: var(--settings-muted, #7a856f); }
+.building-energy-intro dl { display: grid; gap: 16px; margin: 22px 0; }
+.building-energy-intro dt { font-size: 10px; color: var(--settings-muted, #7a856f); }
+.building-energy-intro dd { margin: 5px 0 0; font-size: 25px; color: var(--settings-text, #44583b); font-variant-numeric: tabular-nums; }
+.building-energy-intro dd small { font-size: 12px; }
+.building-energy-intro .building-energy-roof-note { font-size: 10px; }
+.building-energy-study { margin-top: 24px; scroll-margin-top: 20px; min-width: 0; }
+.building-energy-savebar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 14px; }
+.building-energy-savebar p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--settings-muted, #7a856f); }
+.building-energy-savebar > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.private-energy-preview { height: 390px; overflow: hidden; border-radius: 12px; margin: 16px 0; }
+@media (max-width: 600px) { .building-energy-savebar { align-items: stretch; } .building-energy-savebar > div { width: 100%; } .building-energy-savebar button { flex: 1 1 auto; min-height: 42px; } }

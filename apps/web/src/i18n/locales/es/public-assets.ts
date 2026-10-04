@@ -1,0 +1,25 @@
+export default {
+  eyebrow: 'Del producto al modelo', title: 'Objetos con historia.',
+  description: 'Explorá tres muebles de IKEA que ya pasaron por el taller: sus modelos, medidas y versiones guardadas. La biblioteca de muestra está abierta a todos.',
+  badge: 'Biblioteca de la demo', library: 'Objetos de muestra',
+  create: '+ Crear un objeto', signIn: 'Iniciar sesión para crear',
+  accountTitle: 'Tu próximo objeto empieza acá.',
+  accountHelp: 'Iniciá sesión para crear objetos, guardar nuevas versiones y trabajar con tu propia biblioteca dentro de tus proyectos. La generación consume créditos de tu cuenta.',
+  curated: 'Selección pública del taller · 3 de octubre de 2026. Son aproximaciones independientes, no modelos oficiales de IKEA.',
+  history: 'Historial guardado', historyHelp: 'Cada entrada corresponde a una versión guardada. Las correcciones pendientes siguen indicadas junto al modelo.',
+  generated: 'Creado', front: 'Frente', side: 'Perfil', perspective: 'Perspectiva',
+  draftHelp: 'Las medidas exteriores provienen de la ficha de producto archivada. La forma, los detalles y los materiales todavía necesitan revisión visual.',
+  measurements: 'Ficha IKEA consultada el 3 de octubre de 2026',
+  correction: 'Necesita otra corrección', correctionHelp: 'La revisión visual de esta versión todavía señala diferencias en el asiento, el volumen del respaldo y la unión con la base. No se considera una réplica fiel.',
+  items: {
+    strandmon: { variant: 'Sillón orejero · Nordvalla gris oscuro', description: 'Respaldo alto, cinco botones y patas de madera. La tapicería y los perfiles del sillón son aproximaciones.', evidence: '82 × 101 × 96 cm exteriores. La ficha archivada indica un asiento de 49 × 54 cm a 45 cm del suelo; había una discrepancia con el dibujo pendiente de comprobar.' },
+    dyvlinge: { variant: 'Sillón giratorio · Kelinge beige', description: 'Asiento bajo, respaldo reclinado y base de cinco radios. Compará el primer borrador con la segunda versión, que incorpora acolchado y pana procedural.', evidence: '63 × 68 × 75 cm exteriores. La ficha archivada indica un asiento de 63 × 47 cm a 43 cm del suelo. Las proporciones interiores se infieren de las referencias.' },
+    fagelfjallet: { variant: 'Estructura de cama · Blanco roto', description: 'Estructura de cama con cabecero y piecero de paneles. No incluye colchón, somier ni ropa de cama; los detalles decorativos son aproximados.', evidence: '152 × 101 × 207 cm exteriores. Los 140 × 200 cm de la variante corresponden al colchón, no al tamaño total de la cama.' },
+  },
+  versions: {
+    'strandmon-v1': 'Borrador guardado con el perfil orejero y las dimensiones exteriores del producto.',
+    'dyvlinge-v1': 'Primer borrador con volúmenes simplificados, sin textura de pana. Las fotos no pudieron visualizarse durante esta generación.',
+    'dyvlinge-v2': 'Segunda versión con cojines, botones y pana procedural. Tres iteraciones de revisión registradas; persisten diferencias visuales.',
+    'fagelfjallet-v1': 'Primer borrador de la estructura a partir de las dimensiones y la descripción archivadas. Fotografías no visualizadas durante la generación.',
+  },
+} as const

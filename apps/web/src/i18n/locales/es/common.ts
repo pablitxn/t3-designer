@@ -1,0 +1,38 @@
+export default {
+  app: {
+    eyebrow: 'T3 Demo / Estudio de arquitectura',
+    areaLabel: 'Superficie interior de ejemplo',
+    navigation: 'Elegir vista del proyecto',
+    loading: 'Abriendo {{workspace}}…',
+    title: 'T3 Designer · {{workspace}}',
+  },
+  workspaces: {
+    walkthrough: { title: 'Recorrido en primera persona', badge: 'A escala humana', nav: 'Recorrido' },
+    apartment: { title: 'Luz en el departamento', badge: 'Medidas estimadas', nav: 'Departamento' },
+    building: { title: 'Edificio y entorno', badge: 'IGN + reconstrucción visual', nav: 'Edificio y sol' },
+    documentation: { title: 'Documentación', badge: 'Datos con sus fuentes', nav: 'Documentación' },
+    assets: { title: 'Biblioteca de objetos', badge: 'Taller 3D', nav: 'Objetos' },
+  },
+  settings: {
+    title: 'Ajustes',
+    close: 'Cerrar ajustes',
+    general: 'General',
+    generalDescription: 'Personalizá cómo se ve y en qué idioma usás T3 Designer.',
+    appearance: 'Apariencia',
+    appearanceDescription: 'Elegí un tema o seguí la apariencia de tu dispositivo.',
+    system: 'Sistema',
+    light: 'Claro',
+    dark: 'Oscuro',
+    automatic: 'Los cambios se aplican y se guardan automáticamente en este navegador.',
+    sessionOnly: 'El navegador no permitió guardar algún cambio. Se aplicó para esta sesión; al recargar puede perderse.',
+  },
+  language: {
+    label: 'Idioma',
+    automatic: 'Idioma del navegador',
+    description: 'El idioma elegido se guarda localmente en este navegador.',
+    changed: 'Idioma cambiado a {{language}}',
+    es: 'Español',
+    en: 'English',
+    fr: 'Français',
+  },
+} as const

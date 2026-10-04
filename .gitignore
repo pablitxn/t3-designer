@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+*.blend1
+*.blend2
+.superdesign/
+
+# Python-generated caches
+__pycache__/
+*.py[cod]
+
+# Reproducible render outputs and validation reports; canonical inputs are tracked.
+artifacts/
+
+# Browser test artifacts
+**/test-results/
+**/playwright-report/
+
+# Operator-supplied public profile; keep its source outside the public repo.
+apps/web/public/site-config.json

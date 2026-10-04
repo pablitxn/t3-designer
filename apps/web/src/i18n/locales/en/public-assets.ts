@@ -1,0 +1,25 @@
+export default {
+  eyebrow: 'From product to model', title: 'Objects with a history.',
+  description: 'Explore three IKEA pieces that have already been through the workshop: their models, dimensions and saved versions. The sample library is open to everyone.',
+  badge: 'Demo library', library: 'Sample objects',
+  create: '+ Create an object', signIn: 'Sign in to create',
+  accountTitle: 'Your next object starts here.',
+  accountHelp: 'Sign in to create objects, save new versions and work with your own library within your projects. Generation consumes credits from your account.',
+  curated: 'Public workshop selection · 3 October 2026. These are independent approximations, not official IKEA models.',
+  history: 'Saved history', historyHelp: 'Each entry is a saved version. Outstanding corrections remain visible alongside the model.',
+  generated: 'Created', front: 'Front', side: 'Side', perspective: 'Perspective',
+  draftHelp: 'Outer dimensions come from the archived product page. Shape, details and materials still need visual review.',
+  measurements: 'IKEA product page consulted on 3 October 2026',
+  correction: 'Further correction needed', correctionHelp: 'The visual review of this version still identifies differences in the seat, backrest volume and connection to the base. It is not considered a faithful replica.',
+  items: {
+    strandmon: { variant: 'Wingback chair · Nordvalla dark grey', description: 'High back, five buttons and wooden legs. Upholstery and chair profiles are approximations.', evidence: '82 × 101 × 96 cm overall. The archived page specifies a 49 × 54 cm seat, 45 cm above the floor; a discrepancy with the drawing remained unverified.' },
+    dyvlinge: { variant: 'Swivel easy chair · Kelinge beige', description: 'Low seat, reclined back and a five-spoke base. Compare the first draft with the second version, which adds padding and procedural corduroy.', evidence: '63 × 68 × 75 cm overall. The archived page specifies a 63 × 47 cm seat, 43 cm above the floor. Internal proportions are inferred from the references.' },
+    fagelfjallet: { variant: 'Bed frame · Off-white', description: 'Bed frame with panelled headboard and footboard. Mattress, slats and bedding are not included; decorative details are approximate.', evidence: '152 × 101 × 207 cm overall. The 140 × 200 cm variant refers to the mattress, not the outer size of the bed.' },
+  },
+  versions: {
+    'strandmon-v1': 'Saved draft with the wingback profile and the product’s outer dimensions.',
+    'dyvlinge-v1': 'First draft with simplified volumes, without corduroy texture. Photos could not be viewed during this generation.',
+    'dyvlinge-v2': 'Second version with cushions, buttons and procedural corduroy. Three recorded review iterations; visual differences remain.',
+    'fagelfjallet-v1': 'First frame draft based on the archived dimensions and description. Photos were not viewed during generation.',
+  },
+} as const

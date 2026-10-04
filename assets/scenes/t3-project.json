@@ -1,0 +1,8806 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "id": "t3-designer",
+    "name": "T3 Demo · apartment and building solar study"
+  },
+  "units": "meters",
+  "coordinates": {
+    "apartment": "local plan X/right,Y/up,Z/down",
+    "site": "X/east,Y/up,Z/south",
+    "blender": "X/east,Y/north,Z/up",
+    "siteToBlender": [
+      [
+        "x",
+        1
+      ],
+      [
+        "z",
+        -1
+      ],
+      [
+        "y",
+        1
+      ]
+    ]
+  },
+  "apartment": {
+    "schemaVersion": 1,
+    "id": "demo-t3",
+    "name": "T3 · Demonstration apartment",
+    "units": "meters",
+    "coordinateSystem": {
+      "x": "east",
+      "y": "up",
+      "z": "south"
+    },
+    "perimeter": [
+      [
+        0.6645552560646903,
+        0
+      ],
+      [
+        6.701698113207549,
+        0
+      ],
+      [
+        6.701698113207549,
+        4.463636363636364
+      ],
+      [
+        5.601698113207548,
+        4.463636363636364
+      ],
+      [
+        5.601698113207548,
+        8.318181818181817
+      ],
+      [
+        0,
+        8.318181818181817
+      ],
+      [
+        0,
+        3.5
+      ],
+      [
+        0.6645552560646903,
+        3.5
+      ]
+    ],
+    "rooms": [
+      {
+        "id": "bedroom-1",
+        "name": "Chambre 1",
+        "polygon": [
+          [
+            0.6645552560646903,
+            0
+          ],
+          [
+            4.038840970350405,
+            0
+          ],
+          [
+            4.038840970350405,
+            3.5
+          ],
+          [
+            0.6645552560646903,
+            3.5
+          ]
+        ],
+        "reportedArea": 11.81,
+        "color": "#dfc7bf"
+      },
+      {
+        "id": "bedroom-2",
+        "name": "Chambre 2",
+        "polygon": [
+          [
+            4.038840970350405,
+            0
+          ],
+          [
+            6.701698113207549,
+            0
+          ],
+          [
+            6.701698113207549,
+            3.5
+          ],
+          [
+            4.038840970350405,
+            3.5
+          ]
+        ],
+        "reportedArea": 9.32,
+        "color": "#c9d2bd"
+      },
+      {
+        "id": "living",
+        "name": "Salon / séjour",
+        "polygon": [
+          [
+            2.2,
+            3.5
+          ],
+          [
+            5.601698113207548,
+            3.5
+          ],
+          [
+            5.601698113207548,
+            8.318181818181817
+          ],
+          [
+            2.2,
+            8.318181818181817
+          ]
+        ],
+        "reportedArea": 16.39,
+        "color": "#e3d5bd"
+      },
+      {
+        "id": "entrance",
+        "name": "Entrée",
+        "polygon": [
+          [
+            0,
+            3.5
+          ],
+          [
+            2.2,
+            3.5
+          ],
+          [
+            2.2,
+            4.527272727272727
+          ],
+          [
+            0,
+            4.527272727272727
+          ]
+        ],
+        "reportedArea": 2.26,
+        "color": "#ded6c3"
+      },
+      {
+        "id": "wc",
+        "name": "WC",
+        "polygon": [
+          [
+            0,
+            4.527272727272727
+          ],
+          [
+            0.72,
+            4.527272727272727
+          ],
+          [
+            0.72,
+            5.735606060606061
+          ],
+          [
+            0,
+            5.735606060606061
+          ]
+        ],
+        "reportedArea": 0.87,
+        "color": "#c9dadb"
+      },
+      {
+        "id": "bathroom",
+        "name": "Salle d’eau",
+        "polygon": [
+          [
+            0.72,
+            4.527272727272727
+          ],
+          [
+            2.2,
+            4.527272727272727
+          ],
+          [
+            2.2,
+            6.381818181818182
+          ],
+          [
+            0,
+            6.381818181818182
+          ],
+          [
+            0,
+            5.735606060606061
+          ],
+          [
+            0.72,
+            5.735606060606061
+          ]
+        ],
+        "reportedArea": 3.21,
+        "color": "#c1d3d2"
+      },
+      {
+        "id": "kitchen",
+        "name": "Cuisine",
+        "polygon": [
+          [
+            0,
+            6.381818181818182
+          ],
+          [
+            2.2,
+            6.381818181818182
+          ],
+          [
+            2.2,
+            8.318181818181817
+          ],
+          [
+            0,
+            8.318181818181817
+          ]
+        ],
+        "reportedArea": 4.26,
+        "color": "#cfbea3"
+      },
+      {
+        "id": "closet",
+        "name": "Placard",
+        "polygon": [
+          [
+            5.601698113207548,
+            3.5
+          ],
+          [
+            6.701698113207549,
+            3.5
+          ],
+          [
+            6.701698113207549,
+            4.463636363636364
+          ],
+          [
+            5.601698113207548,
+            4.463636363636364
+          ]
+        ],
+        "reportedArea": 1.06,
+        "color": "#ccc9bc"
+      }
+    ],
+    "walls": [
+      {
+        "id": "exterior-north",
+        "from": [
+          0.6645552560646903,
+          0
+        ],
+        "to": [
+          6.701698113207549,
+          0
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-east",
+        "from": [
+          6.701698113207549,
+          0
+        ],
+        "to": [
+          6.701698113207549,
+          4.463636363636364
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-closet-south",
+        "from": [
+          6.701698113207549,
+          4.463636363636364
+        ],
+        "to": [
+          5.601698113207548,
+          4.463636363636364
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-living-east",
+        "from": [
+          5.601698113207548,
+          4.463636363636364
+        ],
+        "to": [
+          5.601698113207548,
+          8.318181818181817
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-south",
+        "from": [
+          5.601698113207548,
+          8.318181818181817
+        ],
+        "to": [
+          0,
+          8.318181818181817
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-west",
+        "from": [
+          0,
+          8.318181818181817
+        ],
+        "to": [
+          0,
+          3.5
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-entrance-north",
+        "from": [
+          0,
+          3.5
+        ],
+        "to": [
+          0.6645552560646903,
+          3.5
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "exterior-bedroom-west",
+        "from": [
+          0.6645552560646903,
+          3.5
+        ],
+        "to": [
+          0.6645552560646903,
+          0
+        ],
+        "height": 2.7,
+        "thickness": 0.18,
+        "kind": "exterior",
+        "estimated": true
+      },
+      {
+        "id": "bedroom-divider",
+        "from": [
+          4.038840970350405,
+          0
+        ],
+        "to": [
+          4.038840970350405,
+          3.5
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "bedroom-1-south",
+        "from": [
+          0.6645552560646903,
+          3.5
+        ],
+        "to": [
+          4.038840970350405,
+          3.5
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "bedroom-2-south",
+        "from": [
+          4.038840970350405,
+          3.5
+        ],
+        "to": [
+          6.701698113207549,
+          3.5
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "service-spine",
+        "from": [
+          2.2,
+          3.5
+        ],
+        "to": [
+          2.2,
+          6.381818181818182
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "entrance-service",
+        "from": [
+          0,
+          4.527272727272727
+        ],
+        "to": [
+          2.2,
+          4.527272727272727
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "wc-east",
+        "from": [
+          0.72,
+          4.527272727272727
+        ],
+        "to": [
+          0.72,
+          5.735606060606061
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "wc-south",
+        "from": [
+          0,
+          5.735606060606061
+        ],
+        "to": [
+          0.72,
+          5.735606060606061
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "bathroom-south",
+        "from": [
+          0,
+          6.381818181818182
+        ],
+        "to": [
+          2.2,
+          6.381818181818182
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "kitchen-living",
+        "from": [
+          2.2,
+          6.381818181818182
+        ],
+        "to": [
+          2.2,
+          8.318181818181817
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      },
+      {
+        "id": "closet-west",
+        "from": [
+          5.601698113207548,
+          3.5
+        ],
+        "to": [
+          5.601698113207548,
+          4.463636363636364
+        ],
+        "height": 2.7,
+        "thickness": 0.1,
+        "kind": "interior",
+        "estimated": true
+      }
+    ],
+    "doors": [
+      {
+        "id": "main-entry",
+        "wallId": "exterior-west",
+        "offset": 4.0281818181818165,
+        "width": 0.68,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "end",
+        "opensToward": 1,
+        "locationConfidence": "schematic",
+        "appearance": "panel",
+        "finish": "blue-gray"
+      },
+      {
+        "id": "entrance-living",
+        "wallId": "service-spine",
+        "offset": 0.08,
+        "width": 0.68,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "end",
+        "opensToward": 1,
+        "locationConfidence": "schematic",
+        "appearance": "passage",
+        "finish": "blue-gray"
+      },
+      {
+        "id": "bedroom-1-entry",
+        "wallId": "bedroom-1-south",
+        "offset": 1.75544474393531,
+        "width": 0.73,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "end",
+        "opensToward": -1,
+        "locationConfidence": "schematic",
+        "appearance": "passage",
+        "finish": "gray"
+      },
+      {
+        "id": "bedroom-2-entry",
+        "wallId": "bedroom-2-south",
+        "offset": 0.38,
+        "width": 0.73,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "start",
+        "opensToward": -1,
+        "locationConfidence": "schematic",
+        "appearance": "passage",
+        "finish": "gray"
+      },
+      {
+        "id": "bathroom-entry",
+        "wallId": "entrance-service",
+        "offset": 1.38,
+        "width": 0.68,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "end",
+        "opensToward": 1,
+        "locationConfidence": "schematic",
+        "appearance": "passage",
+        "finish": "blue-gray"
+      },
+      {
+        "id": "closet-entry",
+        "wallId": "closet-west",
+        "offset": 0.08,
+        "width": 0.73,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "start",
+        "opensToward": 1,
+        "locationConfidence": "schematic",
+        "appearance": "panel",
+        "finish": "gray",
+        "condition": "damaged-panel"
+      },
+      {
+        "id": "wc-entry",
+        "wallId": "entrance-service",
+        "offset": 0.1,
+        "width": 0.55,
+        "height": 2.04,
+        "estimated": true,
+        "hinge": "start",
+        "opensToward": -1,
+        "locationConfidence": "observed",
+        "appearance": "panel",
+        "finish": "blue-gray",
+        "evidence": "P03 and V04: separate WC opens from entrance; dimensions estimated."
+      },
+      {
+        "id": "kitchen-passage",
+        "wallId": "kitchen-living",
+        "offset": 0.18,
+        "width": 1.55,
+        "height": 2.16,
+        "estimated": true,
+        "hinge": "start",
+        "opensToward": 1,
+        "locationConfidence": "observed",
+        "appearance": "passage",
+        "finish": "white",
+        "evidence": "V04 40-44s: kitchen opening under lintel with short returns."
+      }
+    ],
+    "windows": [
+      {
+        "id": "bedroom-1-window",
+        "wallId": "exterior-north",
+        "offset": 0.78,
+        "width": 1.48,
+        "height": 1.36,
+        "estimated": true,
+        "sillHeight": 0.83,
+        "kind": "casement",
+        "locationConfidence": "observed",
+        "evidence": "P07/P09/P10 and V04: two-leaf white window, radiator below."
+      },
+      {
+        "id": "bedroom-2-window",
+        "wallId": "exterior-north",
+        "offset": 3.9942857142857147,
+        "width": 1.4,
+        "height": 1.36,
+        "estimated": true,
+        "sillHeight": 0.83,
+        "kind": "casement",
+        "locationConfidence": "observed",
+        "evidence": "P07 and V04: second bedroom window; exact room identity provisional."
+      },
+      {
+        "id": "kitchen-window",
+        "wallId": "exterior-south",
+        "offset": 3.941698113207548,
+        "width": 1.3,
+        "height": 1.12,
+        "estimated": true,
+        "sillHeight": 1.02,
+        "kind": "casement",
+        "locationConfidence": "observed",
+        "evidence": "P06/P11 and V02: window along counter, partly obscured by fridge."
+      },
+      {
+        "id": "balcony-access",
+        "wallId": "exterior-south",
+        "offset": 0.63,
+        "width": 1.46,
+        "height": 2.18,
+        "estimated": true,
+        "sillHeight": 0.02,
+        "kind": "balcony-door",
+        "locationConfidence": "observed",
+        "evidence": "V04 40-44s: white double French door with opaque lower panels."
+      }
+    ],
+    "balcony": {
+      "id": "balcony",
+      "name": "Balcon",
+      "polygon": [
+        [
+          3.201698113207548,
+          8.318181818181817
+        ],
+        [
+          5.601698113207548,
+          8.318181818181817
+        ],
+        [
+          5.601698113207548,
+          8.843181818181817
+        ],
+        [
+          3.201698113207548,
+          8.843181818181817
+        ]
+      ],
+      "reportedArea": 1.26
+    },
+    "metadata": {
+      "source": "Generalized demonstration model. The public plan is rendered from this model; supplied reference documents and identifying metadata are not included.",
+      "description": "Reusable authored apartment geometry with preserved illustrative area values and furnishings. Local dimensions and placements remain approximate; this demo is not a property diagnosis or survey.",
+      "reportedCarrezArea": 49.18,
+      "reportedBasementArea": 8.54,
+      "assumptions": [
+        "All polygon coordinates, wall lengths, thicknesses, heights, opening sizes, offsets, door swings, and balcony dimensions are estimated.",
+        "Estimated anchors: bedroom depth 3.50 m, west strip width 2.20 m (revised for U kitchen), closet width 1.10 m, WC width 0.72 m, balcony width 2.40 m. Remaining dimensions follow from reported areas.",
+        "Conceptual room polygons preserve the eight reported areas, totaling 49.18 m². Walls are centered on zone boundaries and overlap the floor polygons; wall thickness is not deducted. This is not a measured net-area or Carrez model.",
+        "Wall height 2.70 m (estimated to accommodate observed utility recess above doors), exterior thickness 0.18 m, interior thickness 0.10 m, door height 2.04 m, and door widths 0.55–0.73 m are assumptions.",
+        "Openings combine the schematic with visual evidence: bedroom portals widened apart, WC access confirmed, kitchen passage and balcony access observed. Unseen leaf swings remain estimates.",
+        "The kitchen has a cased opening to the living room. Its reconstructed short dimension is 1.936 m, allowing two 0.60 m cabinet runs and a roughly 0.74 m conceptual aisle; real clear widths need measurement.",
+        "Material colors and surface grain are visual approximations. Wear/damage is selectively represented, not a complete condition survey.",
+        "Stored plan axes use the historical east/south labels: +X is drawing-right, +Z is drawing-down, +Y is up. The drawing arrow is not a surveyed compass alignment. The separate apartment-placement transform provisionally aligns the living/kitchen to the southwest courtyard and bedrooms to the northeast as an illustrative placement."
+      ],
+      "unresolved": [
+        "Surveyed wall lengths, angles, thicknesses, ceiling heights, and true room shapes are unavailable.",
+        "Window presence/type is visually observed, but exact positions, dimensions and sill heights require measurement.",
+        "Balcony French door and metal railing are visible in V04; exact balcony proportions and rail spacing remain estimates.",
+        "Door dimensions, exact offsets and hidden hinge details need measurement. Model is photo-aligned rather than surveyed.",
+        "The 8.54 m² basement is an illustrative annex area outside the apartment total but has no plan, location, or level data; it is not reconstructed."
+      ]
+    }
+  },
+  "assets": [
+    {
+      "id": "fridge-freezer",
+      "label": "Heladera / freezer",
+      "url": "/models/current/fridge-freezer.glb",
+      "dimensions": [
+        0.6,
+        1.85,
+        0.64
+      ],
+      "evidence": "P06 / P11 · acero inoxidable, dos puertas",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable",
+      "repoPath": "apps/web/public/models/current/fridge-freezer.glb"
+    },
+    {
+      "id": "washing-machine",
+      "label": "Lavarropas frontal",
+      "url": "/models/current/washing-machine.glb",
+      "dimensions": [
+        0.6,
+        0.85,
+        0.6
+      ],
+      "evidence": "P02 · frontal blanco bajo mesada",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/washing-machine.glb"
+    },
+    {
+      "id": "oven-cooktop",
+      "label": "Horno y placa",
+      "url": "/models/current/oven-cooktop.glb",
+      "dimensions": [
+        0.6,
+        0.88,
+        0.6
+      ],
+      "evidence": "P08 / V02 · horno negro y placa de cuatro zonas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/oven-cooktop.glb"
+    },
+    {
+      "id": "microwave",
+      "label": "Microondas",
+      "url": "/models/current/microwave.glb",
+      "dimensions": [
+        0.48,
+        0.29,
+        0.38
+      ],
+      "evidence": "P08 / P11 · negro, sobre mesada",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable",
+      "repoPath": "apps/web/public/models/current/microwave.glb"
+    },
+    {
+      "id": "extractor-hood",
+      "label": "Campana extractora",
+      "url": "/models/current/extractor-hood.glb",
+      "dimensions": [
+        0.6,
+        0.65,
+        0.48
+      ],
+      "evidence": "P08 · campana y chimenea de acero",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/extractor-hood.glb"
+    },
+    {
+      "id": "boiler",
+      "label": "Caldera mural",
+      "url": "/models/current/boiler.glb",
+      "dimensions": [
+        0.4,
+        0.75,
+        0.3
+      ],
+      "evidence": "P06 / P11 · carcasa blanca",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/boiler.glb"
+    },
+    {
+      "id": "base-cabinet",
+      "label": "Mueble bajo de cocina",
+      "url": "/models/current/base-cabinet.glb",
+      "dimensions": [
+        0.6,
+        0.9,
+        0.6
+      ],
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/base-cabinet.glb"
+    },
+    {
+      "id": "sink-cabinet",
+      "label": "Mueble con pileta y escurridor",
+      "url": "/models/current/sink-cabinet.glb",
+      "dimensions": [
+        0.9,
+        1.05,
+        0.6
+      ],
+      "evidence": "P06 / P11 · una pileta de acero",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/sink-cabinet.glb"
+    },
+    {
+      "id": "wall-cabinet",
+      "label": "Alacena",
+      "url": "/models/current/wall-cabinet.glb",
+      "dimensions": [
+        0.8,
+        0.7,
+        0.32
+      ],
+      "evidence": "P06 / P11 · roble, dos hojas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/wall-cabinet.glb"
+    },
+    {
+      "id": "bathroom-vanity",
+      "label": "Vanitory y lavabo",
+      "url": "/models/current/bathroom-vanity.glb",
+      "dimensions": [
+        0.6,
+        0.88,
+        0.5
+      ],
+      "evidence": "P02 · un lavabo circular de acero; el segundo es un reflejo",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/bathroom-vanity.glb"
+    },
+    {
+      "id": "toilet",
+      "label": "Inodoro",
+      "url": "/models/current/toilet.glb",
+      "dimensions": [
+        0.38,
+        0.78,
+        0.65
+      ],
+      "evidence": "P03 / V04 · cerámica blanca",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/toilet.glb"
+    },
+    {
+      "id": "radiator",
+      "label": "Radiador",
+      "url": "/models/current/radiator.glb",
+      "dimensions": [
+        0.9,
+        0.6,
+        0.1
+      ],
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/radiator.glb"
+    },
+    {
+      "id": "towel-rail",
+      "label": "Toallero radiador",
+      "url": "/models/current/towel-rail.glb",
+      "dimensions": [
+        0.45,
+        0.7,
+        0.1
+      ],
+      "evidence": "P02 · blanco, visible en espejo",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/towel-rail.glb"
+    },
+    {
+      "id": "glass-block-screen",
+      "label": "Mampara de ladrillos de vidrio",
+      "url": "/models/current/glass-block-screen.glb",
+      "dimensions": [
+        0.8,
+        2.1,
+        0.08
+      ],
+      "evidence": "P02 / V04 · bloques translúcidos",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/glass-block-screen.glb"
+    },
+    {
+      "id": "shower-tray",
+      "label": "Receptor de ducha",
+      "url": "/models/current/shower-tray.glb",
+      "dimensions": [
+        0.8,
+        0.12,
+        0.8
+      ],
+      "evidence": "V04 03s · receptor elevado blanco",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/shower-tray.glb"
+    },
+    {
+      "id": "electrical-panel",
+      "label": "Tablero eléctrico",
+      "url": "/models/current/electrical-panel.glb",
+      "dimensions": [
+        0.38,
+        0.52,
+        0.09
+      ],
+      "evidence": "P04 · sobre paso entrada–living",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/electrical-panel.glb"
+    },
+    {
+      "id": "low-table",
+      "label": "Mesa baja de madera",
+      "url": "/models/current/low-table.glb",
+      "dimensions": [
+        0.65,
+        0.48,
+        0.65
+      ],
+      "evidence": "V04 44s · junto al acceso al balcón",
+      "dimensionalStatus": "estimated",
+      "mobility": "movable",
+      "repoPath": "apps/web/public/models/current/low-table.glb"
+    },
+    {
+      "id": "wall-mirror",
+      "label": "Espejo de baño",
+      "url": "/models/current/wall-mirror.glb",
+      "dimensions": [
+        1.2,
+        1,
+        0.035
+      ],
+      "evidence": "P02 · sobre lavabo y lavarropas",
+      "dimensionalStatus": "estimated",
+      "mobility": "fixed",
+      "repoPath": "apps/web/public/models/current/wall-mirror.glb"
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "k-fridge",
+      "assetId": "fridge-freezer",
+      "roomId": "kitchen",
+      "label": "Heladera / freezer",
+      "position": [
+        1.7700000000000002,
+        0.015,
+        7.888181818181817
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P06 / P11 · acero inoxidable, dos puertas",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "k-sink",
+      "assetId": "sink-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble con pileta y escurridor",
+      "position": [
+        0.4,
+        0.015,
+        7.35
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P06 / P11 · una pileta de acero",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-oven",
+      "assetId": "oven-cooktop",
+      "roomId": "kitchen",
+      "label": "Horno y placa",
+      "position": [
+        1.06,
+        0.015,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 / V02 · horno negro y placa de cuatro zonas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-drawers",
+      "assetId": "base-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble bajo de cocina",
+      "position": [
+        1.67,
+        0.015,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-south-cabinet",
+      "assetId": "base-cabinet",
+      "roomId": "kitchen",
+      "label": "Mueble bajo de cocina",
+      "position": [
+        1.02,
+        0.015,
+        7.928181818181817
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P06 / P08 / V02 · roble, frentes enmarcados",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-microwave",
+      "assetId": "microwave",
+      "roomId": "kitchen",
+      "label": "Microondas",
+      "position": [
+        1.67,
+        0.925,
+        6.741818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 / P11 · negro, sobre mesada",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "k-hood",
+      "assetId": "extractor-hood",
+      "roomId": "kitchen",
+      "label": "Campana extractora",
+      "position": [
+        1.06,
+        1.52,
+        6.681818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P08 · campana y chimenea de acero",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-boiler",
+      "assetId": "boiler",
+      "roomId": "kitchen",
+      "label": "Caldera mural",
+      "position": [
+        0.49,
+        1.2,
+        6.601818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P06 / P11 · carcasa blanca",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "k-upper",
+      "assetId": "wall-cabinet",
+      "roomId": "kitchen",
+      "label": "Alacena",
+      "position": [
+        0.25,
+        1.48,
+        7.35
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P06 / P11 · roble, dos hojas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-washer",
+      "assetId": "washing-machine",
+      "roomId": "bathroom",
+      "label": "Lavarropas frontal",
+      "position": [
+        1.08,
+        0.015,
+        4.9772727272727275
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · frontal blanco bajo mesada",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-vanity",
+      "assetId": "bathroom-vanity",
+      "roomId": "bathroom",
+      "label": "Vanitory y lavabo",
+      "position": [
+        1.03,
+        0.015,
+        5.587272727272728
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · un lavabo circular de acero; el segundo es un reflejo",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-shower",
+      "assetId": "shower-tray",
+      "roomId": "bathroom",
+      "label": "Receptor de ducha",
+      "position": [
+        1.7300000000000002,
+        0.015,
+        5.911818181818182
+      ],
+      "rotation": 0,
+      "evidence": "V04 03s · receptor elevado blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-glass",
+      "assetId": "glass-block-screen",
+      "roomId": "bathroom",
+      "label": "Mampara de ladrillos de vidrio",
+      "position": [
+        0.9,
+        0.015,
+        6.141818181818182
+      ],
+      "rotation": 0,
+      "evidence": "P02 / V04 · bloques translúcidos",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-towel",
+      "assetId": "towel-rail",
+      "roomId": "bathroom",
+      "label": "Toallero radiador",
+      "position": [
+        2.0900000000000003,
+        0.5,
+        5.057272727272728
+      ],
+      "rotation": -1.5707963267948966,
+      "evidence": "P02 · blanco, visible en espejo",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "b-mirror",
+      "assetId": "wall-mirror",
+      "roomId": "bathroom",
+      "label": "Espejo de baño",
+      "position": [
+        0.7949999999999999,
+        0.98,
+        5.282272727272727
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P02 · sobre lavabo y lavarropas",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "wc-toilet",
+      "assetId": "toilet",
+      "roomId": "wc",
+      "label": "Inodoro",
+      "position": [
+        0.36,
+        0.015,
+        5.330606060606061
+      ],
+      "rotation": 3.141592653589793,
+      "evidence": "P03 / V04 · cerámica blanca",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "living-radiator",
+      "assetId": "radiator",
+      "roomId": "living",
+      "label": "Radiador",
+      "position": [
+        2.31,
+        0.18,
+        5.53
+      ],
+      "rotation": 1.5707963267948966,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "living-table",
+      "assetId": "low-table",
+      "roomId": "living",
+      "label": "Mesa baja de madera",
+      "position": [
+        5.101698113207548,
+        0.015,
+        7.718181818181817
+      ],
+      "rotation": 0,
+      "evidence": "V04 44s · junto al acceso al balcón",
+      "placementStatus": "estimated",
+      "mobility": "movable"
+    },
+    {
+      "id": "entry-electrics",
+      "assetId": "electrical-panel",
+      "roomId": "entrance",
+      "label": "Tablero eléctrico",
+      "position": [
+        2.0700000000000003,
+        2.07,
+        4.04
+      ],
+      "rotation": -1.5707963267948966,
+      "evidence": "P04 · sobre paso entrada–living",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "bedroom-1-radiator",
+      "assetId": "radiator",
+      "roomId": "bedroom-1",
+      "label": "Radiador",
+      "position": [
+        2.1845552560646904,
+        0.14,
+        0.16
+      ],
+      "rotation": 0,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    },
+    {
+      "id": "bedroom-2-radiator",
+      "assetId": "radiator",
+      "roomId": "bedroom-2",
+      "label": "Radiador",
+      "position": [
+        5.358840970350405,
+        0.14,
+        0.16
+      ],
+      "rotation": 0,
+      "evidence": "P07 / P10 / V04 · panel blanco",
+      "placementStatus": "estimated",
+      "mobility": "fixed"
+    }
+  ],
+  "placement": {
+    "buildingId": "demo-building-001",
+    "confidence": "estimated",
+    "position": [
+      -12.684077802732626,
+      9.3,
+      -11.62850331177366
+    ],
+    "rotationY": -0.5374010334436539,
+    "floorIndex": 3,
+    "storeyHeight": 3.1,
+    "floorElevation": 9.3,
+    "facadeOffset": 5.5,
+    "exteriorInset": 0.09,
+    "wallHeight": 2.7,
+    "bounds": {
+      "minX": 0,
+      "maxX": 6.701698113207549,
+      "minZ": 0,
+      "maxZ": 8.318181818181817,
+      "width": 6.701698113207549,
+      "depth": 8.318181818181817
+    },
+    "livingFacadeAzimuth": 210.79081112229017,
+    "bedroomFacadeAzimuth": 30.790811122290165,
+    "label": "T3 · 3.er piso estimado",
+    "assumption": "Ubicación ilustrativa del modelo: tercer piso, living hacia el patio suroeste y habitaciones hacia el noreste."
+  },
+  "geometry": {
+    "walls": [
+      {
+        "wallId": "exterior-north",
+        "solids": [
+          {
+            "position": [
+              1.0545552560646905,
+              1.35,
+              0
+            ],
+            "scale": [
+              0.78,
+              2.7,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              2.1845552560646904,
+              0.415,
+              0
+            ],
+            "scale": [
+              1.4799999999999998,
+              0.83,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              2.1845552560646904,
+              2.4450000000000003,
+              0
+            ],
+            "scale": [
+              1.4799999999999998,
+              0.5100000000000002,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              3.7916981132075476,
+              1.35,
+              0
+            ],
+            "scale": [
+              1.7342857142857149,
+              2.7,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              5.358840970350405,
+              0.415,
+              0
+            ],
+            "scale": [
+              1.4000000000000004,
+              0.83,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              5.358840970350405,
+              2.4450000000000003,
+              0
+            ],
+            "scale": [
+              1.4000000000000004,
+              0.5100000000000002,
+              0.18
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              6.3802695417789765,
+              1.35,
+              0
+            ],
+            "scale": [
+              0.6428571428571432,
+              2.7,
+              0.18
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-east",
+        "solids": [
+          {
+            "position": [
+              6.701698113207549,
+              1.35,
+              2.231818181818182
+            ],
+            "scale": [
+              4.463636363636364,
+              2.7,
+              0.18
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-closet-south",
+        "solids": [
+          {
+            "position": [
+              6.151698113207548,
+              1.35,
+              4.463636363636364
+            ],
+            "scale": [
+              1.1000000000000005,
+              2.7,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-living-east",
+        "solids": [
+          {
+            "position": [
+              5.601698113207548,
+              1.35,
+              6.390909090909091
+            ],
+            "scale": [
+              3.8545454545454527,
+              2.7,
+              0.18
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-south",
+        "solids": [
+          {
+            "position": [
+              5.286698113207548,
+              1.35,
+              8.318181818181817
+            ],
+            "scale": [
+              0.63,
+              2.7,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              4.241698113207548,
+              0.01,
+              8.318181818181817
+            ],
+            "scale": [
+              1.46,
+              0.02,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              4.241698113207548,
+              2.45,
+              8.318181818181817
+            ],
+            "scale": [
+              1.46,
+              0.5,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              2.585849056603774,
+              1.35,
+              8.318181818181817
+            ],
+            "scale": [
+              1.851698113207548,
+              2.7,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              1.0100000000000007,
+              0.51,
+              8.318181818181817
+            ],
+            "scale": [
+              1.2999999999999998,
+              1.02,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              1.0100000000000007,
+              2.42,
+              8.318181818181817
+            ],
+            "scale": [
+              1.2999999999999998,
+              0.56,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          },
+          {
+            "position": [
+              0.1800000000000006,
+              1.35,
+              8.318181818181817
+            ],
+            "scale": [
+              0.3600000000000003,
+              2.7,
+              0.18
+            ],
+            "rotationY": -3.141592653589793
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-west",
+        "solids": [
+          {
+            "position": [
+              0,
+              1.35,
+              6.304090909090908
+            ],
+            "scale": [
+              4.0281818181818165,
+              2.7,
+              0.18
+            ],
+            "rotationY": 1.5707963267948966
+          },
+          {
+            "position": [
+              0,
+              2.37,
+              3.95
+            ],
+            "scale": [
+              0.6799999999999997,
+              0.6600000000000001,
+              0.18
+            ],
+            "rotationY": 1.5707963267948966
+          },
+          {
+            "position": [
+              0,
+              1.35,
+              3.5549999999999997
+            ],
+            "scale": [
+              0.11000000000000032,
+              2.7,
+              0.18
+            ],
+            "rotationY": 1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-entrance-north",
+        "solids": [
+          {
+            "position": [
+              0.3322776280323452,
+              1.35,
+              3.5
+            ],
+            "scale": [
+              0.6645552560646903,
+              2.7,
+              0.18
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "exterior-bedroom-west",
+        "solids": [
+          {
+            "position": [
+              0.6645552560646903,
+              1.35,
+              1.75
+            ],
+            "scale": [
+              3.5,
+              2.7,
+              0.18
+            ],
+            "rotationY": 1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "bedroom-divider",
+        "solids": [
+          {
+            "position": [
+              4.038840970350405,
+              1.35,
+              1.75
+            ],
+            "scale": [
+              3.5,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "bedroom-1-south",
+        "solids": [
+          {
+            "position": [
+              1.5422776280323454,
+              1.35,
+              3.5
+            ],
+            "scale": [
+              1.75544474393531,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              2.785,
+              2.37,
+              3.5
+            ],
+            "scale": [
+              0.73,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              3.5944204851752026,
+              1.35,
+              3.5
+            ],
+            "scale": [
+              0.8888409703504045,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "bedroom-2-south",
+        "solids": [
+          {
+            "position": [
+              4.228840970350405,
+              1.35,
+              3.5
+            ],
+            "scale": [
+              0.38,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              4.783840970350405,
+              2.37,
+              3.5
+            ],
+            "scale": [
+              0.7299999999999999,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              5.9252695417789765,
+              1.35,
+              3.5
+            ],
+            "scale": [
+              1.5528571428571438,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "service-spine",
+        "solids": [
+          {
+            "position": [
+              2.2,
+              1.35,
+              3.54
+            ],
+            "scale": [
+              0.08,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              2.2,
+              2.37,
+              3.92
+            ],
+            "scale": [
+              0.68,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              2.2,
+              1.35,
+              5.320909090909091
+            ],
+            "scale": [
+              2.121818181818182,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "entrance-service",
+        "solids": [
+          {
+            "position": [
+              0.05,
+              1.35,
+              4.527272727272727
+            ],
+            "scale": [
+              0.1,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              0.375,
+              2.37,
+              4.527272727272727
+            ],
+            "scale": [
+              0.55,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              1.015,
+              1.35,
+              4.527272727272727
+            ],
+            "scale": [
+              0.7299999999999999,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              1.72,
+              2.37,
+              4.527272727272727
+            ],
+            "scale": [
+              0.6800000000000002,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": 0
+          },
+          {
+            "position": [
+              2.13,
+              1.35,
+              4.527272727272727
+            ],
+            "scale": [
+              0.14000000000000012,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "wc-east",
+        "solids": [
+          {
+            "position": [
+              0.72,
+              1.35,
+              5.131439393939394
+            ],
+            "scale": [
+              1.208333333333334,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "wc-south",
+        "solids": [
+          {
+            "position": [
+              0.36,
+              1.35,
+              5.735606060606061
+            ],
+            "scale": [
+              0.72,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "bathroom-south",
+        "solids": [
+          {
+            "position": [
+              1.1,
+              1.35,
+              6.381818181818182
+            ],
+            "scale": [
+              2.2,
+              2.7,
+              0.1
+            ],
+            "rotationY": 0
+          }
+        ]
+      },
+      {
+        "wallId": "kitchen-living",
+        "solids": [
+          {
+            "position": [
+              2.2,
+              1.35,
+              6.471818181818182
+            ],
+            "scale": [
+              0.18,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              2.2,
+              2.43,
+              7.336818181818182
+            ],
+            "scale": [
+              1.55,
+              0.54,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              2.2,
+              1.35,
+              8.215
+            ],
+            "scale": [
+              0.20636363636363475,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      },
+      {
+        "wallId": "closet-west",
+        "solids": [
+          {
+            "position": [
+              5.601698113207548,
+              1.35,
+              3.54
+            ],
+            "scale": [
+              0.08,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              5.601698113207548,
+              2.37,
+              3.945
+            ],
+            "scale": [
+              0.73,
+              0.6600000000000001,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          },
+          {
+            "position": [
+              5.601698113207548,
+              1.35,
+              4.386818181818182
+            ],
+            "scale": [
+              0.1536363636363639,
+              2.7,
+              0.1
+            ],
+            "rotationY": -1.5707963267948966
+          }
+        ]
+      }
+    ],
+    "floor": {
+      "polygon": [
+        [
+          0.6645552560646903,
+          0
+        ],
+        [
+          6.701698113207549,
+          0
+        ],
+        [
+          6.701698113207549,
+          4.463636363636364
+        ],
+        [
+          5.601698113207548,
+          4.463636363636364
+        ],
+        [
+          5.601698113207548,
+          8.318181818181817
+        ],
+        [
+          0,
+          8.318181818181817
+        ],
+        [
+          0,
+          3.5
+        ],
+        [
+          0.6645552560646903,
+          3.5
+        ]
+      ],
+      "elevation": 0,
+      "thickness": 0.14
+    },
+    "ceiling": {
+      "polygon": [
+        [
+          0.6645552560646903,
+          0
+        ],
+        [
+          6.701698113207549,
+          0
+        ],
+        [
+          6.701698113207549,
+          4.463636363636364
+        ],
+        [
+          5.601698113207548,
+          4.463636363636364
+        ],
+        [
+          5.601698113207548,
+          8.318181818181817
+        ],
+        [
+          0,
+          8.318181818181817
+        ],
+        [
+          0,
+          3.5
+        ],
+        [
+          0.6645552560646903,
+          3.5
+        ]
+      ],
+      "elevation": 2.7,
+      "thickness": 0.18
+    },
+    "contextSections": {
+      "before": [
+        [
+          -11.857737074144163,
+          -13.405905790815797
+        ],
+        [
+          -15.538,
+          -15.615
+        ],
+        [
+          -21.713,
+          -7.221
+        ],
+        [
+          -17.1600773716041,
+          -4.507902961587891
+        ]
+      ],
+      "apartmentBand": [
+        [
+          -11.608,
+          -13.256
+        ],
+        [
+          -11.857737074144163,
+          -13.405905790815797
+        ],
+        [
+          -17.1600773716041,
+          -4.507902961587891
+        ],
+        [
+          -11.05942038298917,
+          -0.872507467504823
+        ],
+        [
+          -6.121787845089113,
+          -9.158484192342613
+        ],
+        [
+          -12.052,
+          -12.614
+        ]
+      ],
+      "after": [
+        [
+          -11.05942038298917,
+          -0.8725074675048239
+        ],
+        [
+          14.6,
+          14.418
+        ],
+        [
+          16.817,
+          17.835
+        ],
+        [
+          25.373,
+          12.441
+        ],
+        [
+          21.988,
+          7.221
+        ],
+        [
+          -6.121787845089113,
+          -9.158484192342613
+        ]
+      ],
+      "belowTop": 9.16,
+      "ceilingBase": 12
+    }
+  },
+  "site": {
+    "latitude": 48,
+    "longitude": -4,
+    "timeZone": "Europe/Paris",
+    "address": "T3 · Demonstration apartment",
+    "officialAddress": "Generalized demonstration site · no postal address",
+    "targetId": "demo-building-001",
+    "rnbId": "demo-reference-001",
+    "groundAltitude": 8.8,
+    "retrievedAt": "2026-09-26",
+    "radiusMeters": 95,
+    "datasetKind": "generalized-demo",
+    "geolocationNote": "Approximate regional solar origin only. This is not a surveyed location or an official property record.",
+    "attribution": "Adapted from © IGN · BD TOPO / BAN · DGFiP cadastre · RNB — Licence Ouverte 2.0; local geometry retained, identifiers and geolocation generalized",
+    "rnbUrl": "https://rnb.beta.gouv.fr/",
+    "mapUrl": "https://geoservices.ign.fr/bdtopo"
+  },
+  "buildings": [
+    {
+      "id": "demo-building-001",
+      "rnbId": "demo-reference-001",
+      "isTarget": true,
+      "label": "Edificio de demostración",
+      "footprint": [
+        [
+          -11.608,
+          -13.256
+        ],
+        [
+          -15.538,
+          -15.615
+        ],
+        [
+          -21.713,
+          -7.221
+        ],
+        [
+          14.6,
+          14.418
+        ],
+        [
+          16.817,
+          17.835
+        ],
+        [
+          25.373,
+          12.441
+        ],
+        [
+          21.988,
+          7.221
+        ],
+        [
+          -12.052,
+          -12.614
+        ]
+      ],
+      "height": 15.5,
+      "roofHeight": 0.8,
+      "groundAltitude": 8.8,
+      "groundOffset": 0,
+      "floors": 5,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-002",
+      "rnbId": "demo-reference-002",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -5.46,
+          18.137
+        ],
+        [
+          -2.775,
+          13.374
+        ],
+        [
+          -4.369,
+          12.412
+        ],
+        [
+          -5.319,
+          11.895
+        ],
+        [
+          -8.004,
+          16.658
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-003",
+      "rnbId": "demo-reference-003",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -10.341,
+          15.262
+        ],
+        [
+          -7.547,
+          10.59
+        ],
+        [
+          -9.983,
+          9.202
+        ],
+        [
+          -10.101,
+          9.012
+        ],
+        [
+          -12.885,
+          13.784
+        ]
+      ],
+      "height": 3.2,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.3,
+      "groundOffset": -1.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-004",
+      "rnbId": "demo-reference-004",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -10.341,
+          15.262
+        ],
+        [
+          -9.489,
+          15.788
+        ],
+        [
+          -8.004,
+          16.658
+        ],
+        [
+          -5.319,
+          11.895
+        ],
+        [
+          -5.854,
+          11.541
+        ],
+        [
+          -7.547,
+          10.59
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.2,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-005",
+      "rnbId": "demo-reference-005",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -2.775,
+          13.374
+        ],
+        [
+          -5.46,
+          18.137
+        ],
+        [
+          -3.023,
+          19.525
+        ],
+        [
+          -0.33,
+          14.862
+        ],
+        [
+          -1.498,
+          14.163
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-006",
+      "rnbId": "demo-reference-006",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -12.885,
+          13.784
+        ],
+        [
+          -10.101,
+          9.012
+        ],
+        [
+          -12.537,
+          7.624
+        ],
+        [
+          -15.43,
+          12.305
+        ],
+        [
+          -12.994,
+          13.693
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-007",
+      "rnbId": "demo-reference-007",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -15.43,
+          12.305
+        ],
+        [
+          -12.537,
+          7.624
+        ],
+        [
+          -15.181,
+          6.154
+        ],
+        [
+          -17.866,
+          10.918
+        ]
+      ],
+      "height": 3.2,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.3,
+      "groundOffset": -1.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-008",
+      "rnbId": "demo-reference-008",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -0.33,
+          14.862
+        ],
+        [
+          -3.023,
+          19.525
+        ],
+        [
+          -1.43,
+          20.486
+        ],
+        [
+          -0.796,
+          20.83
+        ],
+        [
+          1.998,
+          16.158
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-009",
+      "rnbId": "demo-reference-009",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -17.866,
+          10.918
+        ],
+        [
+          -15.181,
+          6.154
+        ],
+        [
+          -17.309,
+          4.84
+        ],
+        [
+          -20.093,
+          9.612
+        ]
+      ],
+      "height": 3.2,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.3,
+      "groundOffset": -1.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-010",
+      "rnbId": "demo-reference-010",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -0.796,
+          20.83
+        ],
+        [
+          1.857,
+          22.4
+        ],
+        [
+          4.551,
+          17.736
+        ],
+        [
+          1.998,
+          16.158
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-011",
+      "rnbId": "demo-reference-011",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -17.309,
+          4.84
+        ],
+        [
+          -19.854,
+          3.361
+        ],
+        [
+          -22.638,
+          8.134
+        ],
+        [
+          -22.104,
+          8.487
+        ],
+        [
+          -20.093,
+          9.612
+        ]
+      ],
+      "height": 3,
+      "roofHeight": 0.1,
+      "groundAltitude": 7.5,
+      "groundOffset": -1.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-012",
+      "rnbId": "demo-reference-012",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          4.551,
+          17.736
+        ],
+        [
+          1.857,
+          22.4
+        ],
+        [
+          5.887,
+          24.749
+        ],
+        [
+          11.017,
+          21.473
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-013",
+      "rnbId": "demo-reference-013",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -19.854,
+          3.361
+        ],
+        [
+          -22.19,
+          1.965
+        ],
+        [
+          -24.974,
+          6.737
+        ],
+        [
+          -22.638,
+          8.134
+        ]
+      ],
+      "height": 3,
+      "roofHeight": 0,
+      "groundAltitude": 7.5,
+      "groundOffset": -1.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-014",
+      "rnbId": "demo-reference-014",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          22.009,
+          -23.725
+        ],
+        [
+          14.379,
+          -21.429
+        ],
+        [
+          15.03,
+          -19.78
+        ],
+        [
+          8.057,
+          -23.571
+        ],
+        [
+          3.498,
+          -20.648
+        ],
+        [
+          9.421,
+          -17.365
+        ],
+        [
+          18.513,
+          -12.358
+        ],
+        [
+          19.818,
+          -12.376
+        ],
+        [
+          23.532,
+          -13.514
+        ],
+        [
+          24.802,
+          -15.035
+        ]
+      ],
+      "height": 6.9,
+      "roofHeight": 3,
+      "groundAltitude": 10,
+      "groundOffset": 1.2,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-015",
+      "rnbId": "demo-reference-015",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -17.537,
+          -19.955
+        ],
+        [
+          -13.892,
+          -25.207
+        ],
+        [
+          -10.913,
+          -23.367
+        ],
+        [
+          -12.953,
+          -20.369
+        ],
+        [
+          -13.941,
+          -19.074
+        ],
+        [
+          -14.749,
+          -17.996
+        ]
+      ],
+      "height": 2.7,
+      "roofHeight": 0.2,
+      "groundAltitude": 7.7,
+      "groundOffset": -1.1,
+      "floors": 1,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-016",
+      "rnbId": "demo-reference-016",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -11.718,
+          30.055
+        ],
+        [
+          -9.051,
+          25.092
+        ],
+        [
+          -11.388,
+          23.696
+        ],
+        [
+          -14.263,
+          28.577
+        ]
+      ],
+      "height": 4.1,
+      "roofHeight": 0,
+      "groundAltitude": 6.2,
+      "groundOffset": -2.6,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-017",
+      "rnbId": "demo-reference-017",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -21.788,
+          24.233
+        ],
+        [
+          -19.013,
+          19.36
+        ],
+        [
+          -19.972,
+          18.743
+        ],
+        [
+          -21.349,
+          17.964
+        ],
+        [
+          -24.124,
+          22.836
+        ]
+      ],
+      "height": 3.6,
+      "roofHeight": 0,
+      "groundAltitude": 6.7,
+      "groundOffset": -2.1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-018",
+      "rnbId": "demo-reference-018",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -9.051,
+          25.092
+        ],
+        [
+          -11.718,
+          30.055
+        ],
+        [
+          -10.767,
+          30.572
+        ],
+        [
+          -9.5,
+          31.261
+        ],
+        [
+          -6.615,
+          26.48
+        ],
+        [
+          -8.418,
+          25.437
+        ]
+      ],
+      "height": 4.1,
+      "roofHeight": 0,
+      "groundAltitude": 6.2,
+      "groundOffset": -2.6,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-019",
+      "rnbId": "demo-reference-019",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -16.577,
+          20.748
+        ],
+        [
+          -19.252,
+          25.612
+        ],
+        [
+          -17.441,
+          26.753
+        ],
+        [
+          -16.699,
+          27.189
+        ],
+        [
+          -13.823,
+          22.308
+        ]
+      ],
+      "height": 3.8,
+      "roofHeight": 0,
+      "groundAltitude": 6.5,
+      "groundOffset": -2.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-020",
+      "rnbId": "demo-reference-020",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -36.079,
+          -9.441
+        ],
+        [
+          -29.923,
+          -18.034
+        ],
+        [
+          -23.466,
+          -13.292
+        ],
+        [
+          -23.82,
+          -12.757
+        ],
+        [
+          -22.208,
+          -11.597
+        ],
+        [
+          -27.911,
+          -3.547
+        ]
+      ],
+      "height": 9.5,
+      "roofHeight": 2.8,
+      "groundAltitude": 7.2,
+      "groundOffset": -1.6,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-021",
+      "rnbId": "demo-reference-021",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -14.263,
+          28.577
+        ],
+        [
+          -11.388,
+          23.696
+        ],
+        [
+          -13.823,
+          22.308
+        ],
+        [
+          -16.699,
+          27.189
+        ],
+        [
+          -15.856,
+          27.615
+        ],
+        [
+          -15.431,
+          27.879
+        ]
+      ],
+      "height": 3.8,
+      "roofHeight": 0,
+      "groundAltitude": 6.5,
+      "groundOffset": -2.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-022",
+      "rnbId": "demo-reference-022",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -19.013,
+          19.36
+        ],
+        [
+          -21.788,
+          24.233
+        ],
+        [
+          -20.095,
+          25.185
+        ],
+        [
+          -19.252,
+          25.612
+        ],
+        [
+          -16.577,
+          20.748
+        ]
+      ],
+      "height": 4,
+      "roofHeight": 0,
+      "groundAltitude": 6.3,
+      "groundOffset": -2.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-023",
+      "rnbId": "demo-reference-023",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -6.615,
+          26.48
+        ],
+        [
+          -9.5,
+          31.261
+        ],
+        [
+          -6.955,
+          32.74
+        ],
+        [
+          -1.635,
+          29.345
+        ]
+      ],
+      "height": 4.2,
+      "roofHeight": 0,
+      "groundAltitude": 6.1,
+      "groundOffset": -2.7,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-024",
+      "rnbId": "demo-reference-024",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          10.684,
+          -36.768
+        ],
+        [
+          7.368,
+          -35.665
+        ],
+        [
+          -2.4,
+          -32.573
+        ],
+        [
+          -0.574,
+          -26.811
+        ],
+        [
+          1.383,
+          -27.39
+        ],
+        [
+          3.498,
+          -20.648
+        ],
+        [
+          8.057,
+          -23.571
+        ],
+        [
+          12.616,
+          -26.495
+        ],
+        [
+          11.395,
+          -30.001
+        ],
+        [
+          11.884,
+          -30.146
+        ],
+        [
+          11.432,
+          -31.813
+        ],
+        [
+          12.212,
+          -32.084
+        ]
+      ],
+      "height": 6.9,
+      "roofHeight": 2,
+      "groundAltitude": 10,
+      "groundOffset": 1.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-025",
+      "rnbId": "demo-reference-025",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -23.894,
+          16.485
+        ],
+        [
+          -26.669,
+          21.357
+        ],
+        [
+          -26.135,
+          21.711
+        ],
+        [
+          -24.124,
+          22.836
+        ],
+        [
+          -21.349,
+          17.964
+        ],
+        [
+          -22.834,
+          17.093
+        ]
+      ],
+      "height": 3.8,
+      "roofHeight": 0,
+      "groundAltitude": 6.5,
+      "groundOffset": -2.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-026",
+      "rnbId": "demo-reference-026",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          14.379,
+          -21.429
+        ],
+        [
+          12.616,
+          -26.495
+        ],
+        [
+          19.549,
+          -30.938
+        ],
+        [
+          20.498,
+          -28.21
+        ],
+        [
+          22.009,
+          -23.725
+        ]
+      ],
+      "height": 9.1,
+      "roofHeight": 2.4,
+      "groundAltitude": 8.6,
+      "groundOffset": -0.2,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-027",
+      "rnbId": "demo-reference-027",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -26.221,
+          15.189
+        ],
+        [
+          -28.997,
+          20.061
+        ],
+        [
+          -26.986,
+          21.185
+        ],
+        [
+          -26.669,
+          21.357
+        ],
+        [
+          -23.894,
+          16.485
+        ]
+      ],
+      "height": 3.8,
+      "roofHeight": 0,
+      "groundAltitude": 6.5,
+      "groundOffset": -2.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-028",
+      "rnbId": "demo-reference-028",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -28.766,
+          13.71
+        ],
+        [
+          -31.541,
+          18.582
+        ],
+        [
+          -31.224,
+          18.754
+        ],
+        [
+          -28.997,
+          20.061
+        ],
+        [
+          -26.221,
+          15.189
+        ],
+        [
+          -26.964,
+          14.753
+        ],
+        [
+          -27.814,
+          14.227
+        ]
+      ],
+      "height": 4,
+      "roofHeight": 0,
+      "groundAltitude": 6.3,
+      "groundOffset": -2.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-029",
+      "rnbId": "demo-reference-029",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          34.504,
+          13.426
+        ],
+        [
+          29.683,
+          14.564
+        ],
+        [
+          28.654,
+          9.835
+        ],
+        [
+          33.022,
+          7.029
+        ]
+      ],
+      "height": 2.4,
+      "roofHeight": 0.4,
+      "groundAltitude": 7.8,
+      "groundOffset": -1,
+      "floors": 1,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-030",
+      "rnbId": "demo-reference-030",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -31.541,
+          18.582
+        ],
+        [
+          -28.766,
+          13.71
+        ],
+        [
+          -31.202,
+          12.322
+        ],
+        [
+          -34.086,
+          17.104
+        ]
+      ],
+      "height": 4,
+      "roofHeight": 0,
+      "groundAltitude": 6.3,
+      "groundOffset": -2.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-031",
+      "rnbId": "demo-reference-031",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          34.294,
+          15.554
+        ],
+        [
+          34.312,
+          15.753
+        ],
+        [
+          34.139,
+          16.07
+        ],
+        [
+          34.474,
+          17.548
+        ],
+        [
+          31.529,
+          18.315
+        ],
+        [
+          31.068,
+          16.548
+        ]
+      ],
+      "height": 2.6,
+      "roofHeight": 0.3,
+      "groundAltitude": 7.6,
+      "groundOffset": -1.2,
+      "floors": 0,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-032",
+      "rnbId": "demo-reference-032",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          34.763,
+          17.421
+        ],
+        [
+          34.474,
+          17.548
+        ],
+        [
+          34.139,
+          16.07
+        ],
+        [
+          34.312,
+          15.753
+        ]
+      ],
+      "height": 2,
+      "roofHeight": 0.2,
+      "groundAltitude": 7.7,
+      "groundOffset": -1.1,
+      "floors": null,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-033",
+      "rnbId": "demo-reference-033",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          4.754,
+          -43.468
+        ],
+        [
+          7.368,
+          -35.665
+        ],
+        [
+          10.684,
+          -36.768
+        ],
+        [
+          15.94,
+          -38.65
+        ],
+        [
+          13.335,
+          -46.351
+        ],
+        [
+          12.755,
+          -46.098
+        ],
+        [
+          10.408,
+          -45.384
+        ]
+      ],
+      "height": 6.8,
+      "roofHeight": 3.4,
+      "groundAltitude": 10,
+      "groundOffset": 1.2,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-034",
+      "rnbId": "demo-reference-034",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -26.675,
+          -24.355
+        ],
+        [
+          -34.265,
+          -13.824
+        ],
+        [
+          -43.138,
+          -19.754
+        ],
+        [
+          -42.513,
+          -20.615
+        ],
+        [
+          -44.433,
+          -21.848
+        ],
+        [
+          -42.465,
+          -24.538
+        ],
+        [
+          -37.36,
+          -31.428
+        ],
+        [
+          -36.816,
+          -32.08
+        ],
+        [
+          -36.372,
+          -32.723
+        ],
+        [
+          -26.05,
+          -25.215
+        ]
+      ],
+      "height": 6.7,
+      "roofHeight": 3.4,
+      "groundAltitude": 7.3,
+      "groundOffset": -1.5,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-035",
+      "rnbId": "demo-reference-035",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -45.674,
+          20.059
+        ],
+        [
+          -43.733,
+          17.07
+        ],
+        [
+          -41.397,
+          18.468
+        ],
+        [
+          -43.528,
+          21.573
+        ]
+      ],
+      "height": 3,
+      "roofHeight": 0.5,
+      "groundAltitude": 5.6,
+      "groundOffset": -3.2,
+      "floors": 1,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-036",
+      "rnbId": "demo-reference-036",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -15.935,
+          36.765
+        ],
+        [
+          -14.241,
+          37.717
+        ],
+        [
+          -19.638,
+          46.944
+        ],
+        [
+          -22.4,
+          45.286
+        ],
+        [
+          -23.261,
+          46.87
+        ],
+        [
+          -26.766,
+          44.775
+        ],
+        [
+          -27.627,
+          46.36
+        ],
+        [
+          -29.738,
+          45.244
+        ],
+        [
+          -33.034,
+          43.231
+        ],
+        [
+          -32.281,
+          41.555
+        ],
+        [
+          -35.785,
+          39.46
+        ],
+        [
+          -34.842,
+          37.668
+        ],
+        [
+          -38.88,
+          35.219
+        ],
+        [
+          -33.937,
+          26.534
+        ],
+        [
+          -27.68,
+          30.189
+        ],
+        [
+          -27.236,
+          29.547
+        ],
+        [
+          -23.324,
+          31.705
+        ],
+        [
+          -23.668,
+          32.339
+        ]
+      ],
+      "height": 11.5,
+      "roofHeight": 4.6,
+      "groundAltitude": 5.6,
+      "groundOffset": -3.2,
+      "floors": 4,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-037",
+      "rnbId": "demo-reference-037",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          39.065,
+          -34.005
+        ],
+        [
+          38.965,
+          -33.995
+        ],
+        [
+          32.551,
+          -33.819
+        ],
+        [
+          32.981,
+          -26.825
+        ],
+        [
+          33.295,
+          -22.231
+        ],
+        [
+          42.998,
+          -22.705
+        ],
+        [
+          42.405,
+          -31.494
+        ],
+        [
+          44.109,
+          -31.547
+        ],
+        [
+          43.975,
+          -34.147
+        ]
+      ],
+      "height": 7,
+      "roofHeight": 2.4,
+      "groundAltitude": 9.9,
+      "groundOffset": 1.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-038",
+      "rnbId": "demo-reference-038",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          4.754,
+          -43.468
+        ],
+        [
+          10.408,
+          -45.384
+        ],
+        [
+          9.197,
+          -48.792
+        ],
+        [
+          12.124,
+          -49.759
+        ],
+        [
+          10.614,
+          -54.243
+        ],
+        [
+          10.423,
+          -54.126
+        ],
+        [
+          9.384,
+          -56.745
+        ],
+        [
+          2.071,
+          -54.277
+        ],
+        [
+          0.802,
+          -53.861
+        ],
+        [
+          3.217,
+          -47.146
+        ],
+        [
+          3.008,
+          -46.123
+        ],
+        [
+          3.93,
+          -43.695
+        ]
+      ],
+      "height": 7.3,
+      "roofHeight": 2.9,
+      "groundAltitude": 10.2,
+      "groundOffset": 1.4,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-039",
+      "rnbId": "demo-reference-039",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          30.849,
+          60.874
+        ],
+        [
+          39.738,
+          55.853
+        ],
+        [
+          42.203,
+          55.329
+        ],
+        [
+          41.616,
+          52.167
+        ],
+        [
+          40.239,
+          52.493
+        ],
+        [
+          39.58,
+          48.533
+        ],
+        [
+          38.394,
+          48.74
+        ],
+        [
+          35.721,
+          35.821
+        ],
+        [
+          36.609,
+          35.64
+        ],
+        [
+          35.363,
+          29.624
+        ],
+        [
+          35.951,
+          29.47
+        ],
+        [
+          34.596,
+          23.363
+        ],
+        [
+          31.344,
+          24.059
+        ],
+        [
+          30.674,
+          23.315
+        ],
+        [
+          24.55,
+          24.471
+        ],
+        [
+          22.691,
+          26.146
+        ],
+        [
+          15.922,
+          27.962
+        ],
+        [
+          15.687,
+          27.582
+        ],
+        [
+          -5.754,
+          39.362
+        ],
+        [
+          1.185,
+          52.802
+        ],
+        [
+          3.903,
+          52.858
+        ],
+        [
+          15.403,
+          46.697
+        ],
+        [
+          19.725,
+          45.602
+        ],
+        [
+          19.463,
+          43.818
+        ],
+        [
+          24.564,
+          42.454
+        ],
+        [
+          27.134,
+          47.546
+        ],
+        [
+          26.473,
+          48.009
+        ],
+        [
+          27.34,
+          49.839
+        ],
+        [
+          25.429,
+          50.915
+        ]
+      ],
+      "height": 10.1,
+      "roofHeight": 22.3,
+      "groundAltitude": 6.8,
+      "groundOffset": -2,
+      "floors": null,
+      "planarAccuracy": 2.5,
+      "verticalAccuracy": 1.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-040",
+      "rnbId": "demo-reference-040",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -37.36,
+          -31.428
+        ],
+        [
+          -42.465,
+          -24.538
+        ],
+        [
+          -50.325,
+          -30.358
+        ],
+        [
+          -44.576,
+          -37.91
+        ],
+        [
+          -36.816,
+          -32.08
+        ]
+      ],
+      "height": 9.4,
+      "roofHeight": 2.5,
+      "groundAltitude": 7.1,
+      "groundOffset": -1.7,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-041",
+      "rnbId": "demo-reference-041",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          48.794,
+          7.013
+        ],
+        [
+          48.284,
+          -1.984
+        ],
+        [
+          56.682,
+          -2.441
+        ],
+        [
+          57.092,
+          6.565
+        ]
+      ],
+      "height": 7.5,
+      "roofHeight": 2.3,
+      "groundAltitude": 8.2,
+      "groundOffset": -0.6,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-042",
+      "rnbId": "demo-reference-042",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -8.875,
+          -50.877
+        ],
+        [
+          -13.36,
+          -49.367
+        ],
+        [
+          -14.307,
+          -55.411
+        ],
+        [
+          -14.434,
+          -55.701
+        ],
+        [
+          -10.61,
+          -56.749
+        ]
+      ],
+      "height": 3.1,
+      "roofHeight": 2,
+      "groundAltitude": 8.8,
+      "groundOffset": 0,
+      "floors": null,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-043",
+      "rnbId": "demo-reference-043",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          33.863,
+          -45.994
+        ],
+        [
+          29.369,
+          -44.583
+        ],
+        [
+          32.262,
+          -34.797
+        ],
+        [
+          37.064,
+          -36.135
+        ],
+        [
+          35.699,
+          -41.236
+        ],
+        [
+          41.615,
+          -41.368
+        ],
+        [
+          41.655,
+          -46.495
+        ],
+        [
+          37.841,
+          -46.453
+        ],
+        [
+          33.828,
+          -46.392
+        ]
+      ],
+      "height": 8.2,
+      "roofHeight": 2.6,
+      "groundAltitude": 10,
+      "groundOffset": 1.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-044",
+      "rnbId": "demo-reference-044",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -29.437,
+          -53.844
+        ],
+        [
+          -26.191,
+          -57.955
+        ],
+        [
+          -17.417,
+          -50.911
+        ],
+        [
+          -22.64,
+          -44.21
+        ],
+        [
+          -25.556,
+          -46.459
+        ],
+        [
+          -24.93,
+          -47.318
+        ],
+        [
+          -27.981,
+          -49.957
+        ],
+        [
+          -26.82,
+          -51.569
+        ]
+      ],
+      "height": 7.4,
+      "roofHeight": 1.7,
+      "groundAltitude": 7.9,
+      "groundOffset": -0.9,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-045",
+      "rnbId": "demo-reference-045",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          56.893,
+          -20.141
+        ],
+        [
+          57.33,
+          -10.838
+        ],
+        [
+          52.556,
+          -10.306
+        ],
+        [
+          51.974,
+          -20.1
+        ]
+      ],
+      "height": 2,
+      "roofHeight": 1.4,
+      "groundAltitude": 9.1,
+      "groundOffset": 0.3,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-046",
+      "rnbId": "demo-reference-046",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          0.313,
+          -53.716
+        ],
+        [
+          -2.716,
+          -62.786
+        ],
+        [
+          6.463,
+          -65.725
+        ],
+        [
+          9.384,
+          -56.745
+        ],
+        [
+          2.071,
+          -54.277
+        ],
+        [
+          0.802,
+          -53.861
+        ]
+      ],
+      "height": 10.4,
+      "roofHeight": 2.7,
+      "groundAltitude": 9.6,
+      "groundOffset": 0.8,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-047",
+      "rnbId": "demo-reference-047",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          52.9,
+          16.89
+        ],
+        [
+          52.624,
+          9.379
+        ],
+        [
+          59.029,
+          9.103
+        ],
+        [
+          61.729,
+          8.96
+        ],
+        [
+          62.031,
+          17.874
+        ],
+        [
+          53.433,
+          18.349
+        ],
+        [
+          53.398,
+          16.844
+        ]
+      ],
+      "height": 8,
+      "roofHeight": 2.2,
+      "groundAltitude": 8,
+      "groundOffset": -0.8,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-048",
+      "rnbId": "demo-reference-048",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -30.797,
+          -52.214
+        ],
+        [
+          -27.981,
+          -49.957
+        ],
+        [
+          -26.82,
+          -51.569
+        ],
+        [
+          -29.437,
+          -53.844
+        ]
+      ],
+      "height": 4.4,
+      "roofHeight": 1.4,
+      "groundAltitude": 9.7,
+      "groundOffset": 0.9,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-049",
+      "rnbId": "demo-reference-049",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          23.308,
+          -57.197
+        ],
+        [
+          34.849,
+          -57.335
+        ],
+        [
+          37.658,
+          -57.388
+        ],
+        [
+          37.836,
+          -52.078
+        ],
+        [
+          30.108,
+          -51.984
+        ],
+        [
+          30.114,
+          -46.359
+        ],
+        [
+          24.895,
+          -46.29
+        ],
+        [
+          23.69,
+          -46.281
+        ],
+        [
+          21.71,
+          -52.633
+        ],
+        [
+          22.915,
+          -52.641
+        ],
+        [
+          24.618,
+          -52.694
+        ]
+      ],
+      "height": 4.3,
+      "roofHeight": 3.5,
+      "groundAltitude": 9.5,
+      "groundOffset": 0.7,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-050",
+      "rnbId": "demo-reference-050",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          56.491,
+          -30.153
+        ],
+        [
+          46.146,
+          -30.123
+        ],
+        [
+          46.168,
+          -22.087
+        ],
+        [
+          55.209,
+          -22.099
+        ],
+        [
+          55.358,
+          -28.241
+        ],
+        [
+          56.572,
+          -28.15
+        ],
+        [
+          56.528,
+          -29.753
+        ]
+      ],
+      "height": 7,
+      "roofHeight": 1,
+      "groundAltitude": 10,
+      "groundOffset": 1.2,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-051",
+      "rnbId": "demo-reference-051",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          58.028,
+          -10.9
+        ],
+        [
+          57.561,
+          -16.083
+        ],
+        [
+          60.958,
+          -16.288
+        ],
+        [
+          61.426,
+          -11.107
+        ]
+      ],
+      "height": 2.6,
+      "roofHeight": 0.6,
+      "groundAltitude": 8.7,
+      "groundOffset": -0.1,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-052",
+      "rnbId": "demo-reference-052",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          58.352,
+          19.412
+        ],
+        [
+          61.949,
+          19.187
+        ],
+        [
+          62.207,
+          26.499
+        ],
+        [
+          57.695,
+          26.604
+        ],
+        [
+          57.876,
+          27.492
+        ],
+        [
+          55.865,
+          27.473
+        ],
+        [
+          55.883,
+          26.567
+        ],
+        [
+          53.084,
+          26.719
+        ],
+        [
+          52.745,
+          19.616
+        ]
+      ],
+      "height": 9.5,
+      "roofHeight": 1.9,
+      "groundAltitude": 8,
+      "groundOffset": -0.8,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-053",
+      "rnbId": "demo-reference-053",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          59.802,
+          5.416
+        ],
+        [
+          59.572,
+          -2.701
+        ],
+        [
+          68.794,
+          -2.93
+        ],
+        [
+          69.124,
+          5.178
+        ]
+      ],
+      "height": 10.3,
+      "roofHeight": 1.3,
+      "groundAltitude": 8.4,
+      "groundOffset": -0.4,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-054",
+      "rnbId": "demo-reference-054",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -40.994,
+          -58.327
+        ],
+        [
+          -31.785,
+          -50.92
+        ],
+        [
+          -35.303,
+          -46.483
+        ],
+        [
+          -44.511,
+          -53.891
+        ]
+      ],
+      "height": 7.7,
+      "roofHeight": 1.4,
+      "groundAltitude": 7.1,
+      "groundOffset": -1.7,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-055",
+      "rnbId": "demo-reference-055",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -9.727,
+          -63.661
+        ],
+        [
+          -15.39,
+          -61.843
+        ],
+        [
+          -16.411,
+          -65.368
+        ],
+        [
+          -10.739,
+          -67.086
+        ]
+      ],
+      "height": 2.2,
+      "roofHeight": 1,
+      "groundAltitude": 9.3,
+      "groundOffset": 0.5,
+      "floors": null,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-056",
+      "rnbId": "demo-reference-056",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -19.861,
+          70.073
+        ],
+        [
+          -19.787,
+          67.555
+        ],
+        [
+          -22.007,
+          67.454
+        ],
+        [
+          -21.785,
+          61.003
+        ],
+        [
+          -19.674,
+          61.013
+        ],
+        [
+          -19.536,
+          56.983
+        ],
+        [
+          -17.724,
+          57.019
+        ],
+        [
+          -17.695,
+          54.003
+        ],
+        [
+          -7.132,
+          54.155
+        ],
+        [
+          -7.119,
+          62.091
+        ],
+        [
+          -7.148,
+          65.107
+        ],
+        [
+          -6.342,
+          65.135
+        ],
+        [
+          -6.354,
+          69.456
+        ],
+        [
+          -7.16,
+          69.429
+        ],
+        [
+          -7.145,
+          75.155
+        ],
+        [
+          -17.817,
+          74.912
+        ],
+        [
+          -17.905,
+          71.704
+        ],
+        [
+          -19.826,
+          71.576
+        ]
+      ],
+      "height": 11,
+      "roofHeight": 5.2,
+      "groundAltitude": 5.7,
+      "groundOffset": -3.1,
+      "floors": 4,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-057",
+      "rnbId": "demo-reference-057",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          47.203,
+          -52.924
+        ],
+        [
+          47.217,
+          -47.198
+        ],
+        [
+          42.715,
+          -46.994
+        ],
+        [
+          42.278,
+          -57.402
+        ],
+        [
+          46.998,
+          -57.427
+        ]
+      ],
+      "height": 4.9,
+      "roofHeight": 1.4,
+      "groundAltitude": 12.6,
+      "groundOffset": 3.8,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-058",
+      "rnbId": "demo-reference-058",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -4.83,
+          -70.633
+        ],
+        [
+          -2.895,
+          -64.78
+        ],
+        [
+          4.435,
+          -67.048
+        ],
+        [
+          4.725,
+          -67.175
+        ],
+        [
+          3.224,
+          -71.561
+        ],
+        [
+          2.545,
+          -71.299
+        ],
+        [
+          2.011,
+          -72.757
+        ]
+      ],
+      "height": 7.8,
+      "roofHeight": 2.4,
+      "groundAltitude": 10.2,
+      "groundOffset": 1.4,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-059",
+      "rnbId": "demo-reference-059",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          57.12,
+          45.845
+        ],
+        [
+          50.556,
+          41.012
+        ],
+        [
+          56.024,
+          33.687
+        ],
+        [
+          60.216,
+          36.725
+        ],
+        [
+          59.853,
+          37.16
+        ],
+        [
+          62.343,
+          39.144
+        ]
+      ],
+      "height": 9.8,
+      "roofHeight": 2.2,
+      "groundAltitude": 7.9,
+      "groundOffset": -0.9,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-060",
+      "rnbId": "demo-reference-060",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          32.541,
+          -59.538
+        ],
+        [
+          31.414,
+          -68.679
+        ],
+        [
+          24.565,
+          -67.759
+        ],
+        [
+          25.682,
+          -58.717
+        ]
+      ],
+      "height": 9.1,
+      "roofHeight": 2.9,
+      "groundAltitude": 10.3,
+      "groundOffset": 1.5,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-061",
+      "rnbId": "demo-reference-061",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          57.997,
+          -31.292
+        ],
+        [
+          65.787,
+          -31.795
+        ],
+        [
+          65.393,
+          -38.39
+        ],
+        [
+          57.602,
+          -37.888
+        ]
+      ],
+      "height": 10.9,
+      "roofHeight": 1.8,
+      "groundAltitude": 10.3,
+      "groundOffset": 1.5,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-062",
+      "rnbId": "demo-reference-062",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          56.021,
+          -43.171
+        ],
+        [
+          61.981,
+          -43.909
+        ],
+        [
+          61.99,
+          -43.81
+        ],
+        [
+          62.025,
+          -40.095
+        ],
+        [
+          56.063,
+          -39.357
+        ],
+        [
+          56.056,
+          -41.666
+        ]
+      ],
+      "height": 3.4,
+      "roofHeight": 0.4,
+      "groundAltitude": 12.5,
+      "groundOffset": 3.7,
+      "floors": null,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-063",
+      "rnbId": "demo-reference-063",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -61.516,
+          -54.164
+        ],
+        [
+          -51.595,
+          -41.094
+        ],
+        [
+          -47.787,
+          -45.658
+        ],
+        [
+          -55.445,
+          -55.918
+        ]
+      ],
+      "height": 4.7,
+      "roofHeight": 2.4,
+      "groundAltitude": 8.6,
+      "groundOffset": -0.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-064",
+      "rnbId": "demo-reference-064",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          32.66,
+          60.912
+        ],
+        [
+          41.177,
+          58.436
+        ],
+        [
+          43.889,
+          67.333
+        ],
+        [
+          35.48,
+          69.901
+        ],
+        [
+          34.947,
+          68.442
+        ],
+        [
+          32.41,
+          69.274
+        ],
+        [
+          30.684,
+          63.502
+        ],
+        [
+          33.23,
+          62.77
+        ]
+      ],
+      "height": 11.2,
+      "roofHeight": 3.1,
+      "groundAltitude": 7.1,
+      "groundOffset": -1.7,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-065",
+      "rnbId": "demo-reference-065",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          47.203,
+          -52.924
+        ],
+        [
+          46.998,
+          -57.427
+        ],
+        [
+          52.315,
+          -57.504
+        ],
+        [
+          52.412,
+          -53.092
+        ]
+      ],
+      "height": 4.2,
+      "roofHeight": 0.4,
+      "groundAltitude": 12.6,
+      "groundOffset": 3.8,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-066",
+      "rnbId": "demo-reference-066",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          2.011,
+          -72.757
+        ],
+        [
+          5.636,
+          -73.787
+        ],
+        [
+          3.312,
+          -80.611
+        ],
+        [
+          -3.322,
+          -78.405
+        ],
+        [
+          -2.625,
+          -76.257
+        ],
+        [
+          -6.132,
+          -75.037
+        ],
+        [
+          -4.83,
+          -70.633
+        ]
+      ],
+      "height": 7.5,
+      "roofHeight": 2.7,
+      "groundAltitude": 10.2,
+      "groundOffset": 1.4,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-067",
+      "rnbId": "demo-reference-067",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          46.998,
+          -57.427
+        ],
+        [
+          46.863,
+          -60.026
+        ],
+        [
+          52.281,
+          -60.114
+        ],
+        [
+          52.315,
+          -57.504
+        ]
+      ],
+      "height": 3.7,
+      "roofHeight": 0.4,
+      "groundAltitude": 12.8,
+      "groundOffset": 4,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-068",
+      "rnbId": "demo-reference-068",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          80.642,
+          -0.784
+        ],
+        [
+          80.854,
+          7.133
+        ],
+        [
+          73.643,
+          7.382
+        ],
+        [
+          73.431,
+          -0.536
+        ]
+      ],
+      "height": 10,
+      "roofHeight": 1.3,
+      "groundAltitude": 8.6,
+      "groundOffset": -0.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-069",
+      "rnbId": "demo-reference-069",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -40.994,
+          -58.327
+        ],
+        [
+          -44.511,
+          -53.891
+        ],
+        [
+          -51.981,
+          -59.847
+        ],
+        [
+          -51.175,
+          -60.925
+        ],
+        [
+          -52.143,
+          -61.641
+        ],
+        [
+          -54.516,
+          -63.436
+        ],
+        [
+          -51.161,
+          -67.456
+        ],
+        [
+          -49.015,
+          -65.942
+        ],
+        [
+          -47.764,
+          -67.663
+        ],
+        [
+          -46.035,
+          -66.312
+        ],
+        [
+          -43.653,
+          -64.416
+        ],
+        [
+          -43.291,
+          -64.851
+        ],
+        [
+          -38.654,
+          -61.352
+        ]
+      ],
+      "height": 6.5,
+      "roofHeight": 2.5,
+      "groundAltitude": 7.3,
+      "groundOffset": -1.5,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-070",
+      "rnbId": "demo-reference-070",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          61.073,
+          -53.975
+        ],
+        [
+          61.472,
+          -54.011
+        ],
+        [
+          61.632,
+          -50.007
+        ],
+        [
+          61.776,
+          -48.412
+        ],
+        [
+          55.852,
+          -48.38
+        ],
+        [
+          55.838,
+          -54.105
+        ]
+      ],
+      "height": 9.2,
+      "roofHeight": 0.1,
+      "groundAltitude": 12.7,
+      "groundOffset": 3.9,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-071",
+      "rnbId": "demo-reference-071",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          34.076,
+          -65.906
+        ],
+        [
+          41.576,
+          -64.07
+        ],
+        [
+          42.738,
+          -68.998
+        ],
+        [
+          43.055,
+          -68.826
+        ],
+        [
+          43.273,
+          -69.75
+        ],
+        [
+          40.909,
+          -70.34
+        ],
+        [
+          40.691,
+          -69.416
+        ],
+        [
+          35.148,
+          -70.724
+        ]
+      ],
+      "height": 10.1,
+      "roofHeight": 1.3,
+      "groundAltitude": 10.9,
+      "groundOffset": 2.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-072",
+      "rnbId": "demo-reference-072",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          62.343,
+          39.144
+        ],
+        [
+          69.143,
+          44.358
+        ],
+        [
+          69.25,
+          46.66
+        ],
+        [
+          69.365,
+          50.166
+        ],
+        [
+          68.16,
+          50.173
+        ],
+        [
+          67.091,
+          51.677
+        ],
+        [
+          63.107,
+          48.721
+        ],
+        [
+          62.399,
+          49.79
+        ],
+        [
+          57.12,
+          45.845
+        ]
+      ],
+      "height": 9.5,
+      "roofHeight": 2.8,
+      "groundAltitude": 8,
+      "groundOffset": -0.8,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-073",
+      "rnbId": "demo-reference-073",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          43.055,
+          -68.826
+        ],
+        [
+          42.738,
+          -68.998
+        ],
+        [
+          41.576,
+          -64.07
+        ],
+        [
+          49.9,
+          -62.009
+        ],
+        [
+          50.636,
+          -64.989
+        ],
+        [
+          49.712,
+          -65.207
+        ],
+        [
+          50.23,
+          -67.262
+        ]
+      ],
+      "height": 10.1,
+      "roofHeight": 1.3,
+      "groundAltitude": 10.9,
+      "groundOffset": 2.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-074",
+      "rnbId": "demo-reference-074",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -70.58,
+          -45.509
+        ],
+        [
+          -64.244,
+          -51.004
+        ],
+        [
+          -61.647,
+          -47.823
+        ],
+        [
+          -67.892,
+          -42.437
+        ]
+      ],
+      "height": 2.5,
+      "roofHeight": 1.2,
+      "groundAltitude": 7.1,
+      "groundOffset": -1.7,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-075",
+      "rnbId": "demo-reference-075",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          31.302,
+          -76.606
+        ],
+        [
+          31.283,
+          -75.701
+        ],
+        [
+          27.741,
+          -75.983
+        ]
+      ],
+      "height": 1.2,
+      "roofHeight": 0.4,
+      "groundAltitude": 10.6,
+      "groundOffset": 1.8,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-076",
+      "rnbId": "demo-reference-076",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          16.54,
+          -84.316
+        ],
+        [
+          16.753,
+          -77.503
+        ],
+        [
+          27.57,
+          -77.877
+        ],
+        [
+          27.679,
+          -76.681
+        ],
+        [
+          31.284,
+          -76.806
+        ],
+        [
+          32.19,
+          -76.787
+        ],
+        [
+          32.066,
+          -80.392
+        ],
+        [
+          32.012,
+          -82.095
+        ],
+        [
+          31.913,
+          -82.086
+        ],
+        [
+          31.713,
+          -82.069
+        ],
+        [
+          22.799,
+          -81.766
+        ],
+        [
+          22.918,
+          -83.786
+        ]
+      ],
+      "height": 1.7,
+      "roofHeight": 2.5,
+      "groundAltitude": 10.3,
+      "groundOffset": 1.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-077",
+      "rnbId": "demo-reference-077",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          55.838,
+          -54.105
+        ],
+        [
+          55.718,
+          -65.447
+        ],
+        [
+          58.934,
+          -65.436
+        ],
+        [
+          58.789,
+          -64.82
+        ],
+        [
+          60.791,
+          -64.9
+        ],
+        [
+          61.073,
+          -53.975
+        ]
+      ],
+      "height": 7.3,
+      "roofHeight": 1.1,
+      "groundAltitude": 12.8,
+      "groundOffset": 4,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-078",
+      "rnbId": "demo-reference-078",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          80.563,
+          -32.827
+        ],
+        [
+          72.274,
+          -32.28
+        ],
+        [
+          71.844,
+          -39.274
+        ],
+        [
+          80.143,
+          -39.721
+        ],
+        [
+          80.233,
+          -38.724
+        ]
+      ],
+      "height": 9.4,
+      "roofHeight": 1.4,
+      "groundAltitude": 12,
+      "groundOffset": 3.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-079",
+      "rnbId": "demo-reference-079",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          67.795,
+          -52.973
+        ],
+        [
+          67.666,
+          -49.948
+        ],
+        [
+          66.76,
+          -49.967
+        ],
+        [
+          66.731,
+          -46.95
+        ],
+        [
+          67.636,
+          -46.931
+        ],
+        [
+          67.5,
+          -45.111
+        ],
+        [
+          72.645,
+          -44.872
+        ],
+        [
+          72.838,
+          -48.304
+        ],
+        [
+          74.043,
+          -48.313
+        ],
+        [
+          74.236,
+          -52.851
+        ],
+        [
+          71.618,
+          -52.917
+        ]
+      ],
+      "height": 9.2,
+      "roofHeight": 2.6,
+      "groundAltitude": 10.7,
+      "groundOffset": 1.9,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-080",
+      "rnbId": "demo-reference-080",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -67.892,
+          -42.437
+        ],
+        [
+          -74.699,
+          -36.598
+        ],
+        [
+          -80.664,
+          -43.695
+        ],
+        [
+          -73.939,
+          -49.325
+        ],
+        [
+          -70.58,
+          -45.509
+        ]
+      ],
+      "height": 8.9,
+      "roofHeight": 1.6,
+      "groundAltitude": 5.9,
+      "groundOffset": -2.9,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-081",
+      "rnbId": "demo-reference-081",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          41.388,
+          81.926
+        ],
+        [
+          45.42,
+          80.96
+        ],
+        [
+          43.317,
+          69.898
+        ],
+        [
+          35.416,
+          71.414
+        ],
+        [
+          32.951,
+          71.938
+        ],
+        [
+          34.135,
+          77.256
+        ],
+        [
+          36.599,
+          76.732
+        ],
+        [
+          37.845,
+          82.748
+        ]
+      ],
+      "height": 7.2,
+      "roofHeight": 3.3,
+      "groundAltitude": 7.6,
+      "groundOffset": -1.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-082",
+      "rnbId": "demo-reference-082",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          92.655,
+          -1.265
+        ],
+        [
+          93.038,
+          8.546
+        ],
+        [
+          81.931,
+          9.045
+        ],
+        [
+          81.798,
+          4.235
+        ],
+        [
+          81.63,
+          -0.974
+        ]
+      ],
+      "height": 9.2,
+      "roofHeight": 1.7,
+      "groundAltitude": 8.9,
+      "groundOffset": 0.1,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-083",
+      "rnbId": "demo-reference-083",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -60.749,
+          -63.476
+        ],
+        [
+          -60.205,
+          -64.128
+        ],
+        [
+          -57.344,
+          -60.267
+        ],
+        [
+          -62.402,
+          -56.193
+        ],
+        [
+          -65.362,
+          -60.046
+        ],
+        [
+          -64.709,
+          -60.607
+        ]
+      ],
+      "height": 4.7,
+      "roofHeight": 3.9,
+      "groundAltitude": 7.5,
+      "groundOffset": -1.3,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-084",
+      "rnbId": "demo-reference-084",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          67.795,
+          -52.973
+        ],
+        [
+          71.618,
+          -52.917
+        ],
+        [
+          72.167,
+          -61.305
+        ],
+        [
+          67.919,
+          -61.625
+        ],
+        [
+          67.928,
+          -62.63
+        ],
+        [
+          64.893,
+          -62.859
+        ],
+        [
+          64.629,
+          -60.223
+        ],
+        [
+          61.911,
+          -60.28
+        ],
+        [
+          61.34,
+          -59.926
+        ],
+        [
+          61.518,
+          -54.618
+        ],
+        [
+          64.543,
+          -54.489
+        ],
+        [
+          64.47,
+          -53.076
+        ]
+      ],
+      "height": 9,
+      "roofHeight": 3.2,
+      "groundAltitude": 10.9,
+      "groundOffset": 2.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-085",
+      "rnbId": "demo-reference-085",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          80.233,
+          -38.724
+        ],
+        [
+          87.544,
+          -38.982
+        ],
+        [
+          87.919,
+          -31.481
+        ],
+        [
+          83.117,
+          -31.249
+        ],
+        [
+          83.072,
+          -31.747
+        ],
+        [
+          80.572,
+          -31.621
+        ],
+        [
+          80.563,
+          -32.827
+        ]
+      ],
+      "height": 8.9,
+      "roofHeight": 1.1,
+      "groundAltitude": 11.8,
+      "groundOffset": 3,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-086",
+      "rnbId": "demo-reference-086",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          83.248,
+          43.689
+        ],
+        [
+          83.364,
+          46.089
+        ],
+        [
+          83.577,
+          52.902
+        ],
+        [
+          73.458,
+          53.212
+        ],
+        [
+          73.306,
+          50.413
+        ],
+        [
+          72.708,
+          50.467
+        ],
+        [
+          72.55,
+          43.147
+        ],
+        [
+          83.276,
+          42.883
+        ]
+      ],
+      "height": 7.9,
+      "roofHeight": 2.3,
+      "groundAltitude": 8.1,
+      "groundOffset": -0.7,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-087",
+      "rnbId": "demo-reference-087",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          -13.725,
+          92.426
+        ],
+        [
+          -16.66,
+          93.293
+        ],
+        [
+          -18.288,
+          88.618
+        ],
+        [
+          -15.696,
+          87.279
+        ]
+      ],
+      "height": 3.1,
+      "roofHeight": 2.4,
+      "groundAltitude": 3.9,
+      "groundOffset": -4.9,
+      "floors": 1,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-088",
+      "rnbId": "demo-reference-088",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          8.632,
+          93.021
+        ],
+        [
+          7.838,
+          89.776
+        ],
+        [
+          -5.536,
+          92.993
+        ],
+        [
+          -5.03,
+          95.258
+        ],
+        [
+          1.757,
+          93.641
+        ],
+        [
+          2.045,
+          94.62
+        ]
+      ],
+      "height": 3,
+      "roofHeight": 1.2,
+      "groundAltitude": 6.2,
+      "groundOffset": -2.6,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-089",
+      "rnbId": "demo-reference-089",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          59.139,
+          74.899
+        ],
+        [
+          59.236,
+          79.311
+        ],
+        [
+          60.948,
+          79.358
+        ],
+        [
+          61.945,
+          79.268
+        ],
+        [
+          67.96,
+          79.126
+        ],
+        [
+          67.727,
+          74.325
+        ],
+        [
+          66.613,
+          74.225
+        ],
+        [
+          66.321,
+          64.305
+        ],
+        [
+          64.319,
+          64.385
+        ],
+        [
+          61.511,
+          64.437
+        ],
+        [
+          61.583,
+          65.234
+        ],
+        [
+          61.021,
+          65.688
+        ],
+        [
+          60.567,
+          66.23
+        ],
+        [
+          60.531,
+          66.938
+        ],
+        [
+          60.593,
+          67.635
+        ],
+        [
+          60.756,
+          68.323
+        ],
+        [
+          61.191,
+          68.686
+        ],
+        [
+          61.825,
+          69.03
+        ],
+        [
+          62.02,
+          74.539
+        ]
+      ],
+      "height": 4.8,
+      "roofHeight": 4.6,
+      "groundAltitude": 8.8,
+      "groundOffset": 0,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-090",
+      "rnbId": "demo-reference-090",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -64.709,
+          -60.607
+        ],
+        [
+          -60.749,
+          -63.476
+        ],
+        [
+          -61.88,
+          -64.881
+        ],
+        [
+          -64.64,
+          -68.751
+        ],
+        [
+          -63.979,
+          -69.213
+        ],
+        [
+          -66.378,
+          -72.413
+        ],
+        [
+          -66.939,
+          -73.064
+        ],
+        [
+          -73.618,
+          -69.147
+        ],
+        [
+          -71.102,
+          -65.757
+        ],
+        [
+          -69.498,
+          -66.907
+        ],
+        [
+          -68.484,
+          -65.691
+        ]
+      ],
+      "height": 4.3,
+      "roofHeight": 2.2,
+      "groundAltitude": 9.5,
+      "groundOffset": 0.7,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-091",
+      "rnbId": "demo-reference-091",
+      "isTarget": false,
+      "label": "Anexo",
+      "footprint": [
+        [
+          80.064,
+          -43.934
+        ],
+        [
+          80.113,
+          -50.067
+        ],
+        [
+          84.733,
+          -50.081
+        ],
+        [
+          84.633,
+          -48.967
+        ],
+        [
+          84.651,
+          -48.768
+        ],
+        [
+          84.485,
+          -43.93
+        ]
+      ],
+      "height": 3.2,
+      "roofHeight": 0.2,
+      "groundAltitude": 12.3,
+      "groundOffset": 3.5,
+      "floors": 1,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-092",
+      "rnbId": "demo-reference-092",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          41.388,
+          81.926
+        ],
+        [
+          37.845,
+          82.748
+        ],
+        [
+          30.86,
+          84.383
+        ],
+        [
+          31.99,
+          87.998
+        ],
+        [
+          33.857,
+          87.529
+        ],
+        [
+          36.215,
+          95.856
+        ],
+        [
+          36.242,
+          96.155
+        ],
+        [
+          44.651,
+          93.588
+        ],
+        [
+          44.623,
+          93.289
+        ]
+      ],
+      "height": 8.7,
+      "roofHeight": 2.6,
+      "groundAltitude": 7.6,
+      "groundOffset": -1.2,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-093",
+      "rnbId": "demo-reference-093",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          31.111,
+          88.28
+        ],
+        [
+          31.99,
+          87.998
+        ],
+        [
+          33.857,
+          87.529
+        ],
+        [
+          36.215,
+          95.856
+        ],
+        [
+          33.669,
+          96.588
+        ]
+      ],
+      "height": 6,
+      "roofHeight": 2.3,
+      "groundAltitude": 7.1,
+      "groundOffset": -1.7,
+      "floors": null,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-094",
+      "rnbId": "demo-reference-094",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          99.448,
+          -26.192
+        ],
+        [
+          99.831,
+          -17.486
+        ],
+        [
+          89.929,
+          -16.994
+        ],
+        [
+          89.528,
+          -25.9
+        ]
+      ],
+      "height": 10.2,
+      "roofHeight": 2,
+      "groundAltitude": 9.2,
+      "groundOffset": 0.4,
+      "floors": 3,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-095",
+      "rnbId": "demo-reference-095",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -85.441,
+          -39.848
+        ],
+        [
+          -87.58,
+          -37.947
+        ],
+        [
+          -91.691,
+          -41.193
+        ],
+        [
+          -89.452,
+          -43.103
+        ]
+      ],
+      "height": 2.9,
+      "roofHeight": 0.1,
+      "groundAltitude": 4.2,
+      "groundOffset": -4.6,
+      "floors": null,
+      "planarAccuracy": 5,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-096",
+      "rnbId": "demo-reference-096",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          83.248,
+          43.689
+        ],
+        [
+          83.276,
+          42.883
+        ],
+        [
+          83.177,
+          41.786
+        ],
+        [
+          83.008,
+          36.577
+        ],
+        [
+          92.638,
+          36.411
+        ],
+        [
+          92.47,
+          31.202
+        ],
+        [
+          96.972,
+          30.996
+        ],
+        [
+          97.283,
+          40.011
+        ],
+        [
+          95.081,
+          40.109
+        ],
+        [
+          95.179,
+          43.415
+        ],
+        [
+          90.568,
+          43.53
+        ],
+        [
+          90.64,
+          44.327
+        ],
+        [
+          89.598,
+          45.024
+        ],
+        [
+          87.894,
+          45.078
+        ],
+        [
+          86.935,
+          44.46
+        ],
+        [
+          86.763,
+          43.673
+        ]
+      ],
+      "height": 6.4,
+      "roofHeight": 2.9,
+      "groundAltitude": 8.5,
+      "groundOffset": -0.3,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-097",
+      "rnbId": "demo-reference-097",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -8.315,
+          -102.569
+        ],
+        [
+          -8.085,
+          -94.452
+        ],
+        [
+          -16.619,
+          -94.384
+        ],
+        [
+          -17.049,
+          -102.483
+        ]
+      ],
+      "height": 6.1,
+      "roofHeight": 2,
+      "groundAltitude": 8.9,
+      "groundOffset": 0.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 1,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-098",
+      "rnbId": "demo-reference-098",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          66.321,
+          64.305
+        ],
+        [
+          66.613,
+          74.225
+        ],
+        [
+          67.727,
+          74.325
+        ],
+        [
+          69.331,
+          74.281
+        ],
+        [
+          72.04,
+          74.237
+        ],
+        [
+          72.059,
+          73.331
+        ],
+        [
+          75.664,
+          73.208
+        ],
+        [
+          75.594,
+          70.2
+        ],
+        [
+          75.585,
+          68.995
+        ],
+        [
+          75.435,
+          63.984
+        ]
+      ],
+      "height": 4.8,
+      "roofHeight": 1.8,
+      "groundAltitude": 8.9,
+      "groundOffset": 0.1,
+      "floors": 2,
+      "planarAccuracy": 3,
+      "verticalAccuracy": 2.5,
+      "source": "generalized-demo"
+    },
+    {
+      "id": "demo-building-099",
+      "rnbId": "demo-reference-099",
+      "isTarget": false,
+      "label": "Edificio vecino",
+      "footprint": [
+        [
+          -99.501,
+          2.513
+        ],
+        [
+          -113.284,
+          8.981
+        ],
+        [
+          -114.725,
+          9.714
+        ],
+        [
+          -127.908,
+          -16.122
+        ],
+        [
+          -166.086,
+          2.796
+        ],
+        [
+          -175.682,
+          7.782
+        ],
+        [
+          -174.072,
+          11.153
+        ],
+        [
+          -185.517,
+          16.807
+        ],
+        [
+          -182.206,
+          23.441
+        ],
+        [
+          -211.62,
+          38.153
+        ],
+        [
+          -196.99,
+          67.776
+        ],
+        [
+          -189.497,
+          63.986
+        ],
+        [
+          -183.38,
+          76.092
+        ],
+        [
+          -141.387,
+          54.92
+        ],
+        [
+          -103.037,
+          35.685
+        ],
+        [
+          -95.735,
+          49.794
+        ],
+        [
+          -79.768,
+          41.923
+        ]
+      ],
+      "holes": [
+        [
+          [
+            -190.709,
+            47.216
+          ],
+          [
+            -174.362,
+            39.109
+          ],
+          [
+            -170.923,
+            46.033
+          ],
+          [
+            -187.271,
+            54.14
+          ]
+        ]
+      ],
+      "height": 15.2,
+      "roofHeight": 0,
+      "groundAltitude": 5,
+      "groundOffset": -3.8,
+      "floors": 3,
+      "planarAccuracy": 2.5,
+      "verticalAccuracy": 1.5,
+      "source": "generalized-demo"
+    }
+  ],
+  "roads": [
+    {
+      "id": "demo-road-001",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          40.726,
+          -94.636
+        ],
+        [
+          19.9,
+          -96.073
+        ],
+        [
+          4.382,
+          -96.581
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-002",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -109.739,
+          -108.685
+        ],
+        [
+          -105.445,
+          -108.973
+        ],
+        [
+          -103.107,
+          -109.786
+        ],
+        [
+          -102.761,
+          -110
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-003",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -110,
+          -108.747
+        ],
+        [
+          -109.739,
+          -108.685
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-004",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -110,
+          -106.26
+        ],
+        [
+          -109.739,
+          -108.685
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-005",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          39.974,
+          -106.324
+        ],
+        [
+          40.035,
+          -103.415
+        ],
+        [
+          40.448,
+          -98.832
+        ],
+        [
+          40.726,
+          -94.636
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-006",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          45.044,
+          -110
+        ],
+        [
+          44.705,
+          -109.564
+        ],
+        [
+          39.974,
+          -106.324
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-007",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          15.395,
+          -110
+        ],
+        [
+          18.449,
+          -107.697
+        ],
+        [
+          24.011,
+          -106.189
+        ],
+        [
+          30.742,
+          -106.194
+        ],
+        [
+          39.974,
+          -106.324
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-008",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          4.382,
+          -96.581
+        ],
+        [
+          2.809,
+          -101.764
+        ],
+        [
+          -2.16,
+          -108.951
+        ],
+        [
+          -3.548,
+          -110
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-009",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          4.382,
+          -96.581
+        ],
+        [
+          6.714,
+          -88.553
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-010",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          49.204,
+          58.315
+        ],
+        [
+          55.695,
+          91.285
+        ],
+        [
+          60.652,
+          110
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-011",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          11.414,
+          -73.204
+        ],
+        [
+          19.741,
+          -46.628
+        ],
+        [
+          34.18,
+          -4.629
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-012",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          110,
+          -8.574
+        ],
+        [
+          109.438,
+          -9.009
+        ],
+        [
+          102.147,
+          -11.867
+        ],
+        [
+          34.18,
+          -4.629
+        ]
+      ],
+      "width": 3,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-013",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          11.414,
+          -73.204
+        ],
+        [
+          37.207,
+          -74.628
+        ],
+        [
+          99.309,
+          -62.247
+        ],
+        [
+          110,
+          -56.463
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-014",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          6.714,
+          -88.553
+        ],
+        [
+          8.45,
+          -82.681
+        ],
+        [
+          11.414,
+          -73.204
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-015",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          49.204,
+          58.315
+        ],
+        [
+          93.232,
+          56.351
+        ],
+        [
+          110,
+          55.984
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-016",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          34.18,
+          -4.629
+        ],
+        [
+          43.136,
+          27.818
+        ],
+        [
+          49.204,
+          58.315
+        ]
+      ],
+      "width": 5,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-017",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -60.012,
+          -67.562
+        ],
+        [
+          -48.064,
+          -53.168
+        ],
+        [
+          -30.752,
+          -38.354
+        ],
+        [
+          13.421,
+          -10.893
+        ],
+        [
+          24.098,
+          -6.131
+        ],
+        [
+          34.18,
+          -4.629
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-018",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          110,
+          -74.763
+        ],
+        [
+          86.151,
+          -83.364
+        ],
+        [
+          53.154,
+          -91.639
+        ],
+        [
+          40.726,
+          -94.636
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-019",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          -36.564,
+          95.391
+        ],
+        [
+          -19.174,
+          85.483
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-020",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          -43.434,
+          99.427
+        ],
+        [
+          -36.564,
+          95.391
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-021",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          -64.823,
+          110
+        ],
+        [
+          -71.361,
+          97.226
+        ],
+        [
+          -72.918,
+          94.453
+        ],
+        [
+          -82.002,
+          78.394
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-022",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          -110,
+          -29.93
+        ],
+        [
+          -102.122,
+          -20.962
+        ],
+        [
+          -96.762,
+          -16.12
+        ],
+        [
+          -93.676,
+          -11.979
+        ],
+        [
+          -79.939,
+          11.096
+        ],
+        [
+          -77.253,
+          17.483
+        ],
+        [
+          -75.074,
+          24.922
+        ],
+        [
+          -68.76,
+          52.584
+        ],
+        [
+          -66.581,
+          60.023
+        ],
+        [
+          -62.175,
+          68.768
+        ],
+        [
+          -52.936,
+          84.31
+        ],
+        [
+          -43.434,
+          99.427
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-023",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          -38.385,
+          110
+        ],
+        [
+          -43.434,
+          99.427
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-024",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -84.981,
+          110
+        ],
+        [
+          -88.485,
+          101.183
+        ],
+        [
+          -92.465,
+          91.595
+        ],
+        [
+          -97.187,
+          81.574
+        ],
+        [
+          -104.253,
+          66.739
+        ],
+        [
+          -104.669,
+          66.575
+        ],
+        [
+          -105.575,
+          66.556
+        ],
+        [
+          -107.406,
+          67.426
+        ],
+        [
+          -110,
+          68.77
+        ]
+      ],
+      "width": 4,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-025",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          6.714,
+          -88.553
+        ],
+        [
+          -18.888,
+          -88.353
+        ],
+        [
+          -45.886,
+          -85.816
+        ],
+        [
+          -72.705,
+          -80.181
+        ],
+        [
+          -77.824,
+          -79.014
+        ],
+        [
+          -92.675,
+          -75.464
+        ],
+        [
+          -109.113,
+          -68.354
+        ]
+      ],
+      "width": 3,
+      "isPath": false
+    },
+    {
+      "id": "demo-road-026",
+      "name": "Sendero de demostración",
+      "points": [
+        [
+          110,
+          -68.199
+        ],
+        [
+          103.039,
+          -71.023
+        ],
+        [
+          75.503,
+          -78.886
+        ],
+        [
+          47.08,
+          -85.464
+        ],
+        [
+          16.734,
+          -88.855
+        ],
+        [
+          6.714,
+          -88.553
+        ]
+      ],
+      "width": 1.8,
+      "isPath": true
+    },
+    {
+      "id": "demo-road-027",
+      "name": "Vía de demostración",
+      "points": [
+        [
+          -109.113,
+          -68.354
+        ],
+        [
+          -110,
+          -67.958
+        ]
+      ],
+      "width": 3,
+      "isPath": false
+    }
+  ],
+  "parcel": {
+    "id": "demo-parcel-001",
+    "label": "DEMO 001",
+    "area": 1192,
+    "footprint": [
+      [
+        9.981,
+        21.566
+      ],
+      [
+        3.583,
+        17.814
+      ],
+      [
+        0.941,
+        16.254
+      ],
+      [
+        -1.307,
+        14.939
+      ],
+      [
+        -3.758,
+        13.503
+      ],
+      [
+        -5.423,
+        12.528
+      ],
+      [
+        -6.305,
+        11.994
+      ],
+      [
+        -6.868,
+        11.664
+      ],
+      [
+        -8.521,
+        10.708
+      ],
+      [
+        -10.963,
+        9.25
+      ],
+      [
+        -11.144,
+        9.146
+      ],
+      [
+        -13.509,
+        7.762
+      ],
+      [
+        -13.594,
+        7.71
+      ],
+      [
+        -16.161,
+        6.213
+      ],
+      [
+        -18.304,
+        4.949
+      ],
+      [
+        -20.851,
+        3.451
+      ],
+      [
+        -23.175,
+        2.074
+      ],
+      [
+        -27.556,
+        -0.495
+      ],
+      [
+        -22.68,
+        -7.144
+      ],
+      [
+        -16.544,
+        -15.513
+      ],
+      [
+        -14.745,
+        -17.957
+      ],
+      [
+        -12.946,
+        -20.41
+      ],
+      [
+        22.546,
+        0.489
+      ],
+      [
+        33.473,
+        6.797
+      ],
+      [
+        33.016,
+        7.069
+      ],
+      [
+        28.625,
+        9.847
+      ],
+      [
+        24.383,
+        12.5
+      ],
+      [
+        15.798,
+        17.907
+      ]
+    ]
+  },
+  "solar": {
+    "date": "2026-09-26",
+    "timeZone": "Europe/Paris",
+    "source": "apps/web/src/lib/solar.ts NOAA/Meeus",
+    "selected": {
+      "altitude": 39.308772215958115,
+      "azimuth": 197.11718375861773,
+      "direction": [
+        -0.22773349731333342,
+        0.6334993432746576,
+        0.7394701050563272
+      ],
+      "isDaylight": true,
+      "minutes": 900,
+      "utc": "2026-09-26T13:00:00.000Z",
+      "disambiguation": "reject"
+    },
+    "sampleIntervalMinutes": 15,
+    "defaultFrame": 61,
+    "samples": [
+      {
+        "altitude": -35.643583977211264,
+        "azimuth": 319.4672896438673,
+        "direction": [
+          -0.5281316701000265,
+          -0.5827413143386422,
+          -0.6176483624200978
+        ],
+        "isDaylight": false,
+        "frame": 1,
+        "minutes": 0,
+        "localTime": "00:00",
+        "utc": "2026-09-25T22:00:00.000Z",
+        "elapsedMinutes": 0
+      },
+      {
+        "altitude": -37.206865824247934,
+        "azimuth": 323.7044394807717,
+        "direction": [
+          -0.4714635769710028,
+          -0.6046945596882374,
+          -0.6419241271935151
+        ],
+        "isDaylight": false,
+        "frame": 2,
+        "minutes": 15,
+        "localTime": "00:15",
+        "utc": "2026-09-25T22:15:00.000Z",
+        "elapsedMinutes": 15
+      },
+      {
+        "altitude": -38.61764801624638,
+        "azimuth": 328.10932929168575,
+        "direction": [
+          -0.4127757974198563,
+          -0.6241202879126245,
+          -0.6633928001420158
+        ],
+        "isDaylight": false,
+        "frame": 3,
+        "minutes": 30,
+        "localTime": "00:30",
+        "utc": "2026-09-25T22:30:00.000Z",
+        "elapsedMinutes": 30
+      },
+      {
+        "altitude": -39.86161336972675,
+        "azimuth": 332.6779239723629,
+        "direction": [
+          -0.3523197683425414,
+          -0.6409355076407995,
+          -0.6819622100089481
+        ],
+        "isDaylight": false,
+        "frame": 4,
+        "minutes": 45,
+        "localTime": "00:45",
+        "utc": "2026-09-25T22:45:00.000Z",
+        "elapsedMinutes": 45
+      },
+      {
+        "altitude": -40.92483749930945,
+        "azimuth": 337.40060375257366,
+        "direction": [
+          -0.29035450147920583,
+          -0.6550684117499692,
+          -0.6975526069036906
+        ],
+        "isDaylight": false,
+        "frame": 5,
+        "minutes": 60,
+        "localTime": "01:00",
+        "utc": "2026-09-25T23:00:00.000Z",
+        "elapsedMinutes": 60
+      },
+      {
+        "altitude": -41.79432926287659,
+        "azimuth": 342.2615914836735,
+        "direction": [
+          -0.22714547372659458,
+          -0.6664586849636821,
+          -0.7100970039381949
+        ],
+        "isDaylight": false,
+        "frame": 6,
+        "minutes": 75,
+        "localTime": "01:15",
+        "utc": "2026-09-25T23:15:00.000Z",
+        "elapsedMinutes": 75
+      },
+      {
+        "altitude": -42.4586359341523,
+        "azimuth": 347.2387986996127,
+        "direction": [
+          -0.16296348974927388,
+          -0.67505776223715,
+          -0.7195414641645816
+        ],
+        "isDaylight": false,
+        "frame": 7,
+        "minutes": 90,
+        "localTime": "01:30",
+        "utc": "2026-09-25T23:30:00.000Z",
+        "elapsedMinutes": 90
+      },
+      {
+        "altitude": -42.908460917226435,
+        "azimuth": 352.3042339585308,
+        "direction": [
+          -0.09808352177492992,
+          -0.6808290367786898,
+          -0.7258453316204688
+        ],
+        "isDaylight": false,
+        "frame": 8,
+        "minutes": 105,
+        "localTime": "01:45",
+        "utc": "2026-09-25T23:45:00.000Z",
+        "elapsedMinutes": 105
+      },
+      {
+        "altitude": -43.13722514401254,
+        "azimuth": 357.42504648583844,
+        "direction": [
+          -0.032783531538502365,
+          -0.6837480168389096,
+          -0.7289814054752852
+        ],
+        "isDaylight": false,
+        "frame": 9,
+        "minutes": 120,
+        "localTime": "02:00",
+        "utc": "2026-09-26T00:00:00.000Z",
+        "elapsedMinutes": 120
+      },
+      {
+        "altitude": -43.14149773685197,
+        "azimuth": 2.5651659506354463,
+        "direction": [
+          0.032656720584290526,
+          -0.6838024306168409,
+          -0.7289360565119413
+        ],
+        "isDaylight": false,
+        "frame": 10,
+        "minutes": 135,
+        "localTime": "02:15",
+        "utc": "2026-09-26T00:15:00.000Z",
+        "elapsedMinutes": 135
+      },
+      {
+        "altitude": -42.921231952688025,
+        "azimuth": 7.687371582214837,
+        "direction": [
+          0.0979568741392289,
+          -0.6809922787910757,
+          -0.7257092854826985
+        ],
+        "isDaylight": false,
+        "frame": 11,
+        "minutes": 150,
+        "localTime": "02:30",
+        "utc": "2026-09-26T00:30:00.000Z",
+        "elapsedMinutes": 150
+      },
+      {
+        "altitude": -42.47976898421864,
+        "azimuth": 12.755521145729176,
+        "direction": [
+          0.16283716972313536,
+          -0.6753298344729645,
+          -0.7193147230713945
+        ],
+        "isDaylight": false,
+        "frame": 12,
+        "minutes": 165,
+        "localTime": "02:45",
+        "utc": "2026-09-26T00:45:00.000Z",
+        "elapsedMinutes": 165
+      },
+      {
+        "altitude": -41.82360899960634,
+        "azimuth": 17.73663002689284,
+        "direction": [
+          0.22701964754089846,
+          -0.6668395906020099,
+          -0.7097795714418315
+        ],
+        "isDaylight": false,
+        "frame": 13,
+        "minutes": 180,
+        "localTime": "03:00",
+        "utc": "2026-09-26T01:00:00.000Z",
+        "elapsedMinutes": 180
+      },
+      {
+        "altitude": -40.9619857796533,
+        "azimuth": 22.602528463473334,
+        "direction": [
+          0.2902293382425564,
+          -0.6555581549682074,
+          -0.6971444876623266
+        ],
+        "isDaylight": false,
+        "frame": 14,
+        "minutes": 195,
+        "localTime": "03:15",
+        "utc": "2026-09-26T01:15:00.000Z",
+        "elapsedMinutes": 195
+      },
+      {
+        "altitude": -39.906308322674974,
+        "azimuth": 27.330926119936407,
+        "direction": [
+          0.3521954409450947,
+          -0.6415340933322009,
+          -0.6814634094872014
+        ],
+        "isDaylight": false,
+        "frame": 15,
+        "minutes": 210,
+        "localTime": "03:30",
+        "utc": "2026-09-26T01:30:00.000Z",
+        "elapsedMinutes": 210
+      },
+      {
+        "altitude": -38.669543774694105,
+        "azimuth": 31.905840687032594,
+        "direction": [
+          0.4126524833977135,
+          -0.624827721334534,
+          -0.6628033242203858
+        ],
+        "isDaylight": false,
+        "frame": 16,
+        "minutes": 225,
+        "localTime": "03:45",
+        "utc": "2026-09-26T01:45:00.000Z",
+        "elapsedMinutes": 225
+      },
+      {
+        "altitude": -37.26561093534452,
+        "azimuth": 36.31746040838442,
+        "direction": [
+          0.4713414593083475,
+          -0.6055108460466042,
+          -0.6412439816926184
+        ],
+        "isDaylight": false,
+        "frame": 17,
+        "minutes": 240,
+        "localTime": "04:00",
+        "utc": "2026-09-26T02:00:00.000Z",
+        "elapsedMinutes": 240
+      },
+      {
+        "altitude": -35.70883716788774,
+        "azimuth": 40.56158249877427,
+        "direction": [
+          0.5280109379652078,
+          -0.5836664582906759,
+          -0.6168775525625164
+        ],
+        "isDaylight": false,
+        "frame": 18,
+        "minutes": 255,
+        "localTime": "04:15",
+        "utc": "2026-09-26T02:15:00.000Z",
+        "elapsedMinutes": 255
+      },
+      {
+        "altitude": -34.013510488809715,
+        "azimuth": 44.63879376860814,
+        "direction": [
+          0.582418141404528,
+          -0.5593883770657975,
+          -0.5898082333831806
+        ],
+        "isDaylight": false,
+        "frame": 19,
+        "minutes": 270,
+        "localTime": "04:30",
+        "utc": "2026-09-26T02:30:00.000Z",
+        "elapsedMinutes": 270
+      },
+      {
+        "altitude": -32.19353876076873,
+        "azimuth": 48.553546028262474,
+        "direction": [
+          0.6343299844989339,
+          -0.532780847565301,
+          -0.5601518001695451
+        ],
+        "isDaylight": false,
+        "frame": 20,
+        "minutes": 285,
+        "localTime": "04:45",
+        "utc": "2026-09-26T02:45:00.000Z",
+        "elapsedMinutes": 285
+      },
+      {
+        "altitude": -30.262212753913058,
+        "azimuth": 52.3132436336989,
+        "direction": [
+          0.6835240735165651,
+          -0.5039580945276243,
+          -0.5280351123584561
+        ],
+        "isDaylight": false,
+        "frame": 21,
+        "minutes": 300,
+        "localTime": "05:00",
+        "utc": "2026-09-26T03:00:00.000Z",
+        "elapsedMinutes": 300
+      },
+      {
+        "altitude": -28.232060415236408,
+        "azimuth": 55.92741936326945,
+        "direction": [
+          0.7297896588770206,
+          -0.47304383285196777,
+          -0.493595569263827
+        ],
+        "isDaylight": false,
+        "frame": 22,
+        "minutes": 315,
+        "localTime": "05:15",
+        "utc": "2026-09-26T03:15:00.000Z",
+        "elapsedMinutes": 315
+      },
+      {
+        "altitude": -26.11477536943606,
+        "azimuth": 59.407038035234905,
+        "direction": [
+          0.7729285380131065,
+          -0.440170737538929,
+          -0.45698052140037343
+        ],
+        "isDaylight": false,
+        "frame": 23,
+        "minutes": 330,
+        "localTime": "05:30",
+        "utc": "2026-09-26T03:30:00.000Z",
+        "elapsedMinutes": 330
+      },
+      {
+        "altitude": -23.92120208616151,
+        "azimuth": 62.76393963769465,
+        "direction": [
+          0.8127559044759032,
+          -0.405479875246039,
+          -0.41834663917618964
+        ],
+        "isDaylight": false,
+        "frame": 24,
+        "minutes": 345,
+        "localTime": "05:45",
+        "utc": "2026-09-26T03:45:00.000Z",
+        "elapsedMinutes": 345
+      },
+      {
+        "altitude": -21.661361802583194,
+        "azimuth": 66.0104158644142,
+        "direction": [
+          0.849101139648447,
+          -0.3691200999108088,
+          -0.3778592416357486
+        ],
+        "isDaylight": false,
+        "frame": 25,
+        "minutes": 360,
+        "localTime": "06:00",
+        "utc": "2026-09-26T04:00:00.000Z",
+        "elapsedMinutes": 360
+      },
+      {
+        "altitude": -19.344505994982768,
+        "azimuth": 69.15890425105152,
+        "direction": [
+          0.8818085436688833,
+          -0.33124741499532,
+          -0.3356915881750414
+        ],
+        "isDaylight": false,
+        "frame": 26,
+        "minutes": 375,
+        "localTime": "06:15",
+        "utc": "2026-09-26T04:15:00.000Z",
+        "elapsedMinutes": 375
+      },
+      {
+        "altitude": -16.97918715020438,
+        "azimuth": 72.2217802895052,
+        "direction": [
+          0.9107380024364555,
+          -0.2920243051029274,
+          -0.2920241362408371
+        ],
+        "isDaylight": false,
+        "frame": 27,
+        "minutes": 390,
+        "localTime": "06:30",
+        "utc": "2026-09-26T04:30:00.000Z",
+        "elapsedMinutes": 390
+      },
+      {
+        "altitude": -14.573339323756196,
+        "azimuth": 75.21122777027682,
+        "direction": [
+          0.9357655878446137,
+          -0.2516190398475301,
+          -0.24704376817080745
+        ],
+        "isDaylight": false,
+        "frame": 28,
+        "minutes": 405,
+        "localTime": "06:45",
+        "utc": "2026-09-26T04:45:00.000Z",
+        "elapsedMinutes": 405
+      },
+      {
+        "altitude": -12.134363276115938,
+        "azimuth": 78.13916946753102,
+        "direction": [
+          0.9567840886646617,
+          -0.2102049529233912,
+          -0.20094299053365294
+        ],
+        "isDaylight": false,
+        "frame": 29,
+        "minutes": 420,
+        "localTime": "07:00",
+        "utc": "2026-09-26T05:00:00.000Z",
+        "elapsedMinutes": 420
+      },
+      {
+        "altitude": -9.669212808917123,
+        "azimuth": 81.01724299182086,
+        "direction": [
+          0.9737034698093464,
+          -0.16795969948172795,
+          -0.1539191093764735
+        ],
+        "isDaylight": false,
+        "frame": 30,
+        "minutes": 435,
+        "localTime": "07:15",
+        "utc": "2026-09-26T05:15:00.000Z",
+        "elapsedMinutes": 435
+      },
+      {
+        "altitude": -7.184480300982508,
+        "azimuth": 83.85680946850101,
+        "direction": [
+          0.9864512580094664,
+          -0.12506449501258404,
+          -0.10617338488900334
+        ],
+        "isDaylight": false,
+        "frame": 31,
+        "minutes": 450,
+        "localTime": "07:30",
+        "utc": "2026-09-26T05:30:00.000Z",
+        "elapsedMinutes": 450
+      },
+      {
+        "altitude": -4.6864804398863305,
+        "azimuth": 86.66898526906687,
+        "direction": [
+          0.9949728522485285,
+          -0.0817033389587743,
+          -0.057910169153746506
+        ],
+        "isDaylight": false,
+        "frame": 32,
+        "minutes": 465,
+        "localTime": "07:45",
+        "utc": "2026-09-26T05:45:00.000Z",
+        "elapsedMinutes": 465
+      },
+      {
+        "altitude": -2.18133184284991,
+        "azimuth": 89.46468916215122,
+        "direction": [
+          0.9992317576281915,
+          -0.038062226405292526,
+          -0.009336030652665217
+        ],
+        "isDaylight": false,
+        "frame": 33,
+        "minutes": 480,
+        "localTime": "08:00",
+        "utc": "2026-09-26T06:00:00.000Z",
+        "elapsedMinutes": 480
+      },
+      {
+        "altitude": 0.3249632791448561,
+        "azimuth": 92.25469889067864,
+        "direction": [
+          0.9992097416619836,
+          0.0056716487614938554,
+          0.03934113074274847
+        ],
+        "isDaylight": true,
+        "frame": 34,
+        "minutes": 495,
+        "localTime": "08:15",
+        "utc": "2026-09-26T06:15:00.000Z",
+        "elapsedMinutes": 495
+      },
+      {
+        "altitude": 2.826440983169426,
+        "azimuth": 95.04971232490664,
+        "direction": [
+          0.9949069123275465,
+          0.04931069584497522,
+          0.0879129744585639
+        ],
+        "isDaylight": true,
+        "frame": 35,
+        "minutes": 510,
+        "localTime": "08:30",
+        "utc": "2026-09-26T06:30:00.000Z",
+        "elapsedMinutes": 510
+      },
+      {
+        "altitude": 5.317098409836138,
+        "azimuth": 97.86040902669748,
+        "direction": [
+          0.9863417175445122,
+          0.09266773102680258,
+          0.13617161179073306
+        ],
+        "isDaylight": true,
+        "frame": 36,
+        "minutes": 525,
+        "localTime": "08:45",
+        "utc": "2026-09-26T06:45:00.000Z",
+        "elapsedMinutes": 525
+      },
+      {
+        "altitude": 7.7908169600483586,
+        "azimuth": 100.6975083048128,
+        "direction": [
+          0.9735508660784367,
+          0.13555677929259558,
+          0.18391049656217126
+        ],
+        "isDaylight": true,
+        "frame": 37,
+        "minutes": 540,
+        "localTime": "09:00",
+        "utc": "2026-09-26T07:00:00.000Z",
+        "elapsedMinutes": 540
+      },
+      {
+        "altitude": 10.241285333305647,
+        "azimuth": 103.57181966573341,
+        "direction": [
+          0.9565891702120057,
+          0.1777938711930248,
+          0.23092531000153377
+        ],
+        "isDaylight": true,
+        "frame": 38,
+        "minutes": 555,
+        "localTime": "09:15",
+        "utc": "2026-09-26T07:15:00.000Z",
+        "elapsedMinutes": 555
+      },
+      {
+        "altitude": 12.661922130446507,
+        "azimuth": 106.49428099356862,
+        "direction": [
+          0.9355293108577852,
+          0.21919783101017515,
+          0.2770148360763234
+        ],
+        "isDaylight": true,
+        "frame": 39,
+        "minutes": 570,
+        "localTime": "09:30",
+        "utc": "2026-09-26T07:30:00.000Z",
+        "elapsedMinutes": 570
+      },
+      {
+        "altitude": 15.045798063819294,
+        "azimuth": 109.47597882155748,
+        "direction": [
+          0.9104615261158419,
+          0.2595910529349772,
+          0.3219818235536319
+        ],
+        "isDaylight": true,
+        "frame": 40,
+        "minutes": 585,
+        "localTime": "09:45",
+        "utc": "2026-09-26T07:45:00.000Z",
+        "elapsedMinutes": 585
+      },
+      {
+        "altitude": 17.38555832739143,
+        "azimuth": 112.52814370234313,
+        "direction": [
+          0.8814932246152922,
+          0.29880026196478915,
+          0.3656338310483693
+        ],
+        "isDaylight": true,
+        "frame": 41,
+        "minutes": 600,
+        "localTime": "10:00",
+        "utc": "2026-09-26T08:00:00.000Z",
+        "elapsedMinutes": 600
+      },
+      {
+        "altitude": 19.673346391491574,
+        "azimuth": 115.66211200290047,
+        "direction": [
+          0.848748525295257,
+          0.3366572562444395,
+          0.40778405146240354
+        ],
+        "isDaylight": true,
+        "frame": 42,
+        "minutes": 615,
+        "localTime": "10:15",
+        "utc": "2026-09-26T08:15:00.000Z",
+        "elapsedMinutes": 615
+      },
+      {
+        "altitude": 21.90073145951227,
+        "azimuth": 118.8892435407758,
+        "direction": [
+          0.8123677255929078,
+          0.3729996276526714,
+          0.4482521123050897
+        ],
+        "isDaylight": true,
+        "frame": 43,
+        "minutes": 630,
+        "localTime": "10:30",
+        "utc": "2026-09-26T08:30:00.000Z",
+        "elapsedMinutes": 630
+      },
+      {
+        "altitude": 24.058643104531324,
+        "azimuth": 122.22078256522866,
+        "direction": [
+          0.7725067003239514,
+          0.40767145758173673,
+          0.4868648484207737
+        ],
+        "isDaylight": true,
+        "frame": 44,
+        "minutes": 645,
+        "localTime": "10:45",
+        "utc": "2026-09-26T08:45:00.000Z",
+        "elapsedMinutes": 645
+      },
+      {
+        "altitude": 26.13731821211139,
+        "azimuth": 125.6676480848671,
+        "direction": [
+          0.7293362338286591,
+          0.4405239849124643,
+          0.5234570438359488
+        ],
+        "isDaylight": true,
+        "frame": 45,
+        "minutes": 660,
+        "localTime": "11:00",
+        "utc": "2026-09-26T09:00:00.000Z",
+        "elapsedMinutes": 660
+      },
+      {
+        "altitude": 28.126267284891778,
+        "azimuth": 129.24013909609482,
+        "direction": [
+          0.6830412882397039,
+          0.4714162433044291,
+          0.5578721395701571
+        ],
+        "isDaylight": true,
+        "frame": 46,
+        "minutes": 675,
+        "localTime": "11:15",
+        "utc": "2026-09-26T09:15:00.000Z",
+        "elapsedMinutes": 675
+      },
+      {
+        "altitude": 30.01426931466358,
+        "azimuth": 132.94754184533247,
+        "direction": [
+          0.6338202110157037,
+          0.5002156651072683,
+          0.5899629043332317
+        ],
+        "isDaylight": true,
+        "frame": 47,
+        "minutes": 690,
+        "localTime": "11:30",
+        "utc": "2026-09-26T09:30:00.000Z",
+        "elapsedMinutes": 690
+      },
+      {
+        "altitude": 31.789406546764077,
+        "azimuth": 136.7976311671211,
+        "direction": [
+          0.5818838851321193,
+          0.5267986492883577,
+          0.619592065258677
+        ],
+        "isDaylight": true,
+        "frame": 48,
+        "minutes": 705,
+        "localTime": "11:45",
+        "utc": "2026-09-26T09:45:00.000Z",
+        "elapsedMinutes": 705
+      },
+      {
+        "altitude": 33.43915211824871,
+        "azimuth": 140.79606765345522,
+        "direction": [
+          0.5274548255646662,
+          0.5510510909246138,
+          0.6466328959922629
+        ],
+        "isDaylight": true,
+        "frame": 49,
+        "minutes": 720,
+        "localTime": "12:00",
+        "utc": "2026-09-26T10:00:00.000Z",
+        "elapsedMinutes": 720
+      },
+      {
+        "altitude": 34.950524061031764,
+        "azimuth": 144.94570824177572,
+        "direction": [
+          0.4707662259466635,
+          0.5728688700274204,
+          0.6709697595729941
+        ],
+        "isDaylight": true,
+        "frame": 50,
+        "minutes": 735,
+        "localTime": "12:15",
+        "utc": "2026-09-26T10:15:00.000Z",
+        "elapsedMinutes": 735
+      },
+      {
+        "altitude": 36.31031759817194,
+        "azimuth": 149.24587021699165,
+        "direction": [
+          0.41206095948020705,
+          0.5921582975886174,
+          0.6924986038030702
+        ],
+        "isDaylight": true,
+        "frame": 51,
+        "minutes": 750,
+        "localTime": "12:30",
+        "utc": "2026-09-26T10:30:00.000Z",
+        "elapsedMinutes": 750
+      },
+      {
+        "altitude": 37.505423026829774,
+        "azimuth": 153.69161614740995,
+        "direction": [
+          0.35159053837538784,
+          0.6088365169165062,
+          0.7111274070051594
+        ],
+        "isDaylight": true,
+        "frame": 52,
+        "minutes": 765,
+        "localTime": "12:45",
+        "utc": "2026-09-26T10:45:00.000Z",
+        "elapsedMinutes": 765
+      },
+      {
+        "altitude": 38.52322798443787,
+        "azimuth": 158.27315547678074,
+        "direction": [
+          0.289614036287298,
+          0.6228318585816564,
+          0.7267765722153539
+        ],
+        "isDaylight": true,
+        "frame": 53,
+        "minutes": 780,
+        "localTime": "13:00",
+        "utc": "2026-09-26T11:00:00.000Z",
+        "elapsedMinutes": 780
+      },
+      {
+        "altitude": 39.35209044589462,
+        "azimuth": 162.97547940140532,
+        "direction": [
+          0.22639697836205572,
+          0.6340841474330406,
+          0.739379268145006
+        ],
+        "isDaylight": true,
+        "frame": 54,
+        "minutes": 795,
+        "localTime": "13:15",
+        "utc": "2026-09-26T11:15:00.000Z",
+        "elapsedMinutes": 795
+      },
+      {
+        "altitude": 39.98185361671125,
+        "azimuth": 167.7783486684433,
+        "direction": [
+          0.1622102036407633,
+          0.6425449603485525,
+          0.7488817154701396
+        ],
+        "isDaylight": true,
+        "frame": 55,
+        "minutes": 810,
+        "localTime": "13:30",
+        "utc": "2026-09-26T11:30:00.000Z",
+        "elapsedMinutes": 810
+      },
+      {
+        "altitude": 40.40435880968403,
+        "azimuth": 172.6567290487592,
+        "direction": [
+          0.09732870470769477,
+          0.6481778336563638,
+          0.7552434171818153
+        ],
+        "isDaylight": true,
+        "frame": 56,
+        "minutes": 825,
+        "localTime": "13:45",
+        "utc": "2026-09-26T11:45:00.000Z",
+        "elapsedMinutes": 825
+      },
+      {
+        "altitude": 40.613901615568736,
+        "azimuth": 177.58171229513403,
+        "direction": [
+          0.032030449547844356,
+          0.6509584193188407,
+          0.7584373320319086
+        ],
+        "isDaylight": true,
+        "frame": 57,
+        "minutes": 840,
+        "localTime": "14:00",
+        "utc": "2026-09-26T12:00:00.000Z",
+        "elapsedMinutes": 840
+      },
+      {
+        "altitude": 40.60757464868505,
+        "azimuth": 182.52187813341482,
+        "direction": [
+          -0.03340480934495635,
+          0.6508745891885841,
+          0.7584499903495411
+        ],
+        "isDaylight": true,
+        "frame": 58,
+        "minutes": 855,
+        "localTime": "14:15",
+        "utc": "2026-09-26T12:15:00.000Z",
+        "elapsedMinutes": 855
+      },
+      {
+        "altitude": 40.385449693087814,
+        "azimuth": 187.44496437678455,
+        "direction": [
+          -0.09869673349463452,
+          0.6479264869321674,
+          0.7552815516939554
+        ],
+        "isDaylight": true,
+        "frame": 59,
+        "minutes": 870,
+        "localTime": "14:30",
+        "utc": "2026-09-26T12:30:00.000Z",
+        "elapsedMinutes": 870
+      },
+      {
+        "altitude": 39.95057267613405,
+        "azimuth": 192.3196440671488,
+        "direction": [
+          -0.16356559947576332,
+          0.642126527378828,
+          0.7489458041170546
+        ],
+        "isDaylight": true,
+        "frame": 60,
+        "minutes": 885,
+        "localTime": "14:45",
+        "utc": "2026-09-26T12:45:00.000Z",
+        "elapsedMinutes": 885
+      },
+      {
+        "altitude": 39.308772215958115,
+        "azimuth": 197.11718375861773,
+        "direction": [
+          -0.22773349731333342,
+          0.6334993432746576,
+          0.7394701050563272
+        ],
+        "isDaylight": true,
+        "frame": 61,
+        "minutes": 900,
+        "localTime": "15:00",
+        "utc": "2026-09-26T13:00:00.000Z",
+        "elapsedMinutes": 900
+      },
+      {
+        "altitude": 38.46830961989852,
+        "azimuth": 201.81278455173128,
+        "direction": [
+          -0.29092552110270964,
+          0.622081679714364,
+          0.7268952640751434
+        ],
+        "isDaylight": true,
+        "frame": 62,
+        "minutes": 915,
+        "localTime": "15:15",
+        "utc": "2026-09-26T13:15:00.000Z",
+        "elapsedMinutes": 915
+      },
+      {
+        "altitude": 37.43941830502666,
+        "azimuth": 206.386477427984,
+        "direction": [
+          -0.35287094675541897,
+          0.6079222366816861,
+          0.7112753679721169
+        ],
+        "isDaylight": true,
+        "frame": 63,
+        "minutes": 930,
+        "localTime": "15:30",
+        "utc": "2026-09-26T13:30:00.000Z",
+        "elapsedMinutes": 930
+      },
+      {
+        "altitude": 36.23378951978981,
+        "azimuth": 210.82353320133566,
+        "direction": [
+          -0.41330439183063344,
+          0.5910814603501313,
+          0.6926775490254223
+        ],
+        "isDaylight": true,
+        "frame": 64,
+        "minutes": 945,
+        "localTime": "15:45",
+        "utc": "2026-09-26T13:45:00.000Z",
+        "elapsedMinutes": 945
+      },
+      {
+        "altitude": 34.864058668062306,
+        "azimuth": 215.11442869638944,
+        "direction": [
+          -0.47196695247160914,
+          0.5716312840835907,
+          0.6711816973306165
+        ],
+        "isDaylight": true,
+        "frame": 65,
+        "minutes": 960,
+        "localTime": "16:00",
+        "utc": "2026-09-26T14:00:00.000Z",
+        "elapsedMinutes": 960
+      },
+      {
+        "altitude": 33.34333541780705,
+        "azimuth": 219.25446605311348,
+        "direction": [
+          -0.5286073125826407,
+          0.5496548202245929,
+          0.646880118482574
+        ],
+        "isDaylight": true,
+        "frame": 66,
+        "minutes": 975,
+        "localTime": "16:15",
+        "utc": "2026-09-26T14:15:00.000Z",
+        "elapsedMinutes": 975
+      },
+      {
+        "altitude": 31.68480559534376,
+        "azimuth": 223.2431652646414,
+        "direction": [
+          -0.5829828204994862,
+          0.5252460039666813,
+          0.619877138084231
+        ],
+        "isDaylight": true,
+        "frame": 67,
+        "minutes": 990,
+        "localTime": "16:30",
+        "utc": "2026-09-26T14:30:00.000Z",
+        "elapsedMinutes": 990
+      },
+      {
+        "altitude": 29.90141777895229,
+        "azimuth": 227.0835458141659,
+        "direction": [
+          -0.634860528529957,
+          0.4985091908839239,
+          0.5902886547435238
+        ],
+        "isDaylight": true,
+        "frame": 68,
+        "minutes": 1005,
+        "localTime": "16:45",
+        "utc": "2026-09-26T14:45:00.000Z",
+        "elapsedMinutes": 1005
+      },
+      {
+        "altitude": 28.005655248698325,
+        "azimuth": 230.78139172916966,
+        "direction": [
+          -0.6840181909171701,
+          0.4695587098189314,
+          0.5582416434910444
+        ],
+        "isDaylight": true,
+        "frame": 69,
+        "minutes": 1020,
+        "localTime": "17:00",
+        "utc": "2026-09-26T15:00:00.000Z",
+        "elapsedMinutes": 1020
+      },
+      {
+        "altitude": 26.009385663780844,
+        "azimuth": 234.3445660308276,
+        "direction": [
+          -0.7302452159539822,
+          0.43851837302055485,
+          0.5238736117612027
+        ],
+        "isDaylight": true,
+        "frame": 70,
+        "minutes": 1035,
+        "localTime": "17:15",
+        "utc": "2026-09-26T15:15:00.000Z",
+        "elapsedMinutes": 1035
+      },
+      {
+        "altitude": 23.923776394937367,
+        "azimuth": 237.78241322625684,
+        "direction": [
+          -0.7733435681605811,
+          0.405520945678197,
+          0.4873320102362675
+        ],
+        "isDaylight": true,
+        "frame": 71,
+        "minutes": 1050,
+        "localTime": "17:30",
+        "utc": "2026-09-26T15:30:00.000Z",
+        "elapsedMinutes": 1050
+      },
+      {
+        "altitude": 21.75926200897118,
+        "azimuth": 241.10526642302912,
+        "direction": [
+          -0.8131286166655831,
+          0.37070757710201013,
+          0.4487736010937724
+        ],
+        "isDaylight": true,
+        "frame": 72,
+        "minutes": 1065,
+        "localTime": "17:45",
+        "utc": "2026-09-26T15:45:00.000Z",
+        "elapsedMinutes": 1065
+      },
+      {
+        "altitude": 19.5255509896847,
+        "azimuth": 244.32406016040974,
+        "direction": [
+          -0.8494299261589946,
+          0.33422719596103534,
+          0.4083637863787002
+        ],
+        "isDaylight": true,
+        "frame": 73,
+        "minutes": 1080,
+        "localTime": "18:00",
+        "utc": "2026-09-26T16:00:00.000Z",
+        "elapsedMinutes": 1080
+      },
+      {
+        "altitude": 17.231660479726294,
+        "azimuth": 247.45004063623765,
+        "direction": [
+          -0.8820919870214048,
+          0.29623587221940045,
+          0.36627589934780147
+        ],
+        "isDaylight": true,
+        "frame": 74,
+        "minutes": 1095,
+        "localTime": "18:15",
+        "utc": "2026-09-26T16:15:00.000Z",
+        "elapsedMinutes": 1095
+      },
+      {
+        "altitude": 14.885969955367017,
+        "azimuth": 250.49456031785337,
+        "direction": [
+          -0.910974881506074,
+          0.2568961484803359,
+          0.32269046183760025
+        ],
+        "isDaylight": true,
+        "frame": 75,
+        "minutes": 1110,
+        "localTime": "18:30",
+        "utc": "2026-09-26T16:30:00.000Z",
+        "elapsedMinutes": 1110
+      },
+      {
+        "altitude": 12.496286885761439,
+        "azimuth": 253.46894248366075,
+        "direction": [
+          -0.9359548831216888,
+          0.2163763435772745,
+          0.27779441085233364
+        ],
+        "isDaylight": true,
+        "frame": 76,
+        "minutes": 1125,
+        "localTime": "18:45",
+        "utc": "2026-09-26T16:45:00.000Z",
+        "elapsedMinutes": 1125
+      },
+      {
+        "altitude": 10.069919347238246,
+        "azimuth": 256.3844017728986,
+        "direction": [
+          -0.9569249866431035,
+          0.17484983144575766,
+          0.23178029765596153
+        ],
+        "isDaylight": true,
+        "frame": 77,
+        "minutes": 1140,
+        "localTime": "19:00",
+        "utc": "2026-09-26T17:00:00.000Z",
+        "elapsedMinutes": 1140
+      },
+      {
+        "altitude": 7.613752152762732,
+        "azimuth": 259.2520083645974,
+        "direction": [
+          -0.9737953664831148,
+          0.13249429834109616,
+          0.18484546281452718
+        ],
+        "isDaylight": true,
+        "frame": 78,
+        "minutes": 1155,
+        "localTime": "19:15",
+        "utc": "2026-09-26T17:15:00.000Z",
+        "elapsedMinutes": 1155
+      },
+      {
+        "altitude": 5.13432431828508,
+        "azimuth": 262.0826853288812,
+        "direction": [
+          -0.9864937614621342,
+          0.08949098155847532,
+          0.13719119073756292
+        ],
+        "isDaylight": true,
+        "frame": 79,
+        "minutes": 1170,
+        "localTime": "19:30",
+        "utc": "2026-09-26T17:30:00.000Z",
+        "elapsedMinutes": 1170
+      },
+      {
+        "altitude": 2.6379066517435716,
+        "azimuth": 264.8872306039822,
+        "direction": [
+          -0.9949657843249042,
+          0.04602389296768841,
+          0.08902184731192099
+        ],
+        "isDaylight": true,
+        "frame": 80,
+        "minutes": 1185,
+        "localTime": "19:45",
+        "utc": "2026-09-26T17:45:00.000Z",
+        "elapsedMinutes": 1185
+      },
+      {
+        "altitude": 0.13057895146464396,
+        "azimuth": 267.6763567269213,
+        "direction": [
+          -0.999175154680872,
+          0.002279030663981725,
+          0.04054400433711756
+        ],
+        "isDaylight": true,
+        "frame": 81,
+        "minutes": 1200,
+        "localTime": "20:00",
+        "utc": "2026-09-26T18:00:00.000Z",
+        "elapsedMinutes": 1200
+      },
+      {
+        "altitude": -2.3816931990437853,
+        "azimuth": 270.4607427862,
+        "direction": [
+          -0.9991038543696036,
+          -0.04155641791293476,
+          -0.008034445472304082
+        ],
+        "isDaylight": false,
+        "frame": 82,
+        "minutes": 1215,
+        "localTime": "20:15",
+        "utc": "2026-09-26T18:15:00.000Z",
+        "elapsedMinutes": 1215
+      },
+      {
+        "altitude": -4.8929817114626735,
+        "azimuth": 273.2510940275632,
+        "direction": [
+          -0.9947522045857227,
+          -0.08529487792689511,
+          -0.05650517915448618
+        ],
+        "isDaylight": false,
+        "frame": 83,
+        "minutes": 1230,
+        "localTime": "20:30",
+        "utc": "2026-09-26T18:30:00.000Z",
+        "elapsedMinutes": 1230
+      },
+      {
+        "altitude": -7.397318818895019,
+        "azimuth": 276.05820510609016,
+        "direction": [
+          -0.9861388644343783,
+          -0.12874919075004176,
+          -0.10466033600789001
+        ],
+        "isDaylight": false,
+        "frame": 84,
+        "minutes": 1245,
+        "localTime": "20:45",
+        "utc": "2026-09-26T18:45:00.000Z",
+        "elapsedMinutes": 1245
+      },
+      {
+        "altitude": -9.888618826520874,
+        "azimuth": 278.89302313845104,
+        "direction": [
+          -0.9733007509215605,
+          -0.17173341580662124,
+          -0.1522934081006682
+        ],
+        "isDaylight": false,
+        "frame": 85,
+        "minutes": 1260,
+        "localTime": "21:00",
+        "utc": "2026-09-26T19:00:00.000Z",
+        "elapsedMinutes": 1260
+      },
+      {
+        "altitude": -12.360598176526507,
+        "azimuth": 281.76670645424565,
+        "direction": [
+          -0.9562928807246481,
+          -0.21406362716991395,
+          -0.19920012499547773
+        ],
+        "isDaylight": false,
+        "frame": 86,
+        "minutes": 1275,
+        "localTime": "21:15",
+        "utc": "2026-09-26T19:15:00.000Z",
+        "elapsedMinutes": 1275
+      },
+      {
+        "altitude": -14.80669335367452,
+        "azimuth": 284.6906742427784,
+        "direction": [
+          -0.935188134421214,
+          -0.25555870152520205,
+          -0.24517932888504718
+        ],
+        "isDaylight": false,
+        "frame": 87,
+        "minutes": 1290,
+        "localTime": "21:30",
+        "utc": "2026-09-26T19:30:00.000Z",
+        "elapsedMinutes": 1290
+      },
+      {
+        "altitude": -17.21997643037851,
+        "azimuth": 287.6766411151215,
+        "direction": [
+          -0.9100769441831871,
+          -0.2960410941475431,
+          -0.29003383637451263
+        ],
+        "isDaylight": false,
+        "frame": 88,
+        "minutes": 1305,
+        "localTime": "21:45",
+        "utc": "2026-09-26T19:45:00.000Z",
+        "elapsedMinutes": 1305
+      },
+      {
+        "altitude": -19.59306849859577,
+        "azimuth": 290.7366289173106,
+        "direction": [
+          -0.8810669062793448,
+          -0.33533759951991926,
+          -0.3335712832477676
+        ],
+        "isDaylight": false,
+        "frame": 89,
+        "minutes": 1320,
+        "localTime": "22:00",
+        "utc": "2026-09-26T20:00:00.000Z",
+        "elapsedMinutes": 1320
+      },
+      {
+        "altitude": -21.918051930036867,
+        "azimuth": 293.88294591943986,
+        "direction": [
+          -0.848282320045097,
+          -0.37328009335880835,
+          -0.3756049485842099
+        ],
+        "isDaylight": false,
+        "frame": 90,
+        "minutes": 1335,
+        "localTime": "22:15",
+        "utc": "2026-09-26T20:15:00.000Z",
+        "elapsedMinutes": 1335
+      },
+      {
+        "altitude": -24.18638340485668,
+        "azimuth": 297.12812082139396,
+        "direction": [
+          -0.8118636552907422,
+          -0.40970625289196144,
+          -0.4159545546801754
+        ],
+        "isDaylight": false,
+        "frame": 91,
+        "minutes": 1350,
+        "localTime": "22:30",
+        "utc": "2026-09-26T20:30:00.000Z",
+        "elapsedMinutes": 1350
+      },
+      {
+        "altitude": -26.38881103317821,
+        "azimuth": 300.4847760251496,
+        "direction": [
+          -0.7719669504370523,
+          -0.4444602522538479,
+          -0.4544470393779274
+        ],
+        "isDaylight": false,
+        "frame": 92,
+        "minutes": 1365,
+        "localTime": "22:45",
+        "utc": "2026-09-26T20:45:00.000Z",
+        "elapsedMinutes": 1365
+      },
+      {
+        "altitude": -28.515300752642272,
+        "azimuth": 303.9654216966365,
+        "direction": [
+          -0.728763143954376,
+          -0.4773934300444935,
+          -0.4909172974790018
+        ],
+        "isDaylight": false,
+        "frame": 93,
+        "minutes": 1380,
+        "localTime": "23:00",
+        "utc": "2026-09-26T21:00:00.000Z",
+        "elapsedMinutes": 1380
+      },
+      {
+        "altitude": -30.554979547506257,
+        "azimuth": 307.5821499949156,
+        "direction": [
+          -0.6824373419646155,
+          -0.5083649262155295,
+          -0.5252088880494594
+        ],
+        "isDaylight": false,
+        "frame": 94,
+        "minutes": 1395,
+        "localTime": "23:15",
+        "utc": "2026-09-26T21:15:00.000Z",
+        "elapsedMinutes": 1395
+      },
+      {
+        "altitude": -32.4961058584113,
+        "azimuth": 311.34620866330687,
+        "direction": [
+          -0.6331880251528798,
+          -0.5372422855067649,
+          -0.5571747046182767
+        ],
+        "isDaylight": false,
+        "frame": 95,
+        "minutes": 1410,
+        "localTime": "23:30",
+        "utc": "2026-09-26T21:30:00.000Z",
+        "elapsedMinutes": 1410
+      },
+      {
+        "altitude": -34.326080649464146,
+        "azimuth": 315.2674367050905,
+        "direction": [
+          -0.5812261983831684,
+          -0.5639020248727098,
+          -0.5866776053826391
+        ],
+        "isDaylight": false,
+        "frame": 96,
+        "minutes": 1425,
+        "localTime": "23:45",
+        "utc": "2026-09-26T21:45:00.000Z",
+        "elapsedMinutes": 1425
+      }
+    ],
+    "sunrise": "2026-09-26T06:08:04.130Z",
+    "sunset": "2026-09-26T18:05:45.263Z",
+    "solarNoon": "2026-09-26T12:07:20.544Z",
+    "daylightMinutes": 717.68555
+  }
+}

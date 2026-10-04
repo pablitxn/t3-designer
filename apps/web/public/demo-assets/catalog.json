@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "curatedAt": "2026-10-04",
+  "description": "Curated public product-derived drafts. Source jobs, prompts, reference uploads and account data are excluded. Dimensions are archived product dimensions; visual fidelity remains a draft.",
+  "assets": [
+    {
+      "id": "strandmon-v1",
+      "sourceUrl": "https://www.ikea.com/es/es/p/strandmon-sillon-orejero-nordvalla-gris-oscuro-20343224/",
+      "dimensions": [
+        0.82,
+        1.01,
+        0.96
+      ],
+      "units": "meters",
+      "fidelityStatus": "draft-needs-visual-review",
+      "files": {
+        "model.glb": {
+          "bytes": 928920,
+          "sha256": "128916c2f82478bf941b911c2fcde1617b299ebc5218f4c91d7d8c161572fd4a"
+        },
+        "preview.png": {
+          "bytes": 158812,
+          "sha256": "44fcd58b520df695910d9347d613e547e6e652e32beca1526a743e2de368a5ba"
+        },
+        "front.png": {
+          "bytes": 165204,
+          "sha256": "d1cc31010b0190eef399c206d6338736aaf3394bc366e48259b0f2b42fe28040"
+        },
+        "side.png": {
+          "bytes": 138933,
+          "sha256": "aedd477a35a8af6a3d452ea5ba2aadfe9392d0598d2a4f05ce6fe65fe453419f"
+        }
+      }
+    },
+    {
+      "id": "fagelfjallet-v1",
+      "sourceUrl": "https://www.ikea.com/es/en/p/fagelfjallet-bed-frame-off-white-20607154/",
+      "dimensions": [
+        1.52,
+        1.01,
+        2.07
+      ],
+      "units": "meters",
+      "fidelityStatus": "draft-needs-visual-review",
+      "files": {
+        "model.glb": {
+          "bytes": 241644,
+          "sha256": "7a0147905dbe7c9fb6df47b607526c3f0c238f56eb765b1585c60cb04cdbf6cb"
+        },
+        "preview.png": {
+          "bytes": 129306,
+          "sha256": "1bee5df51580dc52ec46c6268764f7e0786c2e4916a2181f4c63789db1a33029"
+        },
+        "front.png": {
+          "bytes": 113575,
+          "sha256": "56c580af6c2331a6cac2827aa549a51740cbc745e9866ec77587a2ff20bf59b4"
+        },
+        "side.png": {
+          "bytes": 89629,
+          "sha256": "1ac32e6c8994132fbaf1a2aa798d44232af0b7049338f470b4dd30f7ad61d983"
+        }
+      }
+    },
+    {
+      "id": "dyvlinge-v1",
+      "sourceUrl": "https://www.ikea.com/es/en/p/dyvlinge-swivel-easy-chair-kelinge-beige-00623862/",
+      "dimensions": [
+        0.63,
+        0.68,
+        0.75
+      ],
+      "units": "meters",
+      "fidelityStatus": "draft-needs-visual-review",
+      "files": {
+        "model.glb": {
+          "bytes": 197956,
+          "sha256": "735f14f7f002f8ed2daa30e6482b49281dac042e6f8ed70eebe131982ad185ce"
+        },
+        "preview.png": {
+          "bytes": 134378,
+          "sha256": "b9ed5430d12cb22a5f9129ce6b4cd4a9393edbe88b58c9847b105c26970a2f69"
+        },
+        "front.png": {
+          "bytes": 147532,
+          "sha256": "80346f52f1964c8e349385cefa40cd62cf3910fc3a5dc56c97dd8f9d6dcefe24"
+        },
+        "side.png": {
+          "bytes": 137566,
+          "sha256": "efab84d3d6bda4a78d44da7fa61b37daf21f095e78ec71127d60f1446c1fb4f3"
+        }
+      }
+    },
+    {
+      "id": "dyvlinge-v2",
+      "sourceUrl": "https://www.ikea.com/es/en/p/dyvlinge-swivel-easy-chair-kelinge-beige-00623862/",
+      "dimensions": [
+        0.63,
+        0.68,
+        0.75
+      ],
+      "units": "meters",
+      "fidelityStatus": "draft-needs-visual-review",
+      "files": {
+        "model.glb": {
+          "bytes": 3250500,
+          "sha256": "052cfdb049062b78c3004ea424ecde558291e441856b3f40edbc9cf7cd154530"
+        },
+        "preview.png": {
+          "bytes": 173885,
+          "sha256": "272ff4ab140dea82c3dd4c8a03be2061ed96fe16014f47c4b625b4acce205070"
+        },
+        "front.png": {
+          "bytes": 192242,
+          "sha256": "f1633e033e429b564bf89a905df3a543fa5c7f758ec42427ee5f2ba333475ae0"
+        },
+        "side.png": {
+          "bytes": 176312,
+          "sha256": "b6e9a86d4d768ba5da61867c124a285079af37aef3dee4e94f87e54d0c842624"
+        }
+      }
+    }
+  ]
+}

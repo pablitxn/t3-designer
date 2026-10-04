@@ -1,0 +1,80 @@
+{
+  "checkpoint": "checkpoint/t3-building-sun-v1",
+  "blenderVersion": "5.2.2 LTS",
+  "files": [
+    {
+      "file": "assets/blender/asset-library.blend",
+      "bytes": 1441137,
+      "sha256": "057ff05ab1a585dc1b975e24d1a3bff85883810960232c682421d2467bdee4ea",
+      "scenes": [
+        {
+          "name": "T3 · Current-state asset library",
+          "objects": 95
+        }
+      ],
+      "missingExternalImages": [],
+      "preservationFingerprint": "f3edb2f196c6946a5fbf2e0b9c293e19ea2744a69bdfe4d7b347fa0d6ce65fc2"
+    },
+    {
+      "file": "assets/blender/door-frame.blend",
+      "bytes": 87344,
+      "sha256": "118d589b89a87cdfca8a1559c34a307da56d7afa310af365821a5730536f2c42",
+      "scenes": [
+        {
+          "name": "T3 - Door Frame Sample",
+          "objects": 6
+        }
+      ],
+      "missingExternalImages": [],
+      "preservationFingerprint": "053ae1bbf18cb5fc22d549a4420fa1e06ef511604fd60bbba9f9ca2041416f43"
+    },
+    {
+      "file": "assets/blender/t3-building-context.blend",
+      "bytes": 425004,
+      "sha256": "ef4bc55ececc3c49ee7b3e78b25bd7d8b636fcc1130dc1405ce87ff304653620",
+      "scenes": [
+        {
+          "name": "Scene",
+          "objects": 3
+        },
+        {
+          "name": "T3 Building Sun",
+          "objects": 639
+        }
+      ],
+      "missingExternalImages": [],
+      "preservationFingerprint": "80868d5a47dbe4759e276e1c4700d6af4486dbb838cd40d188e3942f49c67819"
+    },
+    {
+      "file": "assets/blender/t3-current-state.blend",
+      "bytes": 4867781,
+      "sha256": "df1be7b84b868db304943622df746d3e278473e9fa6f5ee3be9de1ffcabd38fb",
+      "scenes": [
+        {
+          "name": "T3 · Current apartment · estimated geometry",
+          "objects": 1103
+        }
+      ],
+      "missingExternalImages": [],
+      "preservationFingerprint": "b5d5a57fe8cc7463602613f06f38b545cf5a9d15fe06dbe9431f950006943175"
+    }
+  ],
+  "publicSourceSanitation": {
+    "geometryMaterialsAndAnimationPreserved": true,
+    "nativeReadBackVerified": true,
+    "source": "scripts/blender/sanitize_public_source.py",
+    "note": "Private labels, identifiers, file-browser state and render paths removed. Geographic origin generalized; historical lighting animation retained.",
+    "checks": [
+      "vertex positions and topology",
+      "UV layers",
+      "object transforms",
+      "material graph input values",
+      "camera and light settings",
+      "animation keyframe values and handles",
+      "scene object counts",
+      "native save and reopen",
+      "public metadata audit",
+      "file-browser directory buffer capacity overwritten before relative path"
+    ]
+  }
+}
