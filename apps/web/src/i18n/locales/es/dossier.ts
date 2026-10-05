@@ -6,7 +6,8 @@ const dossier = {
       "estimated": "Estimado",
       "observed": "Observado",
       "pending": "Por documentar",
-      "derived": "Calculado"
+      "derived": "Calculado",
+      "demo": "Dato ficticio"
     },
     "review": {
       "original-pending": "Original pendiente de cotejo",
@@ -26,13 +27,13 @@ const dossier = {
       "building": "Edificio y parcela",
       "energy": "Energía y entorno",
       "sources": "Biblioteca de fuentes",
-      "questions": "Por completar"
+      "questions": "Escenario completo"
     },
     "titles": {
       "overview": {
         "eyebrow": "01 / El expediente",
-        "title": "Una mirada completa.",
-        "description": "Un ejemplo completo con geometría reutilizable, superficies ilustrativas y método de investigación. Sin dirección ni expediente de una vivienda identificada."
+        "title": "Una demo completa.",
+        "description": "Identidad, superficies, anexos, energía y entorno de la residencia ficticia, reunidos en una ficha lista para explorar."
       },
       "apartment": {
         "eyebrow": "02 / Escala interior",
@@ -47,23 +48,23 @@ const dossier = {
       "energy": {
         "eyebrow": "04 / Contexto y prestaciones",
         "title": "Energía y entorno.",
-        "description": "Las fuentes disponibles y las pruebas que necesitamos para avanzar."
+        "description": "Consumo, presupuesto, lotes, riesgos y urbanismo del escenario ficticio de 2026."
       },
       "sources": {
         "eyebrow": "05 / La evidencia",
         "title": "Cada dato tiene un origen.",
-        "description": "Este extracto contiene valores del modelo de demostración. Se eliminaron los registros del caso real; las guías conservan el método y la atribución."
+        "description": "Fuentes del escenario ficticio, geometría del modelo y guías de método identificadas por separado."
       },
       "questions": {
-        "eyebrow": "06 / Próximas piezas",
-        "title": "Un expediente que crece.",
-        "description": "Preguntas abiertas y documentos que ayudarán a resolverlas."
+        "eyebrow": "06 / Escenario de ejemplo",
+        "title": "Escenario completo.",
+        "description": "Datos ilustrativos preparados para recorrer toda la demo."
       }
     },
-    "heroKicker": "Expediente de demostración",
-    "heroTitle": "Un lugar para vivir.<br/><accent>Y conocer en detalle.</accent>",
-    "heroDescription": "Un ejemplo completo con geometría reutilizable, superficies ilustrativas y método de investigación. Sin dirección ni expediente de una vivienda identificada.",
-    "reviewDate": "Demo revisada · 04 oct 2026",
+    "heroKicker": "Ficha demo completa",
+    "heroTitle": "Résidence du Jardin.<br/><accent>Una demo para explorar.</accent>",
+    "heroDescription": "Un T3 ficticio en Quimper, con superficies, energía, gastos y contexto completos. El mapa usa un punto público de referencia y todos los datos del escenario están identificados como ejemplos.",
+    "reviewDate": "Demo revisada · 05 oct 2026",
     "statsLabel": "Cifras del expediente",
     "apartmentArea": "Superficie del T3",
     "carrezReported": "Superficie de ejemplo",
@@ -74,11 +75,11 @@ const dossier = {
     "accuracy": "precisión",
     "evidenceGathered": "Referencias del ejemplo",
     "sources": "fuentes",
-    "recordsReferences": "Modelo y guías",
+    "recordsReferences": "Escenario, modelo y guías",
     "explore": "Explorar el expediente",
-    "documentationSections": "Secciones de documentación",
+    "documentationSections": "Secciones de la ficha",
     "readData": "Cómo leer los datos",
-    "legend": "Los valores describen la demo. Las guías oficiales explican un método, sin certificar este modelo.",
+    "legend": "Los datos ficticios completan el escenario 2026; las estimaciones y los cálculos describen el modelo. Las guías oficiales explican métodos y no certifican este ejemplo.",
     "print": "Imprimir esta sección",
     "searchInFile": "Búsqueda en el expediente",
     "findInSources": "Encontrar entre las fuentes.",
@@ -92,7 +93,7 @@ const dossier = {
     "backToFile": "Volver al expediente",
     "factsHeading": "Datos y características",
     "sourcesHeading": "Fuentes",
-    "questionsHeading": "Preguntas abiertas",
+    "questionsHeading": "Escenario completo",
     "observedHeading": "Estado observado",
     "aptLabel": "Departamento / T3",
     "eightRooms": "Ocho ambientes.<br/>Una misma historia.",
@@ -101,11 +102,11 @@ const dossier = {
     "reconstructedPlan": "Plano reconstruido · proporciones estimadas",
     "placeIdentity": "Identidad del ejemplo",
     "oneBuilding": "Un edificio de demostración",
-    "rnbRelation": "Identificadores locales sin relación publicada con una dirección.",
+    "rnbRelation": "Referencias internas de una residencia ficticia, con un punto público de ejemplo en Quimper.",
     "consultBuilding": "Consultar edificio y parcela",
-    "floorConfirmation": "Una hipótesis para revisar: la planta.",
-    "floorDescription": "El modelo se coloca en una tercera planta ilustrativa. Un caso real requiere confirmar planta, cota y lote con documentación autorizada.",
-    "seePending": "Ver pendientes y discrepancia de piso",
+    "floorConfirmation": "Tercera planta, balcón y cave.",
+    "floorDescription": "T3 de tercera planta con dos dormitorios, balcón hacia el patio y cave independiente. Las superficies de los anexos se presentan por separado del interior.",
+    "seePending": "Explorar la ficha completa",
     "documentedIdentity": "Identidad de demostración",
     "allSources": "Ver todas las fuentes",
     "tourApartment": "Recorrer el departamento",
@@ -124,16 +125,16 @@ const dossier = {
     "plotFootprintVolume": "La parcela, la huella<br/>y el volumen.",
     "scalesDescription": "Son escalas distintas del mismo lugar. Cada superficie y altura conserva la definición y precisión de su fuente.",
     "view3d": "Ver el contexto en 3D",
-    "mapLabel": "Contexto local de demostración · norte arriba",
-    "nextLayer": "La próxima capa del expediente",
-    "learnPerformance": "Conocer sus prestaciones<br/>a partir de sus documentos.",
-    "dpeMissing": "La demo no tiene DPE. En un caso real, un diagnóstico del edificio no se atribuye automáticamente a cada departamento.",
-    "energyDiagnosis": "Diagnóstico energético",
-    "conventionalPerformance": "Prestaciones convencionales y método del DPE.",
-    "estimatedCost": "Coste estimado",
-    "diagnosisRange": "Rango del diagnóstico y precios de referencia.",
-    "actualUse": "Consumo real",
-    "billsEnergyPeriod": "Facturas, energía y período medido.",
+    "mapLabel": "Place Saint-Corentin · Quimper · punto público de ejemplo",
+    "nextLayer": "El escenario energético de la demo",
+    "learnPerformance": "Energía y gastos.<br/>Un año de ejemplo.",
+    "dpeMissing": "DPE D, 6.200 kWh y un presupuesto de 900–1.200 € para 2026: valores ficticios para explorar la ficha, separados de las simulaciones solares.",
+    "energyDiagnosis": "DPE de ejemplo",
+    "conventionalPerformance": "Clase D ficticia · escenario del T3 en 2026.",
+    "estimatedCost": "Gasto anual de ejemplo",
+    "diagnosisRange": "900–1.200 € durante 2026, con energía y abonos.",
+    "actualUse": "Consumo anual de ejemplo",
+    "billsEnergyPeriod": "6.200 kWh de energía final para todo el T3 en 2026.",
     "sourceEvidence": "Ficha de evidencia",
     "closeSource": "Cerrar ficha de fuente",
     "sourceType": "Tipo de fuente",
@@ -141,18 +142,18 @@ const dossier = {
     "originalSource": "Abrir guía de método",
     "availableCopy": "Ver ejemplo documentado",
     "linkedFacts": "Datos vinculados",
-    "dateCaveat": "La fecha indica la revisión del ejemplo. Una guía general no es evidencia específica de un inmueble.",
+    "dateCaveat": "La fecha indica la revisión del ejemplo. Los datos ficticios proceden del escenario 2026; las guías generales no certifican una propiedad.",
     "sourceCard": "Ver ficha de la fuente",
     "tableCaption": "Superficies ilustrativas compartidas con el modelo",
     "room": "Ambiente",
     "area": "Superficie",
     "reportedTotal": "Total interior de ejemplo",
     "areaSumCaption": "La suma conserva los valores del modelo; no certifica Carrez ni superficie neta.",
-    "libraryNote": "Este extracto contiene valores del modelo de demostración. Se eliminaron los registros del caso real; las guías conservan el método y la atribución.",
+    "libraryNote": "El escenario ficticio, las geometrías y los cálculos tienen referencias propias. Las guías oficiales se incluyen como material metodológico y no respaldan los valores inventados.",
     "downloadExtract": "Descargar datos de ejemplo",
-    "questionsIntro": "El próximo documento puede convertir una hipótesis en un dato respaldado. Estas preguntas mantienen visible lo que todavía no sabemos.",
-    "footerTitle": "T3 · Expediente de demostración",
-    "footerDescription": "Geometría reutilizable, valores ilustrativos y métodos documentados.",
+    "questionsIntro": "El escenario está completo y sus datos ficticios se distinguen de las estimaciones del modelo.",
+    "footerTitle": "Résidence du Jardin · Demo completa",
+    "footerDescription": "Escenario ficticio de 2026, geometría ilustrativa y referencias metodológicas.",
     "footerDate": "Demo · octubre 2026",
     "sitePlanAlt": "Plano local de parcela y edificio de demostración, norte arriba",
     "apartmentPlanAlt": "Plano esquemático del departamento: superficies reportadas y formas estimadas",
@@ -177,9 +178,9 @@ const dossier = {
   },
   "facts": {
     "official-address": {
-      "label": "Nombre del escenario",
-      "value": "T3 · Departamento de demostración",
-      "note": "Nombre ilustrativo sin dirección postal. El expediente no identifica un propietario ni una vivienda real."
+      "label": "Nombre de la residencia ficticia",
+      "value": "{{value}}",
+      "note": "Nombre creado para esta demo. El punto público del mapa permite explorar Quimper y no identifica una propiedad ni un titular reales."
     },
     "ban-address-id": {
       "label": "Identificador local del escenario",
@@ -187,9 +188,9 @@ const dossier = {
       "note": "Identificador interno del ejemplo. No es una clave de dirección de un servicio público."
     },
     "address-point": {
-      "label": "Origen solar regional aproximado",
+      "label": "Punto de ejemplo en el mapa",
       "value": "{{value}}",
-      "note": "Latitud y longitud aproximadas elegidas para el cálculo solar regional; no sitúan los polígonos ni un acceso real."
+      "note": "Referencia pública en Place Saint-Corentin, Quimper. Sitúa el mapa, no la residencia ficticia; el origen solar regional se documenta por separado."
     },
     "rnb-id": {
       "label": "Referencia local del edificio",
@@ -309,7 +310,7 @@ const dossier = {
     "floor-model": {
       "label": "Planta del modelo",
       "value": "Tercera planta ilustrativa",
-      "note": "Hipótesis de posición vertical del modelo. Un expediente real requeriría confirmar planta y cota."
+      "note": "Tercera planta ilustrativa, con balcón orientado al patio. La cave se presenta como un anexo independiente del interior."
     },
     "living-orientation": {
       "label": "Living y cocina hacia el patio",
@@ -322,34 +323,34 @@ const dossier = {
       "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "apartment-dpe": {
-      "label": "DPE del departamento",
-      "value": "Pendiente de identificar",
-      "note": "Ninguna clase energética se atribuye al ejemplo. Un DPE debe verificarse con un documento propio del inmueble."
+      "label": "DPE de ejemplo",
+      "value": "D",
+      "note": "Clase D ficticia para el T3 en el escenario 2026. Es una categoría ilustrativa, no un diagnóstico emitido ni una inferencia a partir del consumo."
     },
     "actual-energy-use": {
-      "label": "Consumo real",
-      "value": "Sin facturas incorporadas",
-      "note": "La demo no incluye facturas. Para un caso real, registrar períodos, energía y kWh sin confundir consumo medido con el convencional del DPE."
+      "label": "Consumo anual de ejemplo",
+      "value": "{{value}}",
+      "note": "Energía final ficticia del T3 completo, del 1 de enero al 31 de diciembre de 2026. Incluye calefacción, agua caliente y electricidad doméstica; se mantiene separada del consumo convencional del DPE."
     },
     "energy-cost": {
-      "label": "Gasto energético",
-      "value": "Sin datos incorporados",
-      "note": "Sin facturas ni tarifa de un inmueble real. Los escenarios financieros del edificio usan hipótesis editables."
+      "label": "Gasto energético anual de ejemplo",
+      "value": "{{value}}",
+      "note": "Presupuesto ficticio del T3 completo para enero–diciembre de 2026, con energía y abonos incluidos. El rango acompaña el escenario de 6.200 kWh; no son facturas ni una tarifa comercial."
     },
     "legal-lots": {
-      "label": "Lotes y copropiedad",
-      "value": "Documentación pendiente",
-      "note": "No se publican lotes, cuotas ni contratos. En un expediente real deben contrastarse documentos autorizados."
+      "label": "Lotes y copropiedad de ejemplo",
+      "value": "12 · departamento / 42 · cave",
+      "note": "Lotes ficticios 12 (T3) y 42 (cave), con una cuota ilustrativa conjunta de 21/1.000 de partes comunes. Escenario 2026 sin efectos jurídicos ni vínculos con contratos reales."
     },
     "risks": {
-      "label": "Riesgos de la parcela",
-      "value": "Consulta específica pendiente",
-      "note": "La guía no sustituye una consulta de parcela ni un estado de riesgos."
+      "label": "Perfil de riesgos de ejemplo",
+      "value": "Inundación baja · radón 3",
+      "note": "Perfil ficticio para la parcela de demostración en 2026: exposición baja a inundación y radón de nivel 3. No describe los riesgos de Place Saint-Corentin ni constituye un estado de riesgos."
     },
     "planning": {
-      "label": "Urbanismo y patrimonio",
-      "value": "Zonificación por cotejar",
-      "note": "La demo no pertenece a una zona urbanística declarada. Un caso real necesita planos y reglamentos vigentes."
+      "label": "Urbanismo de ejemplo",
+      "value": "UA · uso residencial",
+      "note": "Zonificación ficticia de 2026: vivienda y comercio local, con conservación del aspecto de las fachadas. Reglas creadas para la demo, sin atribuirlas al planeamiento de Quimper."
     },
     "room-area-bedroom-1": {
       "label": "Superficie de {{room}}",
@@ -394,8 +395,8 @@ const dossier = {
   },
   "sources": {
     "ban": {
-      "title": "Ubicación de demostración",
-      "description": "Origen solar regional aproximado. No representa una dirección postal ni el emplazamiento de un inmueble.",
+      "title": "Ubicación del ejemplo",
+      "description": "Punto público en Place Saint-Corentin, Quimper, elegido para navegar el mapa. No sitúa la residencia ficticia ni el edificio reconstruido.",
       "label": "Modelo de demostración"
     },
     "rnb": {
@@ -434,13 +435,13 @@ const dossier = {
       "label": "Modelo de demostración"
     },
     "ademe": {
-      "title": "Método para verificar un DPE",
-      "description": "Guía para un expediente real: un diagnóstico requiere documentos propios y no se infiere de esta demostración.",
+      "title": "Método de lectura del DPE",
+      "description": "Guía general para comprender un DPE. La clase D del ejemplo procede del escenario ficticio, no de un diagnóstico emitido.",
       "label": "Guía de método"
     },
     "georisques": {
       "title": "Método de consulta de riesgos",
-      "description": "Guía general. No se emite una conclusión de riesgos para el escenario de demostración.",
+      "description": "Guía general para entender la terminología de riesgos. El perfil de la demo procede del escenario ficticio, no de esta guía.",
       "label": "Guía de método"
     },
     "copropriete": {
@@ -450,8 +451,13 @@ const dossier = {
     },
     "planning": {
       "title": "Método de consulta urbanística",
-      "description": "Consulta de planes y reglamentos para un futuro expediente autorizado. La demo no identifica una parcela real.",
+      "description": "Guía general de planes y reglamentos. La zonificación de la demo pertenece al escenario ficticio y no identifica una parcela real.",
       "label": "Guía de método"
+    },
+    "demo-scenario": {
+      "title": "Escenario ficticio completo · 2026",
+      "description": "Identidad, energía, gastos, lotes, riesgos y urbanismo creados para esta demo. Período ilustrativo del 1 de enero al 31 de diciembre de 2026, sin documentos ni titulares reales.",
+      "label": "Datos ficticios · escenario 2026"
     }
   },
   "questions": {
@@ -485,32 +491,32 @@ const dossier = {
     "hall-condition": {
       "room": "Entrada",
       "title": "Suelo e instalaciones visibles",
-      "description": "Se observa una zona de suelo levantado o roto junto al acceso a baño/WC, tuberías vistas y un tablero sobre el paso al living. La causa y extensión exacta del daño no están establecidas."
+      "description": "Desgaste localizado del suelo junto al acceso al baño/WC, tuberías vistas y un tablero sobre el paso al living. Son detalles representados en el modelo ilustrativo."
     },
     "living-condition": {
       "room": "Living",
       "title": "Parquet, placard y salida al balcón",
-      "description": "Parquet desgastado, panel de placard roto, radiador junto a cocina y puerta vidriada de dos hojas hacia el balcón. Se documenta la presencia, no las medidas exactas."
+      "description": "Parquet con desgaste, panel de placard roto, radiador junto a cocina y puerta vidriada de dos hojas hacia el balcón. Sus proporciones corresponden al modelo de ejemplo."
     },
     "bedroom-openings": {
       "room": "Habitaciones",
       "title": "Ventanas y radiadores",
-      "description": "Dos ventanas de dos hojas, cajas de persiana, protección exterior y radiadores bajo ventana. Asociar cada visita al dormitorio de 11,81 o 9,32 m² sigue basándose en el plano."
+      "description": "Dos dormitorios con ventanas de dos hojas, cajas de persiana, protección exterior y radiadores. La distribución se relaciona con las superficies del plano."
     },
     "kitchen-layout": {
       "room": "Cocina",
       "title": "Equipamiento en U",
-      "description": "Mesadas y muebles bajos en U, pileta, heladera, horno/placa, campana, microondas y carcasa aparente de caldera. No se confirma lavavajillas ni prestaciones de los equipos."
+      "description": "Equipamiento en U con mesadas, muebles bajos, pileta, heladera, horno/placa, campana, microondas y caldera. Inventario visual del escenario de ejemplo."
     },
     "bathroom-fixtures": {
       "room": "Baño",
       "title": "Lavabo, lavarropas y ducha",
-      "description": "Lavabo circular sobre mesada, lavarropas frontal, espejo, ducha y tabique de bloques de vidrio. El segundo lavabo aparente es un reflejo; el encaje métrico sigue pendiente."
+      "description": "Lavabo circular sobre mesada, lavarropas frontal, espejo, ducha y tabique de bloques de vidrio. Distribución y proporciones del modelo ilustrativo."
     },
     "wc-door": {
       "room": "WC",
       "title": "Recinto separado",
-      "description": "Inodoro con cisterna, ventilación alta y puerta que abre hacia la entrada. Hay que medir el tamaño real del recinto y el ancho de paso."
+      "description": "Inodoro con cisterna, ventilación alta y puerta que abre hacia la entrada. Recinto y paso representados con las proporciones estimadas del modelo."
     }
   },
   "publishers": {
@@ -525,7 +531,8 @@ const dossier = {
     "ademe": "ADEME · Service Public",
     "georisques": "Géorisques",
     "copropriete": "Service Public",
-    "planning": "Géoportail de l’urbanisme"
+    "planning": "Géoportail de l’urbanisme",
+    "demo-scenario": "T3 Designer"
   },
   "evidenceLocators": {
     "official-address": [
@@ -616,22 +623,22 @@ const dossier = {
       "demo-evidence.json#values.ceiling-height"
     ],
     "apartment-dpe": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.apartment-dpe"
     ],
     "actual-energy-use": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.actual-energy-use"
     ],
     "energy-cost": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.energy-cost"
     ],
     "legal-lots": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.legal-lots"
     ],
     "risks": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.risks"
     ],
     "planning": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.planning"
     ],
     "room-area-bedroom-1": [
       "t3Apartment.rooms[id=bedroom-1].reportedArea"

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, type ComponentRef, type RefObject } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Vector3, PerspectiveCamera } from 'three'
+import { Vector3, PerspectiveCamera, Group } from 'three'
 import { apartmentBounds, polygonBounds, polygonCentroid } from '@t3-designer/geometry'
 import type { Apartment as ApartmentData, Fixture, Point2D } from '@t3-designer/scene-schema'
 import { Apartment } from './Apartment'
@@ -11,9 +11,12 @@ import { APARTMENT_PLACEMENT } from '../data/apartment-placement'
 import type { SolarPosition } from '../lib/solar'
 import { advanceCameraTransition, type CameraTransition } from '../lib/camera-transition'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
 import { roomLabel } from '../i18n/workspace-labels'
 import { WebGLGuard } from './WebGLGuard'
+import { ObjectInteractions } from '../editor/ObjectInteractions'
+import { currentFixtures } from '../data/current-state'
+import { demoAssets } from '../data/demo-catalog'
 
 type ViewRequest = { mode: '3d' | 'top'; revision: number }
 
@@ -27,6 +30,13 @@ type ApartmentSceneProps = {
   sun: SolarPosition
   showContext: boolean
   fixtures?: Fixture[]
+  editing?: {
+    enabled: boolean
+    selectedId: string | null
+    onSelect: (id: string | null) => void
+    onMove: (id: string, position: Fixture['position']) => void
+    label: string
+  }
 }
 
 type RoomLabel = {
@@ -57,9 +67,7 @@ function LabelProjection({ labels, elements, enabled }: { labels: RoomLabel[]; e
   return null
 }
 
-function SceneCamera({ apartment, view, focusRoomId, showContext }: Pick<ApartmentSceneProps, 'apartment' | 'view' | 'focusRoomId' | 'showContext'>) {
-  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null)
-  const transition = useRef<CameraTransition | null>(null)
+function SceneCamera({ apartment, view, focusRoomId, showContext, controlsRef, transition }: Pick<ApartmentSceneProps, 'apartment' | 'view' | 'focusRoomId' | 'showContext'> & { controlsRef: RefObject<ComponentRef<typeof OrbitControls> | null>; transition: RefObject<CameraTransition | null> }) {
   const initialized = useRef(false)
   const { width, height } = useThree((state) => state.size)
   const camera = useThree((state) => state.camera)
@@ -101,7 +109,7 @@ function SceneCamera({ apartment, view, focusRoomId, showContext }: Pick<Apartme
     controls.update()
     controls.enableDamping = true
     invalidate()
-  }, [camera, apartment, view, width, height, focusRoomId, showContext, invalidate])
+  }, [camera, apartment, view, width, height, focusRoomId, showContext, invalidate, controlsRef, transition])
 
   useFrame((_, delta) => {
     const goal = transition.current
@@ -131,9 +139,9 @@ function SceneCamera({ apartment, view, focusRoomId, showContext }: Pick<Apartme
   )
 }
 
-export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = true, focusRoomId, view, sun, showContext, fixtures }: ApartmentSceneProps) {
+export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = true, focusRoomId, view, sun, showContext, fixtures = currentFixtures, editing }: ApartmentSceneProps) {
   const { t } = useTranslation('workspace')
-  const { formatNumber } = useLocale()
+  const { formatArea } = useUnits()
   const bounds = apartmentBounds(apartment)
   const [x, z] = bounds.center
   // Canvas owns one explicit camera; controls and labels always use that same instance.
@@ -143,13 +151,17 @@ export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = 
     return perspective
   }, [])
   const labelElements = useRef(new Map<string, HTMLDivElement>())
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null)
+  const transition = useRef<CameraTransition | null>(null)
+  const objects = useRef(new Map<string, Group>())
+  const editableScene = useMemo(() => ({ fixtures, assets: demoAssets }), [fixtures])
   const labels = useMemo<RoomLabel[]>(() => [
     ...apartment.rooms.map((room) => ({ id: room.id, area: room.reportedArea, position: polygonCentroid(room.polygon), extra: false })),
     ...(apartment.balcony ? [{ id: apartment.balcony.id, area: apartment.balcony.reportedArea, position: polygonCentroid(apartment.balcony.polygon), extra: true }] : []),
   ], [apartment])
 
   return (
-    <div className="scene-surface">
+    <div className="scene-surface" tabIndex={editing?.enabled ? 0 : undefined} aria-label={editing?.enabled ? editing.label : undefined}>
     <WebGLGuard fallback={<div className="canvas-fallback">{t('apartment.canvasFallback')}</div>}>
     <Canvas
       frameloop="demand"
@@ -158,6 +170,7 @@ export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = 
       dpr={[1, 2]}
       fallback={<div className="canvas-fallback">{t('apartment.canvasFallback')}</div>}
       aria-label={t('apartment.canvasAria')}
+      style={{ touchAction: 'none' }}
     >
       <color attach="background" args={[sun.isDaylight ? '#e8eae4' : '#687684']} />
       <InteriorSunlight apartment={apartment} sun={sun} />
@@ -171,8 +184,9 @@ export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = 
         <meshStandardMaterial color="#e8eae4" roughness={1} />
       </mesh>
       {!showContext && <gridHelper position={[x, -0.15, z]} args={[30, 30, '#dce0d6', '#e1e5db']} />}
-      <Apartment apartment={apartment} fixtures={fixtures} cutaway={cutaway} showFixtures={showFixtures} solarStudy />
-      <SceneCamera apartment={apartment} view={view} focusRoomId={focusRoomId} showContext={showContext} />
+      <Apartment apartment={apartment} fixtures={fixtures} cutaway={cutaway} showFixtures={showFixtures} solarStudy editing={editing ? { objects, enabled: editing.enabled, selectedId: editing.selectedId } : undefined} />
+      <SceneCamera apartment={apartment} view={view} focusRoomId={focusRoomId} showContext={showContext} controlsRef={controlsRef} transition={transition} />
+      {editing?.enabled && <ObjectInteractions scene={editableScene} editable onSelect={editing.onSelect} onMove={editing.onMove} onDragStart={() => { transition.current = null }} snap={.1} mode={view.mode} objects={objects} controls={controlsRef} />}
       <LabelProjection labels={labels} elements={labelElements} enabled={showLabels} />
     </Canvas>
     </WebGLGuard>
@@ -189,7 +203,7 @@ export function ApartmentScene({ apartment, cutaway, showLabels, showFixtures = 
             style={{ visibility: 'hidden' }}
           >
             <span>{roomLabel(t, label.id)}</span>
-            <small>{label.extra ? t('apartment.extraArea', { area: formatNumber(label.area, 2) }) : t('apartment.reportedArea', { area: formatNumber(label.area, 2) })}</small>
+            <small>{label.extra ? t('apartment.extraArea', { area: formatArea(label.area) }) : formatArea(label.area)}</small>
           </div>
         ))}
       </div>

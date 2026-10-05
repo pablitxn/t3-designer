@@ -49,6 +49,7 @@ export function siteDirectionInProject(snapshot: Pick<ProjectSnapshot, 'placemen
 /** The renderer never turns an arbitrary scene URL into a browser request. */
 export function projectModelUrl(url: string, projectId: string): string | null {
   if (/^\/models\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.glb$/.test(url)) return url
+  if (/^\/demo-assets\/[a-zA-Z0-9_-]+-v\d+\/model\.glb$/.test(url)) return url
   const privateModel = /^\/api\/projects\/([a-f0-9-]{36})\/assets\/([a-f0-9-]{36})\/files\/model\.glb$/.exec(url)
   if (privateModel?.[1] === projectId) return url
   return null

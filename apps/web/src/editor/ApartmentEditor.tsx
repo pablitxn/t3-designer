@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent, t
 import { getAssetMobility, isFixtureMovable, type Fixture, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { polygonCentroid } from '@t3-designer/geometry'
 import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
+import { LengthInput } from '../components/LengthInput'
 import { EditorScene } from './EditorScene'
 import { editorCopy } from './copy'
 import { walkCopy } from '../walkthrough/copy'
@@ -17,13 +19,17 @@ const heading = 'tw:m-0 tw:text-xs tw:font-semibold tw:uppercase tw:tracking-wid
 type History = { past: ProjectSnapshot[]; future: ProjectSnapshot[] }
 const Walkthrough = lazy(() => import('../walkthrough/Walkthrough').then(module => ({ default: module.Walkthrough })))
 
-function NumberField({ name, value, disabled, onChange, minimum = -1000, maximum = 1000, step = .05 }: { name: string; value: number; disabled: boolean; onChange: (value: number) => void; minimum?: number; maximum?: number; step?: number }) {
-  return <label className={label}>{name}<input key={value} className={input} type="number" min={minimum} max={maximum} step={step} defaultValue={Number(value.toFixed(3))} disabled={disabled}
+function NumberField({ name, value, disabled, onChange, minimum = -1000, maximum = 1000, step = .05, length = false }: { name: string; value: number; disabled: boolean; onChange: (value: number) => void; minimum?: number; maximum?: number; step?: number; length?: boolean }) {
+  const units = useUnits()
+  const displayed = length ? units.toDisplayLength(value) : value
+  const rounded = Number(displayed.toFixed(3))
+  return <label className={label}>{length ? name.replace('(m)', `(${units.lengthUnit})`) : name}<input key={`${value}-${length ? units.system : 'number'}`} className={input} type="number" min={length ? units.toDisplayLength(minimum) : minimum} max={length ? units.toDisplayLength(maximum) : maximum} step={length ? 'any' : step} defaultValue={rounded} disabled={disabled}
     onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur() }}
     onBlur={event => {
-      const next = event.currentTarget.valueAsNumber
-      if (Number.isFinite(next) && next >= minimum && next <= maximum && Math.abs(next - value) > .0001) onChange(next)
-      event.currentTarget.value = String(Number(value.toFixed(3)))
+      const raw = event.currentTarget.valueAsNumber
+      const next = length ? units.toMeters(raw) : raw
+      if (raw !== rounded && Number.isFinite(next) && next >= minimum && next <= maximum && Math.abs(next - value) > .0001) onChange(next)
+      event.currentTarget.value = String(rounded)
     }} /></label>
 }
 
@@ -31,6 +37,7 @@ function NumberField({ name, value, disabled, onChange, minimum = -1000, maximum
  * checks. No private scene content is copied to localStorage or analytics. */
 export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean }) {
   const { locale } = useLocale(), c = editorCopy[locale]
+  const units = useUnits()
   const [walking, setWalking] = useState(() => window.location.hash === '#walkthrough')
   useEffect(() => {
     const navigate = () => setWalking(window.location.hash === '#walkthrough')
@@ -132,7 +139,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
   }
   function partition(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const data = new FormData(event.currentTarget), number = (key: string) => Number(data.get(key))
+    const data = new FormData(event.currentTarget), number = (key: string) => units.toMeters(Number(data.get(key)))
     apply(current => addPartition(current, { id: `partition-${crypto.randomUUID()}`, from: [number('fromX'), number('fromZ')], to: [number('toX'), number('toZ')], height: number('height'), thickness: number('thickness') }))
   }
   if (walking) return <Suspense fallback={<p role="status">{walkCopy[locale].loading}</p>}><Walkthrough snapshot={scene} onClose={() => { window.location.hash = 'editor'; setWalking(false) }} /></Suspense>
@@ -150,7 +157,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
     {error && <p role="alert" className="tw:m-0 tw:border-0 tw:border-b tw:border-solid tw:border-amber-300 tw:bg-amber-50 tw:p-3 tw:text-sm tw:text-amber-950">{error}</p>}
     <div className="tw:grid tw:xl:grid-cols-[minmax(0,1fr)_240px]">
       <div className="tw:min-w-0">
-        <div className="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:p-3"><div className="tw:flex tw:gap-1" role="group" aria-label={c.top}><button className={`${button} ${mode === '3d' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>{c.three}</button><button className={`${button} ${mode === 'top' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === 'top'} onClick={() => setMode('top')}>{c.top}</button></div><FullWallsControl checked={fullWalls} onChange={setFullWalls} /><label className="tw:flex tw:items-center tw:gap-2 tw:text-xs">{c.snap}<select className={`${input} tw:w-24!`} value={snap} onChange={event => setSnap(Number(event.target.value))}><option value="0">{c.free}</option><option value="0.05">5 cm</option><option value="0.1">10 cm</option><option value="0.25">25 cm</option></select></label></div>
+        <div className="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:p-3"><div className="tw:flex tw:gap-1" role="group" aria-label={c.top}><button className={`${button} ${mode === '3d' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>{c.three}</button><button className={`${button} ${mode === 'top' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === 'top'} onClick={() => setMode('top')}>{c.top}</button></div><FullWallsControl checked={fullWalls} onChange={setFullWalls} /><label className="tw:flex tw:items-center tw:gap-2 tw:text-xs">{c.snap}<select className={`${input} tw:w-24!`} value={snap} onChange={event => setSnap(Number(event.target.value))}><option value="0">{c.free}</option>{[.05, .1, .25].map(value => <option key={value} value={value}>{units.formatLength(value, 2)}</option>)}</select></label></div>
         <div className="tw:h-[520px] tw:min-w-0 tw:focus-visible:outline-2 tw:focus-visible:-outline-offset-2" tabIndex={0} aria-label={c.selected}>
           <EditorScene scene={scene} selectedId={selected?.id ?? null} onSelect={setSelectedId} onMove={(id, next) => { apply(current => updateFixture(current, id, { position: next })) }} mode={mode} cutaway={!fullWalls} editable={!readOnly} snap={snap} projectId={snapshot.project.id} />
         </div>
@@ -159,9 +166,9 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
       <aside className="tw:grid tw:content-start tw:gap-4 tw:border-0 tw:border-t tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-surface)] tw:p-4 tw:xl:border-l tw:xl:border-t-0">
         <label className={label}>{c.objects} ({scene.fixtures.length})<select className={input} value={selected?.id ?? ''} onChange={event => setSelectedId(event.target.value || null)}><option value="">—</option>{scene.fixtures.map(fixture => <option key={fixture.id} value={fixture.id}>{fixture.label} · {isFixtureMovable(fixture, scene.assets.find(asset => asset.id === fixture.assetId)) ? c.movable : c.fixed} · {fixture.id.slice(-6)}</option>)}</select></label>
         {selected ? <div className="tw:grid tw:gap-3" aria-label={c.selected}>
-          <div><h3 className="tw:m-0 tw:text-sm tw:font-semibold">{selected.label}</h3>{selectedAsset && <p className={`${muted} tw:mb-0 tw:mt-1`}>{selectedAsset.dimensions.map(n => Math.round(n * 100)).join(' × ')} cm</p>}</div>
+          <div><h3 className="tw:m-0 tw:text-sm tw:font-semibold">{selected.label}</h3>{selectedAsset && <p className={`${muted} tw:mb-0 tw:mt-1`}>{units.formatDimensions(selectedAsset.dimensions)}</p>}</div>
           <p className={`${muted} tw:m-0`}>{selectedMovable ? c.movableHint : c.fixedHint}</p>
-          <div className="tw:grid tw:grid-cols-2 tw:gap-2">{[c.x, c.y, c.z].map((name, axis) => <NumberField key={`${selected.id}-${axis}`} name={name} value={selected.position[axis]} disabled={readOnly || !selectedMovable} minimum={axis === 1 ? 0 : undefined} onChange={value => position(axis, value)} />)}<NumberField key={`${selected.id}-rotation`} name={c.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} minimum={-360} maximum={360} step={15} onChange={rotation => { apply(current => updateFixture(current, selected.id, { rotation: rotation * Math.PI / 180 })) }} /></div>
+          <div className="tw:grid tw:grid-cols-2 tw:gap-2">{[c.x, c.y, c.z].map((name, axis) => <NumberField key={`${selected.id}-${axis}`} name={name} length value={selected.position[axis]} disabled={readOnly || !selectedMovable} minimum={axis === 1 ? 0 : undefined} onChange={value => position(axis, value)} />)}<NumberField key={`${selected.id}-rotation`} name={c.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} minimum={-360} maximum={360} step={15} onChange={rotation => { apply(current => updateFixture(current, selected.id, { rotation: rotation * Math.PI / 180 })) }} /></div>
           <button className={button} disabled={readOnly || !selectedMovable} onClick={() => { apply(current => rotateFixture(current, selected.id, Math.PI / 2)) }}>{c.rotate}</button><button className={button} disabled={readOnly || !selectedMovable} onClick={duplicateObject}>{c.duplicate}</button><button className={`${button} tw:text-red-700!`} disabled={readOnly || !selectedMovable} onClick={removeObject}>{c.remove}</button>
         </div> : <p className={`${muted} tw:m-0`}>{c.empty}</p>}
         <div className="tw:grid tw:gap-3 tw:border-0 tw:border-t tw:border-solid tw:border-[var(--settings-border)] tw:pt-4"><h3 className={heading}>{c.catalog}</h3>{placementAsset ? <>
@@ -175,7 +182,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
     <SolarDesignControls scene={scene} readOnly={readOnly} onApply={apply} />
     <details className="tw:border-0 tw:border-t tw:border-solid tw:border-[var(--settings-border)] tw:p-4"><summary className="tw:cursor-pointer tw:text-sm tw:font-medium">{c.partition} <span className={muted}>· {architecture.partitionWallIds.length}</span></summary><p className={muted}>{c.partitionHint}</p>
       <form onSubmit={partition} className="tw:grid tw:grid-cols-2 tw:gap-3 tw:md:grid-cols-3 tw:xl:grid-cols-7">
-        {([{ key: 'fromX', title: c.fromX, value: center[0] - .75 }, { key: 'fromZ', title: c.fromZ, value: center[1] }, { key: 'toX', title: c.toX, value: center[0] + .75 }, { key: 'toZ', title: c.toZ, value: center[1] }, { key: 'height', title: c.height, value: Math.min(2.4, scene.geometry.ceiling.elevation) }, { key: 'thickness', title: c.thickness, value: .1 }]).map(field => <label className={label} key={`${placementRoom.id}-${field.key}`}>{field.title}<input className={input} type="number" name={field.key} defaultValue={Number(field.value.toFixed(2))} step="any" required min={field.key === 'height' ? .2 : field.key === 'thickness' ? .05 : -1000} max={field.key === 'height' ? scene.geometry.ceiling.elevation : field.key === 'thickness' ? .5 : 1000} disabled={readOnly} /></label>)}
+        {([{ key: 'fromX', title: c.fromX, value: center[0] - .75 }, { key: 'fromZ', title: c.fromZ, value: center[1] }, { key: 'toX', title: c.toX, value: center[0] + .75 }, { key: 'toZ', title: c.toZ, value: center[1] }, { key: 'height', title: c.height, value: Math.min(2.4, scene.geometry.ceiling.elevation) }, { key: 'thickness', title: c.thickness, value: .1 }]).map(field => <label className={label} key={`${placementRoom.id}-${field.key}`}>{field.title.replace('(m)', `(${units.lengthUnit})`)}<LengthInput className={input} name={field.key} defaultMeters={field.value} required minMeters={field.key === 'height' ? .2 : field.key === 'thickness' ? .05 : -1000} maxMeters={field.key === 'height' ? scene.geometry.ceiling.elevation : field.key === 'thickness' ? .5 : 1000} disabled={readOnly} /></label>)}
         <button className={`${button} tw:self-end`} disabled={readOnly}>+ {c.addPartition}</button>
       </form>
       {!!architecture.partitionWallIds.length && <ul className="tw:mb-0 tw:grid tw:list-none tw:gap-2 tw:pl-0" aria-label={c.partitions}>{architecture.partitionWallIds.map((id, index) => <li key={id} className="tw:flex tw:items-center tw:justify-between tw:gap-3 tw:text-xs"><span>{c.partition} {index + 1}</span><button className={button} disabled={readOnly} onClick={() => { apply(current => removePartition(current, id)) }}>{c.removePartition} {index + 1}</button></li>)}</ul>}

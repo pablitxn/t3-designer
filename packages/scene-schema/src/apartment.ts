@@ -151,7 +151,7 @@ export type Apartment = z.infer<typeof ApartmentSchema>
 export const MobilitySchema = z.enum(['fixed', 'movable'])
 export type Mobility = z.infer<typeof MobilitySchema>
 
-const modelURL = z.string().regex(/^(?:\/models\/(?:[\w-]+\/)*[\w.-]+\.glb|\/api\/projects\/[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}\/assets\/[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}\/files\/model\.glb)$/i)
+const modelURL = z.string().regex(/^(?:\/models\/(?:[\w-]+\/)*[\w.-]+\.glb|\/demo-assets\/[\w-]+-v\d+\/model\.glb|\/api\/projects\/[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}\/assets\/[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}\/files\/model\.glb)$/i)
 export const AssetSchema = z.object({
   id, label: z.string().min(1), url: modelURL,
   dimensions: z.tuple([positive, positive, positive]),

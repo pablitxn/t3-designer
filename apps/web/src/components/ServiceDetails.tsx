@@ -1,4 +1,4 @@
-import type { Apartment } from '@t3-designer/scene-schema'
+import type { Apartment, Fixture } from '@t3-designer/scene-schema'
 import { assetCatalog, currentFixtures } from '../data/current-state'
 
 type Vec3 = [number, number, number]
@@ -38,8 +38,8 @@ function roomBounds(apartment: Apartment, id: string): Rect | undefined {
 
 // These nominal extents follow the fixture catalog, including its current rotation.
 // They are estimated asset bounds, never measurements inferred from photography.
-function fixtureBounds(id: string): (Rect & { bottom: number; top: number }) | undefined {
-  const fixture = currentFixtures.find(fixture => fixture.id === id)
+function fixtureBounds(fixtures: Fixture[], id: string): (Rect & { bottom: number; top: number }) | undefined {
+  const fixture = fixtures.find(fixture => fixture.id === id)
   const asset = fixture && assetCatalog.find(asset => asset.id === fixture.assetId)
   if (!fixture || !asset) return undefined
   const cosine = Math.abs(Math.cos(fixture.rotation))
@@ -73,17 +73,17 @@ function CounterFiller({ rect, name, top }: { rect: Rect; name: string; top: num
   )
 }
 
-export function ServiceDetails({ apartment, cutaway }: { apartment: Apartment; cutaway: boolean }) {
+export function ServiceDetails({ apartment, cutaway, fixtures = currentFixtures }: { apartment: Apartment; cutaway: boolean; fixtures?: Fixture[] }) {
   const kitchen = roomBounds(apartment, 'kitchen')
   const bathroom = roomBounds(apartment, 'bathroom')
   const entrance = roomBounds(apartment, 'entrance')
   const wc = roomBounds(apartment, 'wc')
-  const sink = fixtureBounds('k-sink')
-  const cooking = fixtureBounds('k-oven')
-  const drawers = fixtureBounds('k-drawers')
-  const southCabinet = fixtureBounds('k-south-cabinet')
-  const washer = fixtureBounds('b-washer')
-  const panel = fixtureBounds('entry-electrics')
+  const sink = fixtureBounds(fixtures, 'k-sink')
+  const cooking = fixtureBounds(fixtures, 'k-oven')
+  const drawers = fixtureBounds(fixtures, 'k-drawers')
+  const southCabinet = fixtureBounds(fixtures, 'k-south-cabinet')
+  const washer = fixtureBounds(fixtures, 'b-washer')
+  const panel = fixtureBounds(fixtures, 'entry-electrics')
   const ceiling = Math.min(...apartment.walls.map(wall => wall.height))
   const shelfFront = panel ? panel.west - 0.085 : 0
   const shelfBack = entrance ? entrance.east - 0.051 : 0

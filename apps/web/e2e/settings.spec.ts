@@ -1,3 +1,4 @@
+import { openSolarControls } from './viewer-helpers'
 import { expect, test } from '@playwright/test'
 import { appearanceLabel, closeSettings, languageLabel, openSettings } from './settings-helpers'
 
@@ -30,6 +31,7 @@ test('follows system appearance until a manual preference overrides it', async (
 
 test('persists appearance and language while preserving the current workspace', async ({ page }) => {
   await page.goto('/#building')
+  await openSolarControls(page)
   await page.locator('#solar-date').fill('2026-12-21')
   await page.locator('#solar-time').fill('15:30')
   const dialog = await openSettings(page)
@@ -40,6 +42,7 @@ test('persists appearance and language while preserving the current workspace', 
   await expect(dialog.locator('.settings-feedback')).not.toHaveText('')
   await dialog.getByRole('button', { name: 'Fermer les paramètres', exact: true }).click()
   await expect(dialog).not.toBeVisible()
+  await openSolarControls(page)
   await expect(page.locator('#solar-date')).toHaveValue('2026-12-21')
   await expect(page.locator('#solar-time')).toHaveValue('15:30')
   await expect(page).toHaveURL(/#building$/)
@@ -159,6 +162,7 @@ test('settings and their controls remain usable on a narrow viewport', async ({ 
   await dialog.getByRole('combobox', { name: languageLabel }).selectOption('fr')
   await dialog.getByRole('combobox', { name: appearanceLabel }).selectOption('dark')
   for (const element of [dialog, ...await dialog.getByRole('combobox').all()]) {
+    await element.scrollIntoViewIfNeeded()
     const bounds = await element.boundingBox()
     expect(bounds).toBeTruthy()
     expect(bounds!.x).toBeGreaterThanOrEqual(0)
@@ -170,4 +174,54 @@ test('settings and their controls remain usable on a narrow viewport', async ({ 
   await dialog.getByRole('button', { name: 'Fermer les paramètres', exact: true }).click()
   await expect(dialog).not.toBeVisible()
   await expect(page.locator('.settings-trigger')).toBeFocused()
+})
+
+test('measurement preference updates both tabs and survives reload', async ({ page, context }) => {
+  await page.goto('/#documentation')
+  const dialog = await openSettings(page)
+  const units = dialog.getByRole('combobox', { name: 'Measurement units', exact: true })
+  await expect(units).toHaveValue('metric')
+  const other = await context.newPage()
+  await other.goto('/#documentation')
+  const otherDialog = await openSettings(other)
+  const otherUnits = otherDialog.getByRole('combobox', { name: 'Measurement units', exact: true })
+  await units.selectOption('imperial')
+  await expect(otherUnits).toHaveValue('imperial')
+  await closeSettings(page)
+  await page.reload()
+  await openSettings(page)
+  await expect(units).toHaveValue('imperial')
+  await other.evaluate(() => localStorage.removeItem('t3-designer.units'))
+  await expect(units).toHaveValue('metric')
+})
+
+test('language shows its resolved name and flag while retaining automatic selection', async ({ page }) => {
+  await page.goto('/#documentation')
+  const dialog = await openSettings(page)
+  const language = dialog.getByRole('combobox', { name: languageLabel })
+  await expect(language).toHaveValue('auto')
+  await expect(language.locator('option:checked')).toHaveText('English 🇬🇧 · Auto')
+  await language.selectOption('fr')
+  await expect(language.locator('option:checked')).toHaveText('Français 🇫🇷')
+  await language.selectOption('auto')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+  await expect(language.locator('option:checked')).toHaveText('English 🇬🇧 · Auto')
+})
+
+test('privacy settings persist the consent choice and contain the policy link', async ({ page }) => {
+  await page.goto('/#documentation')
+  const dialog = await openSettings(page)
+  await dialog.getByRole('button', { name: 'Privacy', exact: true }).click()
+  await expect(dialog.getByTestId('settings-analytics-status')).toContainText('You have not given permission yet.')
+  await dialog.getByTestId('settings-analytics-reject').click()
+  await expect(dialog.getByTestId('settings-analytics-status')).toContainText('You rejected optional analytics.')
+  await closeSettings(page)
+  await expect(page.locator('.privacy-footer')).toHaveCount(0)
+  await openSettings(page)
+  await dialog.getByRole('button', { name: 'Privacy', exact: true }).click()
+  await expect(dialog.getByTestId('settings-analytics-status')).toContainText('You rejected optional analytics.')
+  await expect(dialog.getByTestId('privacy-policy')).toHaveAttribute('href', '/privacy')
+  await dialog.getByTestId('privacy-policy').click()
+  await expect(dialog).not.toBeVisible()
+  await expect(page.getByTestId('privacy-page')).toBeVisible()
 })

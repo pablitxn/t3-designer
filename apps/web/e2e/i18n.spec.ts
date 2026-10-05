@@ -1,11 +1,12 @@
+import { openApartmentDetails, openSolarControls } from './viewer-helpers'
 import { expect, test } from '@playwright/test'
 import { closeSettings, languageLabel, openSettings, setLanguage } from './settings-helpers'
 
 const storageKey = 't3-designer.language'
 const variants = [
-  { browser: 'es-AR', language: 'es', label: 'Idioma', title: 'Documentación', area: '49,18' },
-  { browser: 'en-US', language: 'en', label: 'Language', title: 'Documentation', area: '49.18' },
-  { browser: 'fr-CA', language: 'fr', label: 'Langue', title: 'Documentation', area: '49,18' },
+  { browser: 'es-AR', language: 'es', label: 'Idioma', title: 'Ficha del inmueble', area: '49,18' },
+  { browser: 'en-US', language: 'en', label: 'Language', title: 'Property details', area: '49.18' },
+  { browser: 'fr-CA', language: 'fr', label: 'Langue', title: 'Fiche du bien', area: '49,18' },
 ] as const
 
 for (const variant of variants) {
@@ -21,7 +22,7 @@ for (const variant of variants) {
       const settings = await openSettings(page)
       await expect(settings.getByRole('combobox', { name: variant.label, exact: true })).toHaveValue('auto')
       await closeSettings(page)
-      await expect(page.locator('.area-stat strong')).toContainText(variant.area)
+      await expect(page.locator('.dossier-stats button').first()).toContainText(variant.area)
       await expect(page.locator('.dossier-hero')).toBeVisible()
       expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull()
       expect(errors).toEqual([])
@@ -29,10 +30,13 @@ for (const variant of variants) {
 
     test('translates all workspaces and preserves solar controls and selection', async ({ page }) => {
       await page.goto('/#apartment')
+      await openSolarControls(page)
       await expect(page.locator('#solar-date')).toBeVisible()
+      await openSolarControls(page)
       await page.locator('#solar-date').fill('2026-12-21')
       await page.locator('#solar-time').fill('15:30')
-      await page.locator('.inspector-tabs button').nth(1).click()
+      await openApartmentDetails(page)
+      await page.locator('.inspector-tabs button').first().click()
       await page.locator('.room-navigation button').first().click()
       const selectedRoom = await page.locator('.room-navigation .selected').innerText()
       expect(selectedRoom).toBeTruthy()
@@ -40,15 +44,17 @@ for (const variant of variants) {
       await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
       await expect(page.locator('.room-navigation button').first()).toHaveClass(/selected/)
       await expect(page.locator('.room-navigation button').first()).toContainText('Chambre')
-      await page.locator('.inspector-tabs button').first().click()
+      await openSolarControls(page)
+      await openSolarControls(page)
       await expect(page.locator('#solar-date')).toHaveValue('2026-12-21')
       await expect(page.locator('#solar-time')).toHaveValue('15:30')
       await page.getByRole('button', { name: 'Bâtiment et soleil', exact: true }).click()
+      await openSolarControls(page)
       await expect(page.locator('#solar-date')).toHaveValue('2026-12-21')
       await expect(page.locator('#solar-time')).toHaveValue('15:30')
       await expect(page.locator('.solar-time-heading')).toContainText('Europe/Paris')
       await expect(page.locator('.canvas-fallback')).toContainText('WebGL')
-      await page.getByRole('button', { name: 'Documentation', exact: true }).click()
+      await page.getByRole('button', { name: 'Fiche du bien', exact: true }).click()
       await expect(page.locator('.dossier-hero')).toBeVisible()
       await setLanguage(page, 'auto')
       await expect(page.locator('html')).toHaveAttribute('lang', variant.language)
@@ -58,22 +64,31 @@ for (const variant of variants) {
     test('localizes dossier sections, search, source dialogs and example downloads', async ({ page }) => {
       await page.goto('/#documentation')
       await expect(page.locator('.dossier-hero')).toBeVisible()
+      await expect(page.locator('.dossier-hero')).not.toContainText('{{')
       const navigation = page.locator('.dossier-sidebar nav button')
-      for (let index = 0; index < 6; index++) {
+      await expect(navigation).toHaveCount(5)
+      for (let index = 0; index < 5; index++) {
         await navigation.nth(index).click()
         await expect(navigation.nth(index)).toHaveAttribute('aria-current', 'page')
         await expect(page.locator('.dossier-content')).not.toContainText('{{')
         await expect(page.locator('.dossier-content')).not.toContainText(/(?:facts|sources|questions|ui)\.[a-z]/)
+        await expect(page.locator('.dossier-content .status-pending')).toHaveCount(0)
         if (index === 1) {
           await expect(page.locator('.dossier-surfaces tbody tr')).toHaveCount(8)
           await expect(page.locator('.dossier-surfaces tfoot')).toContainText(variant.area)
+        }
+        if (index === 3) {
+          await expect(page.locator('.dossier-fact .status-demo')).toHaveCount(6)
+          await page.locator('.dossier-fact .dossier-source-links button').first().click()
+          await expect(page.getByRole('dialog')).toContainText({ es: 'Escenario ficticio', en: 'Complete fictional scenario', fr: 'Scénario fictif' }[variant.language])
+          await page.keyboard.press('Escape')
         }
       }
       await navigation.nth(4).click()
       await page.locator('.dossier-source-card').first().click()
       const dialog = page.getByRole('dialog')
       await expect(dialog).toBeVisible()
-      await expect(dialog.locator('h2')).toHaveText({ es: 'Ubicación de demostración', en: 'Demonstration location', fr: 'Localisation de démonstration' }[variant.language])
+      await expect(dialog.locator('h2')).toHaveText({ es: 'Escenario ficticio completo · 2026', en: 'Complete fictional scenario · 2026', fr: 'Scénario fictif complet · 2026' }[variant.language])
       await expect(dialog.locator('a[href="/dossier/demo-evidence.json"]')).toBeVisible()
       await expect(dialog).not.toContainText('{{')
       await page.keyboard.press('Escape')
@@ -120,7 +135,7 @@ test('manual preference persists and synchronizes across tabs', async ({ page, c
   await expect(other.locator('html')).toHaveAttribute('lang', 'es')
   await setLanguage(other, 'fr')
   await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
-  await expect(page.getByRole('dialog').locator('h2')).toHaveText('Localisation de démonstration')
+  await expect(page.getByRole('dialog').locator('h2')).toHaveText('Scénario fictif complet · 2026')
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'languages', { configurable: true, value: ['es'] })
     window.dispatchEvent(new Event('languagechange'))
@@ -171,8 +186,10 @@ test('season labels stay on regional demo dates even across the international da
   const page = await context.newPage()
   try {
     await page.goto('/#building')
+    await openSolarControls(page)
     await expect(page.locator('.season-presets button').last()).toContainText('21 Dec')
     await page.locator('.season-presets button').last().click()
+    await openSolarControls(page)
     await expect(page.locator('#solar-date')).toHaveValue(/-12-21$/)
   } finally {
     await context.close()

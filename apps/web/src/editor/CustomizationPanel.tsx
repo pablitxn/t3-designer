@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_DESIGN_LIGHTS, defaultDesignCustomization, type Fixture, type ProjectSnapshot, type Wall } from '@t3-designer/scene-schema'
 import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
 import { roomLabel } from '../i18n/workspace-labels'
 import { roomFinish } from '../materials/surfaces'
 import { customizationCopy, type CustomizationCopy } from './customization-copy'
@@ -27,12 +28,15 @@ const knownRoomIds = new Set(['bedroom-1', 'bedroom-2', 'living', 'entrance', 'w
 const swatches = [['white', '#f1eee1'], ['cream', '#e5ddc9'], ['sand', '#c9b49a'], ['sage', '#9ba88e'], ['blue', '#869dab'], ['clay', '#bb8673']] as const
 
 function NumberField({ name, value, readOnly, onChange, min = -1000, max = 1000 }: { name: string; value: number; readOnly: boolean; onChange: (value: number) => void; min?: number; max?: number }) {
-  return <label className={label}>{name}<input key={value} className={input} type="number" step="0.05" min={min} max={max} defaultValue={Number(value.toFixed(3))} disabled={readOnly}
+  const units = useUnits()
+  const rounded = Number(units.toDisplayLength(value).toFixed(3))
+  return <label className={label}>{name.replace('(m)', `(${units.lengthUnit})`)}<input key={`${value}-${units.system}`} className={input} type="number" step="any" min={units.toDisplayLength(min)} max={units.toDisplayLength(max)} defaultValue={rounded} disabled={readOnly}
     onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur() }}
     onBlur={event => {
-      const next = event.currentTarget.valueAsNumber
-      if (Number.isFinite(next) && next >= min && next <= max && Math.abs(next - value) > .0001) onChange(next)
-      event.currentTarget.value = String(Number(value.toFixed(3)))
+      const raw = event.currentTarget.valueAsNumber
+      const next = units.toMeters(raw)
+      if (raw !== rounded && Number.isFinite(next) && next >= min && next <= max && Math.abs(next - value) > .0001) onChange(next)
+      event.currentTarget.value = String(rounded)
     }} /></label>
 }
 

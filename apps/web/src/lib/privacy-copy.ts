@@ -34,6 +34,7 @@ type PrivacyCopy = {
 }
 
 const cnilComplaints = 'https://www.cnil.fr/fr/plaintes'
+const osmPrivacy = 'https://osmfoundation.org/wiki/Privacy_Policy'
 
 /** Separate from the dossier's translation catalogs; operational facts have one source. */
 export const privacyCopy: Record<'es' | 'en' | 'fr', PrivacyCopy> = {
@@ -95,6 +96,15 @@ export const privacyCopy: Record<'es' | 'en' | 'fr', PrivacyCopy> = {
           'Si elegís un idioma, la app también lo recuerda localmente hasta que selecciones «Automático» o borres los datos del sitio. Esta preferencia funcional no se envía como evento de analytics.',
           'La distribución de muebles de la demo se guarda automáticamente en este navegador. Podés borrarla con «Restaurar distribución original» o eliminando los datos del sitio. Las posiciones no se envían al servidor ni a analytics, y no se importan automáticamente en tus proyectos privados.',
         ],
+      },
+      {
+        id: 'maps',
+        title: 'Mapa de OpenStreetMap',
+        paragraphs: [
+          'Al abrir la vista Mapa, tu navegador solicita a OpenStreetMap las imágenes necesarias para la zona visible. El proveedor recibe datos de conexión, como tu IP, información del navegador, el origen de este sitio y las imágenes solicitadas. La app no envía datos de tu cuenta ni solicita tu ubicación GPS.',
+          'Estas solicitudes permiten mostrar el mapa y son independientes de tu elección de analytics. Solo se realizan mientras la vista Mapa está abierta; no precargamos regiones ni ofrecemos descargas sin conexión. El navegador reutiliza las imágenes según las cabeceras de caché del proveedor.',
+        ],
+        links: [{ label: 'Política de privacidad de OpenStreetMap Foundation', href: osmPrivacy }],
       },
       {
         id: 'operational-logs',
@@ -196,6 +206,15 @@ export const privacyCopy: Record<'es' | 'en' | 'fr', PrivacyCopy> = {
         ],
       },
       {
+        id: 'maps',
+        title: 'OpenStreetMap map',
+        paragraphs: [
+          'When you open Map view, your browser requests the images needed for the visible area from OpenStreetMap. The provider receives connection data such as your IP address, browser information, this site’s origin and the images requested. The app does not send account data or request your GPS location.',
+          'These requests display the map and are independent of your analytics choice. They only occur while Map view is open; we do not preload regions or offer offline downloads. Your browser reuses images according to the provider’s cache headers.',
+        ],
+        links: [{ label: 'OpenStreetMap Foundation privacy policy', href: osmPrivacy }],
+      },
+      {
         id: 'operational-logs',
         title: 'Operational logs',
         paragraphs: [
@@ -293,6 +312,15 @@ export const privacyCopy: Record<'es' | 'en' | 'fr', PrivacyCopy> = {
           'Si vous choisissez une langue, l’application la mémorise également localement jusqu’à la sélection du mode « Automatique » ou à l’effacement des données du site. Cette préférence fonctionnelle n’est pas transmise comme événement de mesure d’audience.',
           'L’agencement des meubles de démonstration est enregistré automatiquement dans ce navigateur. Vous pouvez l’effacer avec « Restaurer l’agencement original » ou en supprimant les données du site. Les positions ne sont envoyées ni au serveur ni à la mesure d’audience, et ne sont pas importées automatiquement dans vos projets privés.',
         ],
+      },
+      {
+        id: 'maps',
+        title: 'Carte OpenStreetMap',
+        paragraphs: [
+          'Lorsque vous ouvrez la vue Carte, votre navigateur demande à OpenStreetMap les images nécessaires à la zone visible. Le fournisseur reçoit des données de connexion telles que votre adresse IP, des informations sur le navigateur, l’origine de ce site et les images demandées. L’application ne transmet pas les données de votre compte et ne demande pas votre position GPS.',
+          'Ces requêtes permettent d’afficher la carte et sont indépendantes de votre choix de mesure d’audience. Elles ont lieu uniquement lorsque la vue Carte est ouverte ; nous ne préchargeons pas de régions et ne proposons pas de téléchargement hors ligne. Le navigateur réutilise les images selon les en-têtes de cache du fournisseur.',
+        ],
+        links: [{ label: 'Politique de confidentialité de la Fondation OpenStreetMap', href: osmPrivacy }],
       },
       {
         id: 'operational-logs',

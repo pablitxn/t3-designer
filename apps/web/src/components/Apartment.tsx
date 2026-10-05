@@ -1,7 +1,7 @@
 import type { Apartment as ApartmentData, Fixture } from '@t3-designer/scene-schema'
 import { Floor } from './Floor'
 import { Wall } from './Wall'
-import { Fixtures } from './Fixtures'
+import { Fixtures, type FixtureEditing } from './Fixtures'
 import { ServiceDetails } from './ServiceDetails'
 import { ArchitecturalDetails } from './ArchitecturalDetails'
 import { roomFinish } from '../materials/surfaces'
@@ -13,12 +13,13 @@ type ApartmentProps = {
   showFixtures?: boolean
   solarStudy?: boolean
   fixtures?: Fixture[]
+  editing?: FixtureEditing
 }
 
-export function Apartment({ apartment, cutaway, showFixtures = true, solarStudy = false, fixtures }: ApartmentProps) {
+export function Apartment({ apartment, cutaway, showFixtures = true, solarStudy = false, fixtures, editing }: ApartmentProps) {
   return (
     <group>
-      {solarStudy && <ApartmentSolarEnvelope apartment={apartment} showFixtures={showFixtures} />}
+      {solarStudy && <ApartmentSolarEnvelope apartment={apartment} showFixtures={showFixtures} fixtures={fixtures} />}
       <Floor polygon={apartment.perimeter} color="#d4d4c9" thickness={0.14} />
       {apartment.rooms.map((room) => (
         <Floor key={room.id} polygon={room.polygon} color={room.color} elevation={0.01} finish={roomFinish(room.id)} />
@@ -36,7 +37,7 @@ export function Apartment({ apartment, cutaway, showFixtures = true, solarStudy 
         />
       ))}
       <ArchitecturalDetails apartment={apartment} cutaway={solarStudy ? false : cutaway} />
-      {showFixtures && <><Fixtures fixtures={fixtures} /><ServiceDetails apartment={apartment} cutaway={cutaway} /></>}
+      {showFixtures && <><Fixtures fixtures={fixtures} editing={editing} /><ServiceDetails apartment={apartment} cutaway={cutaway} fixtures={fixtures} /></>}
     </group>
   )
 }

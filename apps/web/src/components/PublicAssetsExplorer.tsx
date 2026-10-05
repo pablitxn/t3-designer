@@ -2,6 +2,7 @@ import { lazy, Suspense, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { publicAssetFile, publicAssets } from '../data/public-assets'
 import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
 import { backendEnabled } from '../lib/build-mode'
 import './assets.css'
 
@@ -12,14 +13,14 @@ const imageFiles = { perspective: 'preview.png', front: 'front.png', side: 'side
 /** The public gallery never connects to the private workshop or starts a job. */
 export function PublicAssetsExplorer() {
   const { t } = useTranslation('assets')
-  const { formatNumber, formatDate } = useLocale()
+  const { formatDate } = useLocale()
+  const { formatDimensions } = useUnits()
   const [selectedId, setSelectedId] = useState(publicAssets[0].id)
   const [versionId, setVersionId] = useState<string | null>(null)
   const [mode, setMode] = useState<PreviewMode>('perspective')
   const detail = useRef<HTMLElement>(null)
   const selected = publicAssets.find(asset => asset.id === selectedId) ?? publicAssets[0]
   const revision = selected.revisions.find(item => item.id === versionId) ?? selected.revisions[0]
-  const dimensions = (values: number[]) => `${values.map(value => formatNumber(value * 100, 0)).join(' × ')} cm`
 
   function selectObject(id: typeof selectedId) {
     setSelectedId(id)
@@ -41,7 +42,7 @@ export function PublicAssetsExplorer() {
       <div className="workshop-grid public-gallery-grid">
         {publicAssets.map(asset => <button key={asset.id} className="workshop-card" aria-pressed={asset.id === selected.id} aria-label={t('library.select', { label: asset.name })} onClick={() => selectObject(asset.id)}>
           <img src={publicAssetFile(asset.revisions[0], 'preview.png')} alt="" width="512" height="512" />
-          <div><span className="workshop-card-title">{asset.name}</span><span className="public-gallery-variant">{t(`publicDemo.items.${asset.id}.variant`)}</span><span className="workshop-card-dimensions">{dimensions(asset.dimensions)}</span><span className="workshop-draft">{t('library.draft')}</span><span className="workshop-card-versions">{t('revision.versions', { count: asset.revisions.length })}</span></div>
+          <div><span className="workshop-card-title">{asset.name}</span><span className="public-gallery-variant">{t(`publicDemo.items.${asset.id}.variant`)}</span><span className="workshop-card-dimensions">{formatDimensions(asset.dimensions)}</span><span className="workshop-draft">{t('library.draft')}</span><span className="workshop-card-versions">{t('revision.versions', { count: asset.revisions.length })}</span></div>
         </button>)}
       </div>
     </section>
@@ -65,7 +66,7 @@ export function PublicAssetsExplorer() {
         <div className="workshop-specs">
           <span className="workshop-draft">{t('library.draft')}</span>
           <p className="workshop-draft-help">{t('publicDemo.draftHelp')}</p>
-          <dl><div><dt>{t('library.dimensions')}</dt><dd>{dimensions(selected.dimensions)}</dd></div><div><dt>{t('library.measurements')}</dt><dd className="public-gallery-evidence-date">{t('publicDemo.measurements')}</dd></div></dl>
+          <dl><div><dt>{t('library.dimensions')}</dt><dd>{formatDimensions(selected.dimensions)}</dd></div><div><dt>{t('library.measurements')}</dt><dd className="public-gallery-evidence-date">{t('publicDemo.measurements')}</dd></div></dl>
           <p className="workshop-source-description">{t(`publicDemo.items.${selected.id}.description`)}</p>
           <a className="workshop-source-link" href={selected.sourceUrl} target="_blank" rel="noreferrer">{t('library.source')} ↗</a>
           <details className="workshop-review-notes"><summary>{t('library.evidence')}</summary><p>{t(`publicDemo.items.${selected.id}.evidence`)}</p></details>

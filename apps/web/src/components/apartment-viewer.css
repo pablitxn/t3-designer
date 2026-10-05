@@ -1,0 +1,73 @@
+.apartment-viewer { position: relative; flex: 1; margin: 0 22px; }
+.apartment-viewer .apartment-viewport { margin: 0; min-height: 580px; height: calc(100dvh - 190px); }
+.apartment-viewer .scene-surface:focus-visible { outline: 2px solid var(--settings-accent); outline-offset: -3px; }
+.apartment-viewer .apartment-viewer-toolbar { left: 18px; right: 18px; top: 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; pointer-events: none; }
+.apartment-viewer-toolbar .view-buttons, .apartment-viewer-actions { pointer-events: auto; }
+.apartment-viewer-actions { display: flex; gap: 6px; }
+.arrangement-selection-toolbar { position: absolute; z-index: 20; bottom: 18px; left: 18px; display: flex; align-items: center; gap: 4px; max-width: calc(100% - 36px); padding: 5px; border: 1px solid #62705470; border-radius: 12px; background: #263225f2; color: #eef1e8; box-shadow: 0 4px 16px #14201724; }
+.arrangement-selection-name { min-width: 0; max-width: 200px; padding: 0 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.arrangement-selection-toolbar button { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; padding: 0; border: 0; border-radius: 8px; background: #ffffff0d; color: inherit; cursor: pointer; }
+.arrangement-selection-toolbar button:hover { background: #3c4c30; color: #d1e5b8; }
+.arrangement-selection-toolbar button:focus-visible { outline: 2px solid #d1e5b8; outline-offset: 2px; }
+.arrangement-selection-error { position: absolute; z-index: 20; bottom: 76px; left: 18px; max-width: min(340px, calc(100% - 36px)); margin: 0; padding: 10px 12px; border: 1px solid #d4b57d; border-radius: 8px; background: #fff2d8; color: #674414; box-shadow: 0 4px 16px #14201718; font-size: 11px; line-height: 1.5; }
+.apartment-viewer .apartment-moment-tag { top: 76px; left: 20px; right: auto; pointer-events: none; }
+.apartment-viewer .viewer-panel { top: 76px; bottom: 18px; right: 18px; width: min(340px, calc(100% - 36px)); }
+.apartment-viewer .apartment-viewer-layers { display: grid; gap: 12px; margin: 0 0 22px; padding: 0 0 22px; border: 0; border-bottom: 1px solid var(--settings-border); }
+.apartment-viewer-layers legend { margin-bottom: 15px; color: var(--settings-muted); font-size: 11px; }
+.apartment-viewer-layers label { display: flex; align-items: center; gap: 9px; font-size: 12px; }
+.apartment-viewer-layers input { accent-color: var(--settings-accent); }
+.apartment-viewer .inspector-tabs { margin-top: 0; }
+.apartment-viewer .finish-list { display: block; }
+.apartment-viewer .room-navigation, .apartment-viewer .asset-list { display: block; }
+.apartment-viewer .apartment-orientation, .apartment-viewer .evidence-notes { margin-top: 20px; }
+.apartment-viewer.is-expanded { position: fixed; inset: 0; z-index: 600; margin: 0; background: var(--settings-bg); }
+.apartment-viewer.is-expanded .apartment-viewport { width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; }
+.apartment-viewer .viewer-panel.apartment-furniture-panel { bottom: 18px; }
+.apartment-viewer.has-arrangement-selection .viewer-panel { bottom: 82px; }
+.apartment-furniture-panel .viewer-panel-header { gap: 4px; padding: 7px 10px; }
+.apartment-furniture-panel .viewer-panel-body { padding: 14px; }
+.arrangement-controls { display: grid; gap: 18px; }
+.arrangement-intro { margin: 0 0 16px; color: var(--settings-muted); font-size: 12px; line-height: 1.6; }
+.arrangement-help { margin: 0; color: var(--settings-muted); font-size: 12px; line-height: 1.6; }
+.arrangement-catalog-section { min-width: 0; }
+.arrangement-catalog-section > summary { display: flex; align-items: center; gap: 8px; min-height: 36px; margin: 0; padding: 4px 0; color: var(--settings-muted); font-size: 11px; font-weight: 600; list-style: none; cursor: pointer; }
+.arrangement-catalog-section > summary::-webkit-details-marker { display: none; }
+.arrangement-catalog-section > summary:focus-visible { outline: 2px solid var(--settings-accent); outline-offset: 3px; border-radius: 4px; }
+.arrangement-catalog-section > summary > svg { flex-shrink: 0; }
+.arrangement-catalog-section:not([open]) > summary > svg { transform: rotate(-90deg); }
+.arrangement-catalog-count { margin-left: auto; padding: 2px 6px; border-radius: 5px; background: var(--settings-accent-soft); color: var(--settings-accent); font-size: 10px; font-variant-numeric: tabular-nums; }
+.arrangement-catalog-section[open] > summary { margin-bottom: 8px; }
+.arrangement-catalog { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.arrangement-catalog-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--settings-border); border-radius: 9px; background: var(--settings-bg); }
+.arrangement-catalog-card.is-selected { border-color: var(--settings-accent); box-shadow: 0 0 0 1px var(--settings-accent); }
+.arrangement-catalog-select { display: flex; flex: 1; flex-direction: column; align-items: stretch; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.arrangement-catalog-select:hover { background: var(--settings-accent-soft); }
+.arrangement-catalog-preview { position: relative; display: block; flex-shrink: 0; width: 100%; aspect-ratio: 1.5; overflow: hidden; background: #edf0e9; }
+.arrangement-catalog-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.arrangement-catalog-draft { position: absolute; right: 5px; bottom: 5px; padding: 3px 5px; border-radius: 4px; background: #f9faf3e8; color: #58644b; font-size: 9px; line-height: 1; }
+.arrangement-catalog-name { padding: 8px 8px 0; font-size: 11px; line-height: 1.35; font-weight: 600; overflow-wrap: anywhere; }
+.arrangement-catalog-room { margin-top: auto; padding: 3px 8px 8px; color: var(--settings-muted); font-size: 10px; line-height: 1.4; }
+.arrangement-catalog-presence { display: flex; align-items: center; gap: 6px; min-height: 35px; padding: 4px 8px; border-top: 1px solid var(--settings-border); color: var(--settings-muted); font-size: 10px; line-height: 1.4; cursor: pointer; }
+.arrangement-catalog-presence input { width: 14px; height: 14px; margin: 0; flex-shrink: 0; accent-color: var(--settings-accent); }
+.arrangement-catalog-card.is-present .arrangement-catalog-presence { color: var(--settings-text); }
+.apartment-furniture-panel .arrangement-catalog-select:focus-visible { outline-offset: -3px; }
+.arrangement-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-top: 14px; border-top: 1px solid var(--settings-border); }
+.arrangement-links a { color: var(--settings-accent); font-size: 11px; line-height: 1.5; text-underline-offset: 3px; }
+.arrangement-status { margin: 16px 0 20px; padding: 10px 12px; border-radius: 7px; background: var(--settings-accent-soft); color: var(--settings-accent); font-size: 11px; line-height: 1.6; }
+.arrangement-status.is-warning { background: #fff3cf; color: #7b571e; }
+@media (max-width: 760px) {
+  .apartment-viewer { margin: 0 10px; }
+  .apartment-viewer .apartment-viewport { height: calc(100dvh - 160px); min-height: 540px; }
+  .apartment-viewer .apartment-viewer-toolbar { left: 10px; right: 10px; top: 12px; gap: 6px; flex-wrap: wrap; }
+  .arrangement-selection-toolbar { left: 10px; bottom: 10px; max-width: calc(100% - 20px); }
+  .arrangement-selection-error { left: 10px; bottom: 68px; max-width: min(340px, calc(100% - 20px)); }
+  .apartment-viewer.has-arrangement-selection .viewer-panel { bottom: 74px; }
+  .apartment-viewer .viewer-panel { top: 116px; bottom: 10px; right: 10px; width: min(340px, calc(100% - 20px)); }
+  .apartment-viewer .apartment-moment-tag { top: 118px; left: 12px; }
+  .apartment-viewer.has-panel .apartment-moment-tag { display: none; }
+  .apartment-viewer.is-expanded .apartment-viewport { height: 100dvh; min-height: 0; }
+}
+@media (max-width: 420px) {
+  .apartment-viewer .apartment-viewer-toolbar .view-buttons button { padding: 7px 9px; }
+  .apartment-viewer-actions { gap: 5px; }
+}

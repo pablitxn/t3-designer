@@ -23,6 +23,9 @@ function sourceValue(fact: DossierFact, locale: Locale) {
     return fact.id === 'construction-year' ? String(fact.numericValue)
       : numberFormatter(locale, fractionDigits(fact.value)).format(fact.numericValue)
   }
+  if (fact.id === 'energy-cost') {
+    return fact.value.split('–').map(value => numberFormatter(locale, 0).format(Number(value.replaceAll('.', '')))).join('–')
+  }
   if (['address-point', 'ground-altitudes', 'roof-altitudes', 'source-accuracy'].includes(fact.id)) {
     return fact.value.replace(/[−-]?\d+(?:,\d+)?/g, value =>
       numberFormatter(locale, fractionDigits(value)).format(Number(value.replace('−', '-').replace(',', '.'))))

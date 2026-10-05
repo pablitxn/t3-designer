@@ -72,9 +72,13 @@ test('model requests only use approved local shapes and assets scoped to the cur
   const asset = '22222222-2222-4222-8222-222222222222'
   const url = `/api/projects/${project}/assets/${asset}/files/model.glb`
   assert.equal(projectModelUrl('/models/current/fridge-freezer.glb', project), '/models/current/fridge-freezer.glb')
+  assert.equal(projectModelUrl('/demo-assets/strandmon-v1/model.glb', project), '/demo-assets/strandmon-v1/model.glb')
   assert.equal(projectModelUrl(url, project), url)
   assert.equal(projectModelUrl(url, asset), null)
   for (const value of ['https://example.com/a.glb', '//example.com/a.glb', '/models/../secrets.glb', '/models/a.glb?token=x', '/api/assets/x/files/model.glb', '/models/foo.gltf', '/models/%2e%2e/a.glb']) {
+    assert.equal(projectModelUrl(value, project), null, value)
+  }
+  for (const value of ['/demo-assets/../model.glb', '/demo-assets/strandmon-v1/model.glb?token=x', '/demo-assets/strandmon-v1/other.glb', '/demo-assets/strandmon-v1/nested/model.glb']) {
     assert.equal(projectModelUrl(value, project), null, value)
   }
 })

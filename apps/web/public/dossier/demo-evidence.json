@@ -1,281 +1,522 @@
 {
   "formatVersion": 1,
-  "datasetKind": "generalized-demo",
-  "reviewedAt": "2026-10-04",
-  "purpose": "Illustrative model values and methodology, not official property evidence.",
+  "datasetKind": "complete-demo",
+  "reviewedAt": "2026-10-05",
+  "purpose": "Complete fictional 2026 property scenario with illustrative model values; not official property evidence.",
   "geolocation": {
+    "latitude": 47.9958202,
+    "longitude": -4.1029211,
+    "city": "Quimper",
+    "label": "Place Saint-Corentin",
+    "timeZone": "Europe/Paris",
+    "note": "Public map reference only; not the location of the fictional residence or the reconstructed building."
+  },
+  "solarReference": {
     "latitude": 48,
     "longitude": -4,
     "timeZone": "Europe/Paris",
     "note": "Approximate regional solar origin only. This is not a surveyed location or an official property record."
   },
+  "scenario": {
+    "fictional": true,
+    "name": "Résidence du Jardin · Quimper",
+    "period": "2026-01-01/2026-12-31"
+  },
   "attribution": "Adapted from © IGN · BD TOPO / BAN · DGFiP cadastre · RNB — Licence Ouverte 2.0; local geometry retained, identifiers and geolocation generalized",
   "values": {
     "official-address": {
-      "value": "T3 · Demonstration apartment",
-      "status": "estimated",
-      "scope": "Dirección"
+      "value": "Résidence du Jardin · Quimper",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Dirección",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Nombre creado para esta demo. El punto público del mapa permite explorar Quimper y no identifica una propiedad ni un titular reales."
     },
     "ban-address-id": {
       "value": "demo-site-001",
       "status": "estimated",
-      "scope": "Dirección"
+      "review": "checked",
+      "scope": "Dirección",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Identificador interno del ejemplo. No es una clave de dirección de un servicio público."
     },
     "address-point": {
-      "value": "48,0 · −4,0",
+      "value": "47,9958202 · -4,1029211",
       "unit": "°",
       "status": "estimated",
-      "scope": "Dirección"
+      "review": "checked",
+      "scope": "Dirección",
+      "sourceIds": [
+        "ban"
+      ],
+      "note": "Referencia pública en Place Saint-Corentin, Quimper. Sitúa el mapa, no la residencia ficticia; el origen solar regional se documenta por separado."
     },
     "rnb-id": {
       "value": "demo-reference-001",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Referencia local de demostración, sin correspondencia publicada con un registro externo."
     },
     "ign-id": {
       "value": "demo-building-001",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "ID local que permite relacionar el contexto 3D y sus variantes."
     },
     "parcel-id": {
       "value": "DEMO 001",
       "status": "estimated",
-      "scope": "Parcela"
+      "review": "checked",
+      "scope": "Parcela",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "La parcela de ejemplo es distinta del edificio, del interior y de los lotes jurídicos."
     },
     "parcel-area": {
       "value": "1.192",
       "numericValue": 1192,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Parcela"
+      "review": "checked",
+      "scope": "Parcela",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Superficie ilustrativa del conjunto. No es la huella construida ni la suma de las habitaciones."
     },
     "bdnb-group": {
       "value": "demo-group-001",
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "construction-year": {
       "value": "1956",
       "numericValue": 1956,
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "dwelling-count": {
       "value": "30",
       "numericValue": 30,
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "building-footprint": {
       "value": "475",
       "numericValue": 475,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Huella del volumen a nivel de suelo. No se suman plantas para convertirla en superficie interior."
     },
     "building-height": {
       "value": "15,5",
       "numericValue": 15.5,
       "unit": "m",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Altura del contorno en el modelo; la cubierta agrega su rango vertical."
     },
     "building-mean-height": {
       "value": "16",
       "numericValue": 16,
       "unit": "m",
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "ground-altitudes": {
       "value": "8,8 / 8,8",
       "unit": "m",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "roof-altitudes": {
       "value": "24,3 / 25,1",
       "unit": "m",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "roof-range": {
       "value": "0,8",
       "numericValue": 0.8,
       "unit": "m",
       "status": "derived",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Diferencia de cotas usada como hipótesis visual de la cubierta. No determina una forma medida."
     },
     "building-storeys": {
       "value": "5",
       "numericValue": 5,
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "source-accuracy": {
       "value": "3 m / 2,5 m",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Incertidumbre de los datos geométricos originales antes de generalizar el contexto; los decimales del render no mejoran la precisión."
     },
     "wall-material": {
       "value": "BETON - PIERRE",
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "roof-material": {
       "value": "ZINC ALUMINIUM",
       "status": "estimated",
-      "scope": "Grupo BDNB"
+      "review": "checked",
+      "scope": "Grupo BDNB",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "ign-record-updated": {
       "value": "04/10/2026",
       "status": "estimated",
-      "scope": "Edificio"
+      "review": "checked",
+      "scope": "Edificio",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Fecha de preparación del dataset de demostración, no de inspección ni consulta oficial."
     },
     "apartment-carrez": {
       "value": "49,18",
       "numericValue": 49.18,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Suma de referencia conservada para demostrar el desglose de superficies; no es un certificado Carrez."
     },
     "room-area-bedroom-1": {
       "value": "11,81",
       "numericValue": 11.81,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-bedroom-2": {
       "value": "9,32",
       "numericValue": 9.32,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-living": {
       "value": "16,39",
       "numericValue": 16.39,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-entrance": {
       "value": "2,26",
       "numericValue": 2.26,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-wc": {
       "value": "0,87",
       "numericValue": 0.87,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-bathroom": {
       "value": "3,21",
       "numericValue": 3.21,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-kitchen": {
       "value": "4,26",
       "numericValue": 4.26,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "room-area-closet": {
       "value": "1,06",
       "numericValue": 1.06,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Estancia"
+      "review": "checked",
+      "scope": "Estancia",
+      "sourceIds": [
+        "plan"
+      ],
+      "note": "Área de ejemplo compartida con la geometría. No es una medición independiente ni un certificado."
     },
     "apartment-area-sum": {
       "value": "49,18",
       "numericValue": 49.18,
       "unit": "m²",
       "status": "derived",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Suma aritmética de las ocho áreas de ejemplo. No certifica superficie neta ni incorpora descuentos por muros."
     },
     "balcony-area": {
       "value": "1,26",
       "numericValue": 1.26,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Balcón"
+      "review": "checked",
+      "scope": "Balcón",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Área de anexo ilustrativa, fuera del total interior del ejemplo."
     },
     "basement-area": {
       "value": "8,54",
       "numericValue": 8.54,
       "unit": "m²",
       "status": "estimated",
-      "scope": "Cave"
+      "review": "checked",
+      "scope": "Cave",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Área de anexo ilustrativa, fuera del total interior; el subsuelo no está modelado."
     },
     "floor-plan": {
       "value": "3.er piso ilustrativo",
       "status": "estimated",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "El plano describe la planta ilustrativa del modelo, sin referencia a un diagnóstico real."
     },
     "floor-model": {
       "value": "3.er piso estimado",
       "status": "estimated",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Tercera planta ilustrativa, con balcón orientado al patio. La cave se presenta como un anexo independiente del interior."
     },
     "living-orientation": {
       "value": "Suroeste · 210,79°",
       "status": "estimated",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "ceiling-height": {
       "value": "2,70",
       "numericValue": 2.7,
       "unit": "m",
       "status": "estimated",
-      "scope": "Departamento"
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "model"
+      ],
+      "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente."
     },
     "apartment-dpe": {
-      "value": "Pendiente de identificar",
-      "status": "pending",
-      "scope": "Departamento"
+      "value": "D",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Clase D ficticia para el T3 en el escenario 2026. Es una categoría ilustrativa, no un diagnóstico emitido ni una inferencia a partir del consumo."
     },
     "actual-energy-use": {
-      "value": "Sin facturas incorporadas",
-      "status": "pending",
-      "scope": "Departamento"
+      "value": "6.200",
+      "numericValue": 6200,
+      "unit": "kWh",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Energía final ficticia del T3 completo, del 1 de enero al 31 de diciembre de 2026. Incluye calefacción, agua caliente y electricidad doméstica; se mantiene separada del consumo convencional del DPE."
     },
     "energy-cost": {
-      "value": "Sin datos incorporados",
-      "status": "pending",
-      "scope": "Departamento"
+      "value": "900–1.200",
+      "unit": "€",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Presupuesto ficticio del T3 completo para enero–diciembre de 2026, con energía y abonos incluidos. El rango acompaña el escenario de 6.200 kWh; no son facturas ni una tarifa comercial."
     },
     "legal-lots": {
-      "value": "Documentación pendiente",
-      "status": "pending",
-      "scope": "Departamento"
+      "value": "12 · departamento / 42 · cave",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Departamento",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Lotes ficticios 12 (T3) y 42 (cave), con una cuota ilustrativa conjunta de 21/1.000 de partes comunes. Escenario 2026 sin efectos jurídicos ni vínculos con contratos reales."
     },
     "risks": {
-      "value": "Consulta específica pendiente",
-      "status": "pending",
-      "scope": "Parcela"
+      "value": "Inundación baja · radón 3",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Parcela",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Perfil ficticio para la parcela de demostración en 2026: exposición baja a inundación y radón de nivel 3. No describe los riesgos de Place Saint-Corentin ni constituye un estado de riesgos."
     },
     "planning": {
-      "value": "Zonificación por cotejar",
-      "status": "pending",
-      "scope": "Parcela"
+      "value": "UA · uso residencial",
+      "status": "demo",
+      "review": "checked",
+      "scope": "Parcela",
+      "sourceIds": [
+        "demo-scenario"
+      ],
+      "note": "Zonificación ficticia de 2026: vivienda y comercio local, con conservación del aspecto de las fachadas. Reglas creadas para la demo, sin atribuirlas al planeamiento de Quimper."
     }
   },
   "sources": [
     {
-      "id": "ban",
-      "title": "Ubicación de demostración",
+      "id": "demo-scenario",
+      "title": "Escenario ficticio completo · 2026",
       "publisher": "T3 Designer",
       "kind": "model",
-      "description": "Origen solar regional aproximado. No representa una dirección postal ni el emplazamiento de un inmueble.",
+      "description": "Datos creados para esta demo: identidad, energía, gastos, lotes, riesgos y urbanismo. Período ilustrativo del 1 de enero al 31 de diciembre de 2026; no representan un inmueble ni documentos reales.",
+      "date": "2026-10-05",
+      "label": "Datos ficticios · escenario 2026",
+      "localUrl": "/dossier/demo-evidence.json"
+    },
+    {
+      "id": "ban",
+      "title": "Ubicación del ejemplo",
+      "publisher": "T3 Designer",
+      "kind": "model",
+      "description": "Punto de referencia público en Place Saint-Corentin, Quimper, elegido para navegar el mapa. No es la ubicación de la residencia ficticia ni del edificio reconstruido.",
       "date": "2026-10-04",
       "label": "Modelo de demostración · 04/10/2026",
       "localUrl": "/dossier/demo-evidence.json"
@@ -353,7 +594,7 @@
     },
     {
       "id": "ademe",
-      "title": "Método para verificar un DPE",
+      "title": "Método de lectura del DPE",
       "publisher": "ADEME · Service Public",
       "kind": "official-guide",
       "description": "Guía para un expediente real: un diagnóstico requiere documentos propios y no se infiere de esta demostración.",
@@ -366,7 +607,7 @@
       "title": "Método de consulta de riesgos",
       "publisher": "Géorisques",
       "kind": "official-guide",
-      "description": "Guía general. No se emite una conclusión de riesgos para el escenario de demostración.",
+      "description": "Guía general para entender la terminología de riesgos. El perfil de la demo procede del escenario ficticio, no de esta guía.",
       "date": "2026-10-04",
       "label": "Método de investigación",
       "url": "https://www.georisques.gouv.fr/information-des-acquereurs-et-locataires"
@@ -376,7 +617,7 @@
       "title": "Método de consulta urbanística",
       "publisher": "Géoportail de l’urbanisme",
       "kind": "official-guide",
-      "description": "Consulta de planes y reglamentos para un futuro expediente autorizado. La demo no identifica una parcela real.",
+      "description": "Guía general de planes y reglamentos. La zonificación de la demo pertenece al escenario ficticio y no identifica una parcela real.",
       "date": "2026-10-04",
       "label": "Método de investigación",
       "url": "https://www.geoportail-urbanisme.gouv.fr/"

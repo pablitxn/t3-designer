@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { createPortal } from 'react-dom'
 
 export interface SettingsSection {
@@ -115,5 +115,13 @@ export function SettingsRow({ controlId, label, description, children }: {
       <p id={`${controlId}-description`}>{description}</p>
     </div>
     <div className="settings-row-control">{children}</div>
+  </div>
+}
+
+/** Keep the native keyboard/mobile picker with a consistent, inset chevron. */
+export function SettingsSelect(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <div className="settings-select">
+    <select {...props} />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
   </div>
 }

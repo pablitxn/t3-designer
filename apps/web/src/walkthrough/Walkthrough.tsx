@@ -5,8 +5,10 @@ import { PCFShadowMap, PerspectiveCamera, PointLight } from 'three'
 import { apartmentBounds, segmentWall } from '@t3-designer/geometry'
 import type { ProjectSnapshot } from '@t3-designer/scene-schema'
 import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
 import { roomLabel } from '../i18n/workspace-labels'
 import { WebGLGuard } from '../components/WebGLGuard'
+import { ViewerIcon, ViewerPanel } from '../components/ViewerPanel'
 import { getSolarPosition, resolveLocalDateTime } from '../lib/solar'
 import { walkCopy } from './copy'
 import { buildWalkWorld, canSetWalkDoorOpenness, findWalkDoorTarget, findWalkSpawn, initialWalkDoorStates, withWalkDoorStates, type WalkDoorStates, type WalkWorld } from './navigation'
@@ -61,7 +63,8 @@ function HoldButton({ label, children, field, value, input }: { label: string; c
 export function Walkthrough({ snapshot, onClose, initialMoment, reference = false }: {
   snapshot: ProjectSnapshot; onClose: () => void; initialMoment?: { date: string; minutes: number }; reference?: boolean
 }) {
-  const { locale } = useLocale(), c = walkCopy[locale]
+  const { locale } = useLocale()
+  const { formatLength } = useUnits(), c = walkCopy[locale]
   const { t } = useTranslation('workspace')
   const roomName = (room: ProjectSnapshot['apartment']['rooms'][number]) => reference ? roomLabel(t, room.id) : room.name
   const root = useRef<HTMLElement>(null), canvas = useRef<HTMLCanvasElement | null>(null)
@@ -82,6 +85,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
   const [artificialLights, setArtificialLights] = useState(() => snapshot.customization?.lighting.artificialEnabled !== false), [torch, setTorch] = useState(false)
   const [screenControls, setScreenControls] = useState(() => window.matchMedia('(pointer: coarse)').matches)
   const [fullscreen, setFullscreen] = useState(false), [message, setMessage] = useState('')
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [mouseCaptured, setMouseCaptured] = useState(false)
   const [moment, setMoment] = useState(() => initialMoment ?? { date: snapshot.solar.date, minutes: snapshot.solar.selected.minutes })
   const solar = useMemo(() => {
@@ -131,7 +135,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
   }, [])
 
   function start() {
-    if (!ready || !spawn || !validMoment) return
+    if (!ready || !spawn || !validMoment || settingsOpen) return
     input.current = emptyInput(); setActive(true); setEntered(true)
     canvas.current?.focus({ preventScroll: true })
     if (!window.matchMedia('(pointer: coarse)').matches) {
@@ -141,6 +145,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
     }
   }
   function restart() { pause(); setPose(null); setEntered(false); setSpawnHeight(eyeHeight); setVisitDoors({ snapshot, values: initialDoors }); setReset(value => value + 1) }
+  function toggleSettings() { pause(); setSettingsOpen(previous => !previous) }
   async function toggleFullscreen() {
     pause(); setMessage('')
     try {
@@ -150,7 +155,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
     } catch { setMessage(c.fullscreenError) }
   }
   const fallback = <div className="walk-fallback" role="status">{c.fallback}</div>
-  return <section className={`walkthrough${active ? ' walk-running' : ''}`} ref={root} aria-label={c.title} data-testid="walkthrough" data-active={active}>
+  return <section className={`walkthrough${active ? ' walk-running' : ''}${settingsOpen ? ' walk-settings-open' : ''}`} ref={root} aria-label={c.title} data-testid="walkthrough" data-active={active}>
     <header className="walk-header">
       <div><span className="walk-eyebrow">{c.eyebrow}</span><h2>{c.title}</h2><p>{c.intro}</p></div>
       <button className="walk-button" onClick={() => { pause(); onClose() }}>← {c.back}</button>
@@ -166,13 +171,19 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
           </Canvas>
         </WebGLGuard>
         <div className="walk-status"><span className={active ? 'walk-live' : ''} />{active ? c.live : c.paused}{currentRoom && <> · {roomName(currentRoom)}</>}</div>
-        {active && <><div className={`walk-crosshair${interaction ? ' walk-crosshair-target' : ''}`} aria-hidden="true" /><button className="walk-button walk-pause" onClick={pause}>{c.pause} <kbd>Esc</kbd></button></>}
+        <div className="viewer-toolbar walk-viewer-toolbar" role="group" aria-label={c.viewerControls}>
+          {active && <button type="button" className="viewer-action" aria-label={c.pause} title={`${c.pause} · Esc`} onClick={pause}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg></button>}
+          <button type="button" className="viewer-action" aria-label={c.settings} title={c.settings} aria-haspopup="dialog" aria-expanded={settingsOpen} aria-controls="walk-settings" onClick={toggleSettings}><ViewerIcon kind="settings" /></button>
+          <button type="button" className="viewer-action" aria-label={fullscreen ? c.exitFullscreen : c.fullscreen} title={fullscreen ? c.exitFullscreen : c.fullscreen} aria-pressed={fullscreen} onClick={() => { void toggleFullscreen() }}><ViewerIcon kind={fullscreen ? 'collapse' : 'expand'} /></button>
+        </div>
+        {message && <p className="walk-message" role="status">{message}</p>}
+        {active && <div className={`walk-crosshair${interaction ? ' walk-crosshair-target' : ''}`} aria-hidden="true" />}
         {interaction && <div className="walk-interaction">
           <button type="button" className="walk-button" data-testid="walk-interact" data-door-id={interaction.id} data-door-open={interaction.open}
             onClick={() => { input.current.interact = true }}><kbd>E</kbd> {interaction.open ? c.closeDoor : c.openDoor}</button>
           {doorBlocked && <span role="status">{c.doorBlocked}</span>}
         </div>}
-        {!active && ready && <div className="walk-overlay"><div className="walk-start-card">
+        {!active && ready && !settingsOpen && <div className="walk-overlay"><div className="walk-start-card">
           <span className="walk-eyebrow">{architecture?.name ?? c.reference}{layout && ` / ${layout.name}`}</span>
           <h3>{entered ? c.resume : c.start}</h3>
           <div className="walk-key-guide"><span><kbd>W A S D</kbd> {c.move}</span><span><kbd>↑ ↓ ← →</kbd> {c.look}</span><span><kbd>⇧</kbd> {c.run}</span><span><kbd>C</kbd> {c.crouch}</span><span><kbd>{c.space}</kbd> {c.jump}</span><span><kbd>E</kbd> {c.interact}</span><span><kbd>Esc</kbd> {c.release}</span></div>
@@ -186,8 +197,8 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
         </div>}
         {ready && <div className="walk-map-wrap"><Minimap snapshot={snapshot} world={world} doorStates={doorStates} pose={pose} label={c.map} /></div>}
         {active && <span className="walk-bottom-hint">{c.keyboard} · {window.matchMedia('(pointer: coarse)').matches ? c.mouseTouch : mouseCaptured ? c.mouse : c.mouseFree} · {c.space}: {c.jump} · E: {c.interact}</span>}
-      </div>
-      <aside className="walk-settings" aria-label={c.settings}>
+        {settingsOpen && <ViewerPanel id="walk-settings" title={c.settings} onClose={() => setSettingsOpen(false)} className="walk-settings-panel">
+        <div className="walk-settings">
         <div className="walk-version"><span className="walk-eyebrow">{c.version}</span><strong>{reference ? c.reference : snapshot.project.name}</strong>{architecture && <span>{architecture.name} / {layout?.name}</span>}<p>{c.draft}</p></div>
         <fieldset disabled={active}>
           <legend>{c.settings}</legend>
@@ -199,14 +210,14 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
           <button className="walk-text-button" onClick={() => setMoment(initialMoment ?? { date: snapshot.solar.date, minutes: snapshot.solar.selected.minutes })}>{c.savedSun}</button>
           <label className="walk-check"><input type="checkbox" checked={artificialLights} onChange={event => setArtificialLights(event.target.checked)} />{c.artificial}</label>
           <label className="walk-check"><input type="checkbox" checked={torch} onChange={event => setTorch(event.target.checked)} />{c.torch}</label>
-          <label>{c.height} <output>{eyeHeight.toFixed(2)} m</output><input type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
+          <label>{c.height} <output>{formatLength(eyeHeight)}</output><input type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
           <label>{c.fov} <output>{fov}°</output><input type="range" min="50" max="95" step="1" value={fov} onChange={event => setFov(Number(event.target.value))} /></label>
           <label>{c.sensitivity} <output>{sensitivity.toFixed(1)}×</output><input type="range" min=".3" max="2" step=".1" value={sensitivity} onChange={event => setSensitivity(Number(event.target.value))} /></label>
           <label className="walk-check"><input type="checkbox" checked={screenControls} onChange={event => setScreenControls(event.target.checked)} />{c.controls}</label>
         </fieldset>
-        <button className="walk-button" onClick={() => { void toggleFullscreen() }}>{fullscreen ? c.exitFullscreen : c.fullscreen} ⛶</button>
-        {message && <p role="status">{message}</p>}
-      </aside>
+        </div>
+        </ViewerPanel>}
+      </div>
     </div>
     <footer className="walk-footer">{c.notice}</footer>
   </section>

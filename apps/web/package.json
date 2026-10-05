@@ -27,6 +27,7 @@
     "@t3-designer/geometry": "workspace:*",
     "@t3-designer/scene-schema": "workspace:*",
     "i18next": "26.4.2",
+    "maplibre-gl": "6.11.2",
     "react": "~19.3.0",
     "react-dom": "~19.3.0",
     "react-i18next": "17.0.15",

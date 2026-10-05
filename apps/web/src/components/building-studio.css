@@ -1,0 +1,54 @@
+.building-studio { margin: 0 22px; min-width: 0; border: 1px solid var(--settings-border); border-radius: 14px; overflow: hidden; background: var(--settings-bg); color: var(--settings-text); }
+.building-studio .building-workspace { display: block; padding: 0; }
+.building-studio .building-viewport { margin: 0; border: 0; border-radius: 0; min-height: 540px; height: calc(100dvh - 185px); max-height: none; }
+.building-studio-toolbar { z-index: 45; }
+.building-studio-toolbar .view-buttons { box-shadow: none; }
+.building-studio-toolbar .view-buttons button { min-height: 36px; }
+.building-studio .building-moment-tag { top: 76px; left: 22px; right: auto; }
+.building-studio .building-viewport-bottom { flex-direction: row; align-items: flex-end; }
+.building-studio .building-layers { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+.building-studio .building-study-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 22px; padding: 4px; border-radius: 8px; background: var(--settings-surface); }
+.building-studio .building-study-switcher button { border: 0; min-width: 0; padding: 10px 9px; background: transparent; font-size: 11px; line-height: 1.4; }
+.building-studio .building-study-switcher button[aria-pressed=true] { background: var(--settings-accent-soft); color: var(--settings-accent); }
+.building-studio .building-viewer-panel { width: min(370px, calc(100% - 32px)); }
+.building-studio .building-viewer-panel.wide { width: min(680px, calc(100% - 32px)); }
+.studio-solar-controls > summary { cursor: pointer; font-size: 12px; font-weight: 600; padding: 8px 0; color: var(--settings-text); }
+.building-viewer-panel .solar-heading { margin-bottom: 12px; }
+.building-viewer-panel .solar-heading h2 { margin: 10px 0; color: var(--settings-text); font-size: 23px; letter-spacing: -.035em; line-height: 1.2; font-weight: 530; }
+.building-viewer-panel .solar-heading h2 br { display: none; }
+.building-viewer-panel .building-energy-intro { margin-bottom: 14px; padding-bottom: 14px; }
+.building-viewer-panel .building-energy-intro h2 { text-transform: none; font-size: 23px; line-height: 1.2; letter-spacing: -.03em; }
+.building-viewer-panel .building-energy-intro dl { grid-template-columns: 1fr 1fr; gap: 18px; margin: 15px 0; }
+.building-viewer-panel .building-energy-intro dd { font-size: 23px; }
+.building-viewer-panel .building-energy-study { margin: 18px 0 0; padding: 18px 0 0; border-top: 1px solid var(--settings-border); }
+.building-viewer-panel .energy-workbench { border: 0; padding: 0; background: transparent; }
+.building-viewer-panel .energy-header { flex-wrap: wrap; gap: 12px; }
+.building-viewer-panel .energy-header h2 { font-size: 24px; }
+.building-viewer-panel .energy-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+.building-viewer-panel .energy-kpis .energy-metric { padding: 15px; }
+.building-viewer-panel .energy-kpis .energy-metric:nth-child(3) { border-left: 0; }
+.building-viewer-panel .energy-kpis .energy-metric:nth-child(n+3) { border-top: 1px solid var(--energy-line); }
+.building-viewer-panel .energy-two-column { grid-template-columns: 1fr; gap: 24px; }
+.building-viewer-panel .energy-investment-fields, .building-viewer-panel .energy-month-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.building-studio.is-expanded { position: fixed; z-index: 200; inset: 0; margin: 0; border: 0; border-radius: 0; overflow: hidden; }
+.building-studio.is-expanded .building-workspace, .building-studio.is-expanded .building-viewport { height: 100%; min-height: 0; max-height: none; }
+@media (max-width: 1120px) {
+  .building-studio { margin: 0 15px; }
+}
+@media (max-width: 760px) {
+  .building-studio { margin: 0 10px; }
+  .building-studio .building-viewport { height: calc(100svh - 175px); min-height: 500px; }
+  .building-studio .building-moment-tag { top: 72px; left: 14px; }
+  .building-studio .building-viewport-bottom { flex-direction: column-reverse; align-items: flex-start; gap: 10px; }
+  .building-studio .building-layers { gap: 9px 12px; justify-content: flex-start; padding: 9px 10px; }
+  .building-studio .building-layers label { font-size: 10px; }
+  .building-studio .building-viewer-panel, .building-studio .building-viewer-panel.wide { width: calc(100% - 24px); }
+  .building-studio-toolbar .view-buttons button { padding-inline: 9px; font-size: 10px; }
+  .building-viewer-panel .energy-day-controls { flex-wrap: wrap; gap: 14px; }
+  .building-viewer-panel .energy-day-controls > .energy-field, .building-viewer-panel .energy-day-controls > .energy-clock { flex-basis: 100%; }
+  .building-viewer-panel .energy-fields { gap: 15px 12px; }
+  .building-viewer-panel .energy-monthly-chart { gap: 5px; }
+  .building-viewer-panel .energy-monthly-column > span { font-size: 8px; }
+}
+@media (max-width: 360px) { .building-studio .building-moment-tag { top: 114px; } }
+@media print { .building-studio-toolbar, .building-viewer-panel { display: none; } .building-studio.is-expanded { position: static; } }

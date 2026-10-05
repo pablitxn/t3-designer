@@ -1,7 +1,8 @@
-import { Component, Suspense, useMemo, type ReactNode } from 'react'
+import { Component, Suspense, useMemo, type ReactNode, type RefObject } from 'react'
 import { Html, useGLTF } from '@react-three/drei'
-import { Mesh } from 'three'
-import { assetCatalog, currentFixtures } from '../data/current-state'
+import { Mesh, type Group } from 'three'
+import { currentFixtures } from '../data/current-state'
+import { demoAssets } from '../data/demo-catalog'
 import { useTranslation } from 'react-i18next'
 import { assetEvidence, assetLabel } from '../i18n/workspace-labels'
 import type { Fixture } from '@t3-designer/scene-schema'
@@ -43,20 +44,37 @@ function FixtureModel({ url }: { url: string }) {
   return <primitive object={model} dispose={null} />
 }
 
-export function Fixtures({ fixtures = currentFixtures }: { fixtures?: Fixture[] }) {
+export type FixtureEditing = {
+  objects: RefObject<Map<string, Group>>
+  selectedId: string | null
+  enabled: boolean
+}
+
+export function Fixtures({ fixtures = currentFixtures, editing }: { fixtures?: Fixture[]; editing?: FixtureEditing }) {
   const { t } = useTranslation('workspace')
   return (
     <group name="current-state-fixtures">
       {fixtures.map((fixture) => {
-        const asset = assetCatalog.find((candidate) => candidate.id === fixture.assetId)
+        const asset = demoAssets.find((candidate) => candidate.id === fixture.assetId)
         if (!asset) return null
         return (
-          <group key={fixture.id} name={fixture.id} position={fixture.position} rotation={[0, fixture.rotation, 0]} userData={{ roomId: fixture.roomId, label: assetLabel(t, fixture.assetId), evidence: assetEvidence(t, fixture.assetId) }}>
-            <AssetBoundary label={t('fixtures.failed', { label: assetLabel(t, fixture.assetId) })} retryLabel={t('fixtures.retry')} url={asset.url}>
+          <group key={fixture.id} ref={node => {
+            if (node) editing?.objects.current.set(fixture.id, node)
+            else editing?.objects.current.delete(fixture.id)
+          }} name={fixture.id} position={fixture.position} rotation={[0, fixture.rotation, 0]} userData={{ fixtureId: fixture.id, roomId: fixture.roomId, label: assetLabel(t, fixture.assetId, asset.label), evidence: assetEvidence(t, fixture.assetId) || asset.evidence }}>
+            <AssetBoundary label={t('fixtures.failed', { label: assetLabel(t, fixture.assetId, asset.label) })} retryLabel={t('fixtures.retry')} url={asset.url}>
               <Suspense fallback={null}>
                 <FixtureModel url={asset.url} />
               </Suspense>
             </AssetBoundary>
+            {editing?.enabled && <mesh position={[0, asset.dimensions[1] / 2, 0]}>
+              <boxGeometry args={asset.dimensions} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
+            </mesh>}
+            {editing?.enabled && editing.selectedId === fixture.id && <mesh position={[0, asset.dimensions[1] / 2, 0]} renderOrder={10} raycast={() => {}}>
+              <boxGeometry args={asset.dimensions.map(value => value + .035) as [number, number, number]} />
+              <meshBasicMaterial color="#236747" wireframe depthTest={false} depthWrite={false} />
+            </mesh>}
           </group>
         )
       })}

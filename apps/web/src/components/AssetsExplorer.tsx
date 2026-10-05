@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { CreateJobInputSchema, type AnswersInput, type Asset, type Health, type Job, type ReferenceImage, type RevisionInput } from '@t3-designer/asset-schema'
 import { assetApi, AssetApiError, dimensionsFromCentimetres } from '../lib/asset-api'
 import { useLocale } from '../i18n/useLocale'
+import { useUnits } from '../lib/useUnits'
 import { WorkshopActivity } from './WorkshopActivity'
 import { AssetRevision, type RevisionDraft } from './AssetRevision'
 import { ReferenceComparison, ReferenceImagePicker } from './ReferenceImages'
@@ -17,24 +18,45 @@ type DimensionFields = [string, string, string]
 type WorkshopSnapshot = { connection: 'checking' | 'online' | 'offline'; health: Health | null; jobs: Job[]; assets: Asset[] }
 const activeStatuses = new Set<Job['status']>(['queued', 'analyzing', 'needs_input', 'generating'])
 
+function DimensionInput({ value, onChange, id }: { value: string; onChange: (value: string) => void; id: string }) {
+  const { system } = useUnits()
+  const factor = system === 'imperial' ? 2.54 : 1
+  const unit = system === 'imperial' ? 'in' : 'cm'
+  const [draft, setDraft] = useState<{ source: string; system: string; text: string } | null>(null)
+  const minimum = 5 / factor, maximum = 2000 / factor
+  const rounded = Number((Number(value) / factor).toFixed(6))
+  // Formatting a valid boundary value must not push it outside the native range.
+  const displayed = Number(value) >= 5 && Number(value) <= 2000 ? Math.max(minimum, Math.min(maximum, rounded)) : rounded
+  const text = draft?.source === value && draft.system === system ? draft.text : value === '' ? '' : String(displayed)
+  return <div className="workshop-unit-input"><input id={id} type="number" min={minimum} max={maximum} step="any" inputMode="decimal" value={text} onChange={event => {
+    const text = event.target.value
+    const canonical = text === '' ? '' : String(Number(text) * factor)
+    setDraft({ source: canonical, system, text })
+    onChange(canonical)
+  }} /><span aria-hidden="true">{unit}</span></div>
+}
+
 function DimensionInputs({ values, onChange, prefix }: { values: DimensionFields; onChange: (value: DimensionFields) => void; prefix: string }) {
   const { t } = useTranslation('assets')
+  const { system } = useUnits()
+  const unit = system === 'imperial' ? 'in' : 'cm'
   return <fieldset className="workshop-dimensions">
     <legend>{t('form.dimensions')}</legend>
     <div>{(['width', 'height', 'depth'] as const).map((axis, index) => <label key={axis} htmlFor={`${prefix}-${axis}`}>
-      <span>{t(`form.${axis}`)}</span>
-      <div className="workshop-unit-input"><input id={`${prefix}-${axis}`} type="number" min="5" max="2000" step="0.1" inputMode="decimal" value={values[index]} onChange={event => {
+      <span>{t(`form.${axis}`)} <span className="sr-only">({unit})</span></span>
+      <DimensionInput id={`${prefix}-${axis}`} value={values[index]} onChange={value => {
         const next: DimensionFields = [...values]
-        next[index] = event.target.value
+        next[index] = value
         onChange(next)
-      }} /><span aria-hidden="true">cm</span></div>
+      }} />
     </label>)}</div>
-    <p>{t('form.dimensionHelp')}</p>
+    <p>{t('form.dimensionHelp', { unit })}</p>
   </fieldset>
 }
 
 function AnswerForm({ job, disabled, onAnswer }: { job: Job; disabled: boolean; onAnswer: (input: AnswersInput) => Promise<void> }) {
   const { t } = useTranslation('assets')
+  const { formatLength } = useUnits()
   const [notes, setNotes] = useState('')
   const [dimensions, setDimensions] = useState<DimensionFields>(['', '', ''])
   const [error, setError] = useState('')
@@ -44,7 +66,7 @@ function AnswerForm({ job, disabled, onAnswer }: { job: Job; disabled: boolean; 
     event.preventDefault()
     if (disabled || uploading || (!notes.trim() && !references.length)) return
     let result: AnswersInput['dimensions']
-    try { result = dimensionsFromCentimetres(dimensions) } catch { setError(t('form.invalidDimensions')); return }
+    try { result = dimensionsFromCentimetres(dimensions) } catch { setError(t('form.invalidDimensions', { min: formatLength(.05), max: formatLength(20) })); return }
     setError('')
     await onAnswer({ notes: notes.trim() || t('references.attached'), ...(result ? { dimensions: result } : {}), ...(references.length ? { referenceImageIds: references.map(image => image.id) } : {}) })
   }
@@ -64,7 +86,7 @@ function AssetDetails({ asset, versions, job, draft, disabled, creditNote, onSel
   asset: Asset; versions: Asset[]; job: Job | undefined; draft: RevisionDraft; disabled: boolean; creditNote: string; onSelect: (id: string) => void; onDraft: (draft: RevisionDraft) => void; onRevise: (input: RevisionInput) => Promise<void>;
 }) {
   const { t } = useTranslation('assets')
-  const { formatNumber } = useLocale()
+  const { formatDimensions } = useUnits()
   const [mode, setMode] = useState<'image' | 'model'>('image')
   return <section className="workshop-detail" aria-label={t('library.selected')}>
     <div className="workshop-detail-heading">
@@ -83,7 +105,7 @@ function AssetDetails({ asset, versions, job, draft, disabled, creditNote, onSel
         <span className="workshop-draft">{t('library.draft')}</span>
         <p className="workshop-draft-help">{t('library.draftHelp')}</p>
         <dl>
-          <div><dt>{t('library.dimensions')}</dt><dd>{asset.dimensions.map(value => formatNumber(value * 100, 1)).join(' × ')} <small>cm</small></dd></div>
+          <div><dt>{t('library.dimensions')}</dt><dd>{formatDimensions(asset.dimensions, 1)}</dd></div>
           <div><dt>{t('library.measurements')}</dt><dd>{t(`library.${asset.source.dimensionalStatus}`)}</dd></div>
         </dl>
         <p className="workshop-source-description">{asset.source.description}</p>
@@ -116,6 +138,7 @@ export function AssetsExplorer() {
   const [credits, setCredits] = useState<CreditSummary | null>(null)
   const [creditsFailed, setCreditsFailed] = useState(false)
   const { formatNumber } = useLocale()
+  const { formatDimensions, formatLength } = useUnits()
   const [snapshot, setSnapshot] = useState<WorkshopSnapshot>({ connection: 'checking', health: null, jobs: [], assets: [] })
   const [url, setUrl] = useState('')
   const [notes, setNotes] = useState('')
@@ -247,7 +270,7 @@ export function AssetsExplorer() {
     if (busyRef.current || uploading) return
     setNotice('')
     let measured: AnswersInput['dimensions']
-    try { measured = dimensionsFromCentimetres(dimensions) } catch { setError(t('form.invalidDimensions')); return }
+    try { measured = dimensionsFromCentimetres(dimensions) } catch { setError(t('form.invalidDimensions', { min: formatLength(.05), max: formatLength(20) })); return }
     const input = CreateJobInputSchema.safeParse({ url: url.trim(), notes: notes.trim(), ...(measured ? { dimensions: measured } : {}), ...(references.length ? { referenceImageIds: references.map(image => image.id) } : {}) })
     if (!input.success) { setError(t('form.invalidUrl')); return }
     const version = draftVersion.current
@@ -314,7 +337,7 @@ export function AssetsExplorer() {
         {snapshot.assets.length === 0 ? <div className="workshop-empty"><div className="workshop-empty-object" aria-hidden="true">◇</div><h3>{t('library.emptyTitle')}</h3><p>{t('library.emptyDescription')}</p></div> : <>
           <div className="workshop-grid">{families.map(family => { const asset = family[0]; return <button className="workshop-card" key={asset.id} aria-label={t('library.select', { label: asset.label })} aria-pressed={selected ? assetFamilyId(selected, snapshot.assets) === assetFamilyId(asset, snapshot.assets) : false} onClick={() => setSelectedId(asset.id)}>
             <img src={asset.files.preview} alt="" loading="lazy" />
-            <div><span className="workshop-card-title">{asset.label}</span><span className="workshop-card-dimensions">{asset.dimensions.map(value => formatNumber(value * 100, 1)).join(' × ')} cm</span><span className="workshop-draft">{t('library.draft')}</span>{family.length > 1 && <span className="workshop-card-versions">{t('revision.versions', { count: family.length })}</span>}</div>
+            <div><span className="workshop-card-title">{asset.label}</span><span className="workshop-card-dimensions">{formatDimensions(asset.dimensions, 1)}</span><span className="workshop-draft">{t('library.draft')}</span>{family.length > 1 && <span className="workshop-card-versions">{t('revision.versions', { count: family.length })}</span>}</div>
           </button> })}</div>
           {selected && <div ref={resultPanel} tabIndex={-1} className="workshop-focus-target"><AssetDetails key={selected.id} asset={selected} versions={versions} job={snapshot.jobs.find(job => job.id === selected.jobId)} draft={revisionDrafts[selected.id] ?? { feedback: '', references: [] }} disabled={!ready || !credits || creditsFailed || busy !== null} creditNote={credits ? `${a.cost}: ${credits.costs.revision} ${a.creditUnit}. ${a.retryCost}` : a.creditUnavailable} onSelect={setSelectedId} onDraft={draft => setRevisionDrafts(previous => ({ ...previous, [selected.id]: draft }))} onRevise={input => revise(selected, input)} /></div>}
         </>}

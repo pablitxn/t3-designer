@@ -1,11 +1,11 @@
-.privacy-controls { padding: 0 32px 24px; color: #354139; }
+.privacy-controls { color: #354139; }
 .privacy-links { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 5px 18px; }
 .privacy-text-button { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: #405634; font-size: 12px; text-align: left; text-decoration: underline; text-underline-offset: 3px; }
 .privacy-text-button:hover { color: #243d1b; }
 .privacy-controls :is(button, a):focus-visible, .privacy-page :is(a, h1):focus-visible { outline: 3px solid #405634; outline-offset: 4px; }
 
 /* Part of the document flow: the invitation never covers or blocks the workspace. */
-.privacy-banner { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 10px; padding: 22px; border: 1px solid #bdcbb5; border-radius: 9px; background: #f0f3eb; }
+.privacy-banner { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin: 16px 22px; padding: 22px; border: 1px solid #bdcbb5; border-radius: 9px; background: #f0f3eb; }
 .privacy-banner-copy { max-width: 760px; }
 .privacy-banner h2 { margin: 0 0 9px; font-size: 16px; font-weight: 620; }
 .privacy-banner p { margin: 0; font-size: 13px; line-height: 1.65; }
@@ -42,7 +42,6 @@
   .privacy-banner > .privacy-choices { min-width: 0; max-width: 520px; }
 }
 @media (max-width: 560px) {
-  .privacy-controls { padding: 0 16px 20px; }
   .privacy-links { justify-content: flex-start; }
   .privacy-banner { padding: 17px; }
   .privacy-dialog { width: calc(100% - 16px); max-height: calc(100dvh - 16px); border-radius: 9px; }
@@ -52,7 +51,7 @@
   .privacy-preference, .privacy-pending { padding: 14px; }
   .privacy-choices { grid-template-columns: 1fr; }
 }
-@media print { .privacy-controls { display: none; } }
+@media print { .privacy-footer, .privacy-controls { display: none; } }
 
 .privacy-brand-heading { margin-top: 6px; font-size: 25px; font-weight: 650; letter-spacing: -.8px; }
 .privacy-page { max-width: 1160px; margin: 0 auto; padding: 0 32px 64px; color: #354139; }

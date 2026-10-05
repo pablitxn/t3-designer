@@ -32,10 +32,11 @@ Touch and on-screen controls are available too.
 
 ### Try another arrangement
 
-Open **Apartment → Rearrange furniture**. Select the fridge, microwave or low
-table, drag it in the floor plan or 3D view, then rotate or nudge it into place.
-Undo, redo and **Restore original layout** make it easy to experiment. Fixed
-installations stay locked.
+Open **Apartment → Rearrange furniture**. Use the catalog to include apartment
+objects or three generated furniture drafts. Drag movable objects in the floor
+plan or 3D view, then rotate or nudge them into place. Undo, redo and
+**Restore original layout** make it easy to experiment. Fixed installations can
+be included or removed while their positions stay locked.
 
 ![Moving and rotating furniture in the public demo with undo and redo controls](docs/media/furniture-layout.gif)
 
@@ -140,8 +141,9 @@ calculation does not measure the shadows shown in the 3D scene.
 
 Inspect rooms, dimensions, fixtures and individual GLBs. Reveal the apartment
 inside its building, then explore the surrounding volumes. Open
-**Documentation** to search the example dossier, modeled areas,
-observations, methodology links and unresolved questions.
+**Property details** to search the complete fictional 2026 scenario, modeled
+areas, visual inventory and source references. Energy, costs, lots, risks and
+planning values are explicitly labeled sample data.
 
 | Building and sun | Property dossier |
 | --- | --- |

@@ -68,8 +68,8 @@ const assetEvidenceKeys = {
 
 export type WorkspaceAssetId = keyof typeof assetLabelKeys
 
-export function assetLabel(t: WorkspaceT, id: string): string {
-  return hasOwnKey(assetLabelKeys, id) ? t(assetLabelKeys[id]) : t('apartment.unknownAsset')
+export function assetLabel(t: WorkspaceT, id: string, fallback?: string): string {
+  return hasOwnKey(assetLabelKeys, id) ? t(assetLabelKeys[id]) : fallback ?? t('apartment.unknownAsset')
 }
 
 export function assetEvidence(t: WorkspaceT, id: string): string {

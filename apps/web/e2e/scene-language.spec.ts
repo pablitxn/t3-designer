@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { setLanguage } from './settings-helpers'
+import { openApartmentDetails } from './viewer-helpers'
 
 test.use({
   locale: 'en-GB',
@@ -13,6 +14,7 @@ test('rendered room labels and asset details update without replacing the canvas
   test.setTimeout(process.env.CI ? 120_000 : 60_000)
   await page.goto('/#apartment')
   await expect(page.locator('canvas')).toBeVisible({ timeout: 30_000 })
+  await openApartmentDetails(page)
   await page.getByRole('checkbox', { name: 'Labels', exact: true }).check()
   // Projection requires the first rendered frame; the test-wide timeout does
   // not extend Playwright's default 5s assertion budget under SwiftShader.
@@ -21,7 +23,7 @@ test('rendered room labels and asset details update without replacing the canvas
   await setLanguage(page, 'fr')
   await expect(page.locator('.labels-overlay .room-label').filter({ hasText: 'Chambre 1' })).toBeVisible()
   await expect(page.locator('canvas')).toHaveAttribute('data-original-canvas', 'true')
-  await page.locator('.inspector-tabs button').nth(2).click()
+  await page.locator('.inspector-tabs button').last().click()
   await page.locator('.asset-row').first().click()
   await expect(page.locator('.asset-details')).toContainText('P06 / P11')
   await setLanguage(page, 'en')

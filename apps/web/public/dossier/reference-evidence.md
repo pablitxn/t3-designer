@@ -1,10 +1,33 @@
-# Demonstration model: provenance and visual inventory
+# Complete demo: fictional scenario and visual inventory
 
 The public scene preserves authored apartment geometry, materials, furnishings
 and approximate area values. It is a generalized demonstration, not a property
 condition report. Its plan is rendered from the model and contains no original
 address or diagnosis identifier. Source photos, videos and private documents are
 not redistributed in this dossier.
+
+## Fictional 2026 property scenario
+
+“Résidence du Jardin · Quimper” is an invented residence used to complete the
+demo. These sample values belong to the local `demo-scenario` source in
+[demo-evidence.json](./demo-evidence.json), not to an official diagnosis,
+bill, contract, risk report or planning document:
+
+| Topic | Sample value | Scope and period |
+| --- | --- | --- |
+| Energy rating | DPE D | Fictional apartment rating for the 2026 scenario; independent of the consumption example below. |
+| Final energy use | 6,200 kWh | Entire T3, 1 January–31 December 2026; heating, hot water and domestic electricity. |
+| Annual energy budget | €900–1,200 | Same apartment and period, including energy and standing charges. |
+| Co-ownership | Apartment lot 12; cellar lot 42; combined share 21/1,000 | Invented lots and share for 2026, with no legal effect. |
+| Risk profile | Low flooding exposure; radon level 3 | Fictional plot profile for 2026, unrelated to the public map reference. |
+| Planning | UA, residential and local retail uses; facade appearance retained | Invented zoning and rules for 2026, not Quimper planning regulations. |
+
+The street map starts at the public Place Saint-Corentin reference in Quimper
+(47.9958202, −4.1029211). This is a navigation example, not the location of the
+fictional residence or the reconstructed building. Solar calculations retain
+the separate regional reference at 48° N, 4° W in the Europe/Paris time zone.
+The JSON snapshot records both references explicitly. Official guides linked
+in the library explain methods; they do not establish these fictional values.
 
 ## What can be inspected in the model
 

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { useUnits } from '../lib/useUnits'
+import { LengthInput } from '../components/LengthInput'
 import { goTo, mutate, PrivateApiError, request } from './api'
 import { getAccountCopy } from './account-copy'
 import type { CreditSummary } from './account-api'
@@ -12,6 +14,7 @@ type GenerationJob = { id: string; status: 'queued' | 'running' | 'completed' | 
 const active = (job: GenerationJob) => job.status === 'queued' || job.status === 'running'
 
 export function ProjectGenerator({ language, c }: { language: string; c: PrivateCopy }) {
+  const units = useUnits()
   const a = getAccountCopy(language)
   const g = getGenerationCopy(language)
   const [kind, setKind] = useState<Kind>('apartment')
@@ -54,7 +57,7 @@ export function ProjectGenerator({ language, c }: { language: string; c: Private
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (sending.current || !enabled) return
     const data = new FormData(event.currentTarget)
-    const body: GenerationInput = { name: String(data.get('name')).trim(), prompt: String(data.get('prompt')).trim(), kind, width: Number(data.get('width')), depth: Number(data.get('depth')), storeyHeight: Number(data.get('storeyHeight')), floors: Number(data.get('floors')), latitude: Number(data.get('latitude')), longitude: Number(data.get('longitude')), timeZone: String(data.get('timeZone')).trim() }
+    const body: GenerationInput = { name: String(data.get('name')).trim(), prompt: String(data.get('prompt')).trim(), kind, width: units.toMeters(Number(data.get('width'))), depth: units.toMeters(Number(data.get('depth'))), storeyHeight: units.toMeters(Number(data.get('storeyHeight'))), floors: Number(data.get('floors')), latitude: Number(data.get('latitude')), longitude: Number(data.get('longitude')), timeZone: String(data.get('timeZone')).trim() }
     try { new Intl.DateTimeFormat('en', { timeZone: body.timeZone }).format() } catch { setError(g.invalidTimeZone); return }
     const fingerprint = JSON.stringify(body)
     const retrying = pendingRequest.current?.fingerprint === fingerprint
@@ -89,7 +92,7 @@ export function ProjectGenerator({ language, c }: { language: string; c: Private
       <section className={`${panel} tw:flex tw:flex-col tw:gap-5 tw:p-5`}><Field label={g.kind}><select name="kind" className={input} value={kind} onChange={event => setKind(event.target.value as Kind)} disabled={busy}><option value="apartment">{g.apartment}</option><option value="building">{g.building}</option><option value="project">{g.project}</option></select></Field><Field label={g.name}><input className={input} name="name" maxLength={120} required disabled={busy} /></Field><Field label={g.prompt} help={g.promptHelp}><textarea className={`${input} tw:min-h-44 tw:resize-y tw:font-[inherit]`} name="prompt" minLength={10} maxLength={4000} required disabled={busy} /></Field>
 
       </section>
-      <div className="tw:flex tw:flex-col tw:gap-5"><section className={`${panel} tw:p-5`}><h2 className="tw:mt-0 tw:text-lg tw:font-medium">{g.dimensions}</h2><div className="tw:grid tw:grid-cols-2 tw:gap-4">{([{ name: 'width', label: g.width, min: 3, max: 100, step: .1 }, { name: 'depth', label: g.depth, min: 3, max: 100, step: .1 }, { name: 'storeyHeight', label: g.storeyHeight, min: 2.4, max: 5, step: .1 }, { name: 'floors', label: g.floors, min: 1, max: 30, step: 1 }] as const).map(field => <Field key={field.name} label={field.label}><input className={input} type="number" name={field.name} min={field.min} max={field.max} step={field.step} required disabled={busy} /></Field>)}</div></section>
+      <div className="tw:flex tw:flex-col tw:gap-5"><section className={`${panel} tw:p-5`}><h2 className="tw:mt-0 tw:text-lg tw:font-medium">{g.dimensions}</h2><div className="tw:grid tw:grid-cols-2 tw:gap-4">{([{ name: 'width', label: g.width, min: 3, max: 100, step: .1 }, { name: 'depth', label: g.depth, min: 3, max: 100, step: .1 }, { name: 'storeyHeight', label: g.storeyHeight, min: 2.4, max: 5, step: .1 }, { name: 'floors', label: g.floors, min: 1, max: 30, step: 1 }] as const).map(field => <Field key={field.name} label={field.label.replace('(m)', `(${units.lengthUnit})`)}>{field.name === 'floors' ? <input className={input} type="number" name={field.name} min={field.min} max={field.max} step={field.step} required disabled={busy} /> : <LengthInput className={input} name={field.name} minMeters={field.min} maxMeters={field.max} required disabled={busy} />}</Field>)}</div></section>
         <section className={`${panel} tw:p-5`}><h2 className="tw:mt-0 tw:text-lg tw:font-medium">{g.location}</h2><p className={`${muted} tw:text-xs tw:leading-6`}>{g.locationHelp}</p><div className="tw:grid tw:grid-cols-2 tw:gap-4"><Field label={g.latitude}><input className={input} name="latitude" type="number" min={-90} max={90} step="any" required disabled={busy} /></Field><Field label={g.longitude}><input className={input} name="longitude" type="number" min={-180} max={180} step="any" required disabled={busy} /></Field><div className="tw:col-span-2"><Field label={g.timeZone}><input className={input} name="timeZone" required maxLength={100} disabled={busy} placeholder="Europe/Paris" /></Field></div></div></section></div>
       <section className={`${panel} tw:p-5 tw:xl:col-span-2`}>
         <div className="tw:mb-4 tw:rounded-lg tw:bg-[var(--settings-accent-soft)] tw:p-4"><p className="tw:mt-0 tw:text-sm">{credits ? `${a.cost}: ${credits.costs[kind]} ${a.creditUnit} · ${a.balance}: ${credits.balance}` : c.loading}</p><p className={`${muted} tw:mb-0 tw:text-xs tw:leading-6`}>{g.cancelHelp}</p></div><button className={primary} disabled={busy || !enabled || !credits}>{busy ? c.pending : g.submit} →</button>

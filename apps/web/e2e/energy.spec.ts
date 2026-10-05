@@ -1,10 +1,13 @@
 import { expect, test } from '@playwright/test'
+import { openSolarControls } from './viewer-helpers'
 
 test.use({ locale: 'es-AR', timezoneId: 'America/Argentina/Buenos_Aires' })
 
 async function openEnergy(page: import('@playwright/test').Page) {
   await page.goto('/#building')
+  await openSolarControls(page)
   await page.getByRole('button', { name: 'Energía solar', exact: true }).click()
+  await page.locator('.studio-solar-controls > summary').click()
   await expect(page.getByRole('heading', { name: 'Un techo que genera energía.', exact: true })).toBeVisible()
 }
 
@@ -25,6 +28,7 @@ test('building energy works without WebGL, shares the solar clock and saves only
   await page.getByRole('button', { name: 'Guardar escenario en este navegador', exact: true }).click()
   await expect(page.getByText('Escenario guardado en este navegador.', { exact: true })).toBeVisible()
   await page.reload()
+  await openSolarControls(page)
   await page.getByRole('button', { name: 'Energía solar', exact: true }).click()
   await page.getByRole('tab', { name: 'Paneles', exact: true }).click()
   await expect(page.getByLabel(/^Cantidad de paneles/)).toHaveValue('4')
@@ -54,6 +58,7 @@ test('the solar study is usable on a narrow screen and translated in French', as
   await page.setViewportSize({ width: 390, height: 844 })
   await page.addInitScript(() => localStorage.setItem('t3-designer.language', 'fr'))
   await page.goto('/#building')
+  await openSolarControls(page)
   await page.getByRole('button', { name: 'Énergie solaire', exact: true }).click()
   await page.getByRole('tab', { name: 'Année', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Le rythme des saisons', exact: true })).toBeVisible()

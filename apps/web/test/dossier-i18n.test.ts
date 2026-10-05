@@ -4,6 +4,8 @@ import { createInstance } from 'i18next'
 import { dossierFacts, dossierSources } from '../src/data/dossier.ts'
 import { localizeDossier, matchesDossierQuery } from '../src/i18n/dossier-content.ts'
 import { resources } from '../src/i18n/resources.ts'
+import { DEMO_LOCATION } from '../src/data/demo-location.ts'
+import { numberFormatter } from '../src/i18n/locale.ts'
 
 test('localized dossier preserves every source identity, measurement and evidence relationship', async () => {
   const before = structuredClone({ dossierFacts, dossierSources })
@@ -47,4 +49,34 @@ test('localized search is accent/case insensitive and uses translated room data'
   assert.equal(matchesDossierQuery('cocina', kitchen.label), false)
   assert.equal(matchesDossierQuery('energie', 'Énergie et environnement'), true)
   assert.equal(matchesDossierQuery('unknown', 'Énergie et environnement'), false)
+})
+
+test('every locale presents a complete fictional scenario without pending property records', async () => {
+  const instance = createInstance()
+  await instance.init({ resources, fallbackLng: false, initAsync: false, interpolation: { escapeValue: false } })
+  for (const locale of ['es', 'en', 'fr'] as const) {
+    const content = localizeDossier(locale, instance.getFixedT(locale, 'dossier'), instance.getFixedT(locale, 'workspace'))
+    const fact = (id: string) => content.facts.find(item => item.id === id)!
+    const ui = resources[locale].dossier.ui
+    assert.deepEqual(content.questions, [])
+    assert.ok(ui.status.demo)
+    assert.equal(fact('official-address').value, 'Résidence du Jardin · Quimper')
+    assert.equal(fact('apartment-dpe').value, 'D')
+    assert.equal(fact('actual-energy-use').value, numberFormatter(locale, 0).format(6200))
+    assert.equal(fact('energy-cost').value, [900, 1200].map(value => numberFormatter(locale, 0).format(value)).join('–'))
+    assert.equal(fact('address-point').value, [DEMO_LOCATION.latitude, DEMO_LOCATION.longitude].map(value => numberFormatter(locale, 7).format(value)).join(' · '))
+    for (const id of ['apartment-dpe', 'actual-energy-use', 'energy-cost', 'legal-lots', 'risks', 'planning']) {
+      assert.equal(fact(id).status, 'demo')
+      assert.equal(fact(id).review, 'checked')
+      assert.deepEqual(fact(id).sourceIds, ['demo-scenario'])
+      assert.match(fact(id).note, /2026/)
+    }
+    const visibleContent = [
+      content.facts, content.sources, content.observations,
+      ui.heroKicker, ui.heroTitle, ui.heroDescription, ui.legend,
+      ui.floorConfirmation, ui.floorDescription, ui.dpeMissing, ui.nextLayer,
+      ui.libraryNote, ui.titles.overview, ui.titles.energy, ui.titles.sources,
+    ]
+    assert.doesNotMatch(JSON.stringify(visibleContent), /\bto complete\b|\bpending\b|\bpendientes?\b|por cotejar|à vérifier|en attente|à mesurer/i)
+  }
 })

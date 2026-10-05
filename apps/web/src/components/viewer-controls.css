@@ -1,0 +1,26 @@
+.viewer-toolbar { position: absolute; z-index: 12; top: 16px; right: 16px; left: 16px; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; pointer-events: none; }
+.viewer-toolbar > * { pointer-events: auto; }
+.viewer-action { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 7px; min-width: 40px; min-height: 40px; padding: 9px 11px; border: 1px solid #62705470; border-radius: 8px; background: #263225ed; color: #eef1e8; box-shadow: 0 2px 9px #16201512; font: inherit; font-size: 11px; cursor: pointer; }
+.viewer-action:hover, .viewer-action[aria-pressed=true], .viewer-action[aria-expanded=true] { background: #3c4c30; color: #d1e5b8; }
+.viewer-action:disabled { opacity: .5; cursor: default; }
+.viewer-action svg { flex-shrink: 0; }
+.viewer-action:focus-visible, .viewer-panel :is(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--settings-accent); outline-offset: 3px; }
+.viewer-panel { position: absolute; z-index: 30; top: 68px; right: 16px; display: flex; flex-direction: column; width: min(380px, calc(100% - 32px)); max-height: calc(100% - 84px); min-height: 0; margin: 0; overflow: hidden; border: 1px solid var(--settings-border); border-radius: 12px; background: var(--settings-bg); color: var(--settings-text); box-shadow: 0 14px 50px #1420173b; text-align: left; }
+.viewer-panel-header { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; gap: 14px; padding: 10px 12px 10px 20px; border-bottom: 1px solid var(--settings-border); }
+.viewer-panel-header h2 { margin: 0; font-size: 14px; line-height: 1.4; font-weight: 600; letter-spacing: -.01em; text-transform: none; }
+.viewer-panel-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.viewer-panel-action { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 8px; border: 0; border-radius: 7px; color: var(--settings-muted); background: transparent; cursor: pointer; }
+.viewer-panel-action:hover:not(:disabled) { background: var(--settings-accent-soft); color: var(--settings-text); }
+.viewer-panel-action:disabled { opacity: .35; cursor: default; }
+.viewer-panel-close { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 8px; flex-shrink: 0; border: 0; border-radius: 7px; color: var(--settings-muted); background: transparent; cursor: pointer; }
+.viewer-panel-close:hover { background: var(--settings-accent-soft); color: var(--settings-text); }
+.viewer-panel-body { padding: 20px; overflow: auto; overscroll-behavior: contain; min-height: 0; }
+.viewer-panel .solar-inspector, .viewer-panel .inspector { width: auto; height: auto; min-height: 0; max-height: none; overflow: visible; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+@media (max-width: 600px) {
+  .viewer-toolbar { top: 12px; left: 12px; right: 12px; gap: 6px; }
+  .viewer-action { min-width: 38px; min-height: 38px; padding: 8px; }
+  .viewer-action > span { display: none; }
+  .viewer-panel { top: 64px; right: 12px; width: min(380px, calc(100% - 24px)); max-height: calc(100% - 76px); }
+  .viewer-panel-body { padding: 16px; }
+}
+@media print { .viewer-toolbar, .viewer-panel { display: none; } }

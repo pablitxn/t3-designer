@@ -1,9 +1,10 @@
 import { t3Apartment } from './t3.ts'
+import { DEMO_LOCATION } from './demo-location.ts'
 import { APARTMENT_PLACEMENT } from './apartment-placement.ts'
 import { BUILDING_SITE, SITE_BUILDINGS, SITE_PARCEL } from './building-site.ts'
 
 export type DossierSection = 'identity' | 'building' | 'apartment' | 'energy' | 'context'
-export type DossierStatus = 'official' | 'reported' | 'estimated' | 'observed' | 'pending' | 'derived'
+export type DossierStatus = 'official' | 'reported' | 'estimated' | 'observed' | 'pending' | 'derived' | 'demo'
 export type DossierReview = 'checked' | 'original-pending' | 'disputed' | 'pending'
 export type DossierScope = 'Dirección' | 'Parcela' | 'Edificio' | 'Grupo BDNB' | 'Departamento' | 'Estancia' | 'Balcón' | 'Cave' | 'Entorno'
 
@@ -61,16 +62,17 @@ export interface DossierObservation {
   sourceIds: string[]
 }
 
-export const dossierReviewedAt = '2026-10-04'
+export const dossierReviewedAt = '2026-10-05'
 
-/** Generalized demonstration records; official guides describe methods only. */
+/** Complete fictional scenario and model references; official guides describe methods only. */
 export const dossierSources: DossierSource[] = [
+  {"id": "demo-scenario", "title": "Escenario ficticio completo · 2026", "publisher": "T3 Designer", "kind": "model", "description": "Datos creados para esta demo: identidad, energía, gastos, lotes, riesgos y urbanismo. Período ilustrativo del 1 de enero al 31 de diciembre de 2026; no representan un inmueble ni documentos reales.", "date": "2026-10-05", "label": "Datos ficticios · escenario 2026", "localUrl": "/dossier/demo-evidence.json"},
   {
     "id": "ban",
-    "title": "Ubicación de demostración",
+    "title": "Ubicación del ejemplo",
     "publisher": "T3 Designer",
     "kind": "model",
-    "description": "Origen solar regional aproximado. No representa una dirección postal ni el emplazamiento de un inmueble.",
+    "description": "Punto de referencia público en Place Saint-Corentin, Quimper, elegido para navegar el mapa. No es la ubicación de la residencia ficticia ni del edificio reconstruido.",
     "date": "2026-10-04",
     "label": "Modelo de demostración · 04/10/2026",
     "localUrl": "/dossier/demo-evidence.json"
@@ -148,7 +150,7 @@ export const dossierSources: DossierSource[] = [
   },
   {
     "id": "ademe",
-    "title": "Método para verificar un DPE",
+    "title": "Método de lectura del DPE",
     "publisher": "ADEME · Service Public",
     "kind": "official-guide",
     "description": "Guía para un expediente real: un diagnóstico requiere documentos propios y no se infiere de esta demostración.",
@@ -161,7 +163,7 @@ export const dossierSources: DossierSource[] = [
     "title": "Método de consulta de riesgos",
     "publisher": "Géorisques",
     "kind": "official-guide",
-    "description": "Guía general. No se emite una conclusión de riesgos para el escenario de demostración.",
+    "description": "Guía general para entender la terminología de riesgos. El perfil de la demo procede del escenario ficticio, no de esta guía.",
     "date": "2026-10-04",
     "label": "Método de investigación",
     "url": "https://www.georisques.gouv.fr/information-des-acquereurs-et-locataires"
@@ -171,7 +173,7 @@ export const dossierSources: DossierSource[] = [
     "title": "Método de consulta urbanística",
     "publisher": "Géoportail de l’urbanisme",
     "kind": "official-guide",
-    "description": "Consulta de planes y reglamentos para un futuro expediente autorizado. La demo no identifica una parcela real.",
+    "description": "Guía general de planes y reglamentos. La zonificación de la demo pertenece al escenario ficticio y no identifica una parcela real.",
     "date": "2026-10-04",
     "label": "Método de investigación",
     "url": "https://www.geoportail-urbanisme.gouv.fr/"
@@ -204,9 +206,9 @@ export const dossierRoomAreas: DossierFact[] = t3Apartment.rooms.map(room => fac
 }))
 
 export const dossierFacts: DossierFact[] = [
-  fact({"id": "official-address", "section": "identity", "label": "Nombre del escenario", "value": BUILDING_SITE.address, "scope": "Dirección", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.official-address"}], "note": "Nombre ilustrativo sin dirección postal. El expediente no identifica un propietario ni una vivienda real.", "review": "checked"}),
+  fact({"id": "official-address", "section": "identity", "label": "Nombre de la residencia ficticia", "value": "Résidence du Jardin · Quimper", "scope": "Dirección", "note": "Nombre creado para esta demo. El punto público del mapa permite explorar Quimper y no identifica una propiedad ni un titular reales.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.official-address"}]}),
   fact({"id": "ban-address-id", "section": "identity", "label": "Identificador local del escenario", "value": "demo-site-001", "scope": "Dirección", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.ban-address-id"}], "note": "Identificador interno del ejemplo. No es una clave de dirección de un servicio público.", "review": "checked"}),
-  fact({"id": "address-point", "section": "identity", "label": "Origen solar regional aproximado", "value": "48,0 · −4,0", "unit": "°", "scope": "Dirección", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.address-point"}], "note": "Latitud y longitud aproximadas elegidas para el cálculo solar regional; no sitúan los polígonos ni un acceso real.", "review": "checked"}),
+  fact({ id: 'address-point', section: 'identity', label: 'Punto de ejemplo en el mapa', value: `${number(DEMO_LOCATION.latitude, 7)} · ${number(DEMO_LOCATION.longitude, 7)}`, unit: '°', scope: 'Dirección', status: 'estimated', review: 'checked', evidence: [{ sourceId: 'ban', locator: 'demo-evidence.json#values.address-point' }], note: 'Referencia pública en Place Saint-Corentin, Quimper. Sitúa el mapa, no la residencia ficticia; el origen solar regional se documenta por separado.' }),
   fact({"id": "rnb-id", "section": "identity", "label": "Referencia local del edificio", "value": BUILDING_SITE.rnbId, "scope": "Edificio", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.rnb-id"}], "note": "Referencia local de demostración, sin correspondencia publicada con un registro externo.", "review": "checked"}),
   fact({"id": "ign-id", "section": "identity", "label": "Identificador local del volumen", "value": BUILDING_SITE.targetId, "scope": "Edificio", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.ign-id"}], "note": "ID local que permite relacionar el contexto 3D y sus variantes.", "review": "checked"}),
   fact({"id": "parcel-id", "section": "identity", "label": "Parcela de demostración", "value": SITE_PARCEL.label, "scope": "Parcela", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.parcel-id"}], "note": "La parcela de ejemplo es distinta del edificio, del interior y de los lotes jurídicos.", "review": "checked"}),
@@ -231,79 +233,25 @@ export const dossierFacts: DossierFact[] = [
   fact({"id": "balcony-area", "section": "apartment", "label": "Balcón", "value": number(t3Apartment.balcony?.reportedArea, 2), "numericValue": t3Apartment.balcony?.reportedArea, "unit": "m²", "scope": "Balcón", "status": "estimated", "review": "checked", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.balcony-area"}], "note": "Área de anexo ilustrativa, fuera del total interior del ejemplo."}),
   fact({"id": "basement-area", "section": "apartment", "label": "Cave en subsuelo", "value": number(t3Apartment.metadata.reportedBasementArea, 2), "numericValue": t3Apartment.metadata.reportedBasementArea, "unit": "m²", "scope": "Cave", "status": "estimated", "review": "checked", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.basement-area"}], "note": "Área de anexo ilustrativa, fuera del total interior; el subsuelo no está modelado."}),
   fact({"id": "floor-plan", "section": "apartment", "label": "Planta representada", "value": "3.er piso ilustrativo", "scope": "Departamento", "status": "estimated", "review": "checked", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.floor-plan"}], "note": "El plano describe la planta ilustrativa del modelo, sin referencia a un diagnóstico real."}),
-  fact({"id": "floor-model", "section": "apartment", "label": "Planta del modelo", "value": "3.er piso estimado", "scope": "Departamento", "status": "estimated", "review": "checked", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.floor-model"}], "note": "Hipótesis de posición vertical del modelo. Un expediente real requeriría confirmar planta y cota."}),
+  fact({"id": "floor-model", "section": "apartment", "label": "Planta del modelo", "value": "3.er piso estimado", "scope": "Departamento", "status": "estimated", "review": "checked", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.floor-model"}], "note": "Tercera planta ilustrativa, con balcón orientado al patio. La cave se presenta como un anexo independiente del interior."}),
   fact({"id": "living-orientation", "section": "apartment", "label": "Living y cocina hacia el patio", "value": "Suroeste · 210,79°", "scope": "Departamento", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.living-orientation"}], "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente.", "review": "checked"}),
   fact({"id": "ceiling-height", "section": "apartment", "label": "Altura interior del modelo", "value": number(APARTMENT_PLACEMENT.wallHeight, 2), "numericValue": APARTMENT_PLACEMENT.wallHeight, "unit": "m", "scope": "Departamento", "status": "estimated", "evidence": [{"sourceId": "model", "locator": "demo-evidence.json#values.ceiling-height"}], "note": "Valor conservado como ejemplo del modelo. No acredita una característica de un inmueble identificado ni una medición independiente.", "review": "checked"}),
-  fact({"id": "apartment-dpe", "section": "energy", "label": "DPE del departamento", "value": "Pendiente de identificar", "scope": "Departamento", "status": "pending", "evidence": [{"sourceId": "ademe", "locator": "Guía de método; sin documentos del inmueble"}], "note": "Ninguna clase energética se atribuye al ejemplo. Un DPE debe verificarse con un documento propio del inmueble.", "review": "pending"}),
-  fact({"id": "actual-energy-use", "section": "energy", "label": "Consumo real", "value": "Sin facturas incorporadas", "scope": "Departamento", "status": "pending", "evidence": [{"sourceId": "ademe", "locator": "Guía de método; sin documentos del inmueble"}], "note": "La demo no incluye facturas. Para un caso real, registrar períodos, energía y kWh sin confundir consumo medido con el convencional del DPE.", "review": "pending"}),
-  fact({"id": "energy-cost", "section": "energy", "label": "Gasto energético", "value": "Sin datos incorporados", "scope": "Departamento", "status": "pending", "evidence": [{"sourceId": "ademe", "locator": "Guía de método; sin documentos del inmueble"}], "note": "Sin facturas ni tarifa de un inmueble real. Los escenarios financieros del edificio usan hipótesis editables.", "review": "pending"}),
-  fact({"id": "legal-lots", "section": "context", "label": "Documentación de lotes", "value": "Documentación pendiente", "scope": "Departamento", "status": "pending", "evidence": [{"sourceId": "copropriete", "locator": "Guía de método; sin documentos del inmueble"}], "note": "No se publican lotes, cuotas ni contratos. En un expediente real deben contrastarse documentos autorizados.", "review": "pending"}),
-  fact({"id": "risks", "section": "context", "label": "Riesgos de la parcela", "value": "Consulta específica pendiente", "scope": "Parcela", "status": "pending", "evidence": [{"sourceId": "georisques", "locator": "Guía de método; sin documentos del inmueble"}], "note": "La guía no sustituye una consulta de parcela ni un estado de riesgos.", "review": "pending"}),
-  fact({"id": "planning", "section": "context", "label": "Urbanismo y patrimonio", "value": "Zonificación por cotejar", "scope": "Parcela", "status": "pending", "evidence": [{"sourceId": "planning", "locator": "Guía de método; sin documentos del inmueble"}], "note": "La demo no pertenece a una zona urbanística declarada. Un caso real necesita planos y reglamentos vigentes.", "review": "pending"}),
+  fact({"id": "apartment-dpe", "section": "energy", "label": "DPE de ejemplo", "value": "D", "scope": "Departamento", "note": "Clase D ficticia para el T3 en el escenario 2026. Es una categoría ilustrativa, no un diagnóstico emitido ni una inferencia a partir del consumo.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.apartment-dpe"}]}),
+  fact({"id": "actual-energy-use", "section": "energy", "label": "Consumo anual de ejemplo", "value": "6.200", "numericValue": 6200, "unit": "kWh", "scope": "Departamento", "note": "Energía final ficticia del T3 completo, del 1 de enero al 31 de diciembre de 2026. Incluye calefacción, agua caliente y electricidad doméstica; se mantiene separada del consumo convencional del DPE.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.actual-energy-use"}]}),
+  fact({"id": "energy-cost", "section": "energy", "label": "Gasto energético anual de ejemplo", "value": "900–1.200", "unit": "€", "scope": "Departamento", "note": "Presupuesto ficticio del T3 completo para enero–diciembre de 2026, con energía y abonos incluidos. El rango acompaña el escenario de 6.200 kWh; no son facturas ni una tarifa comercial.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.energy-cost"}]}),
+  fact({"id": "legal-lots", "section": "context", "label": "Lotes y copropiedad de ejemplo", "value": "12 · departamento / 42 · cave", "scope": "Departamento", "note": "Lotes ficticios 12 (T3) y 42 (cave), con una cuota ilustrativa conjunta de 21/1.000 de partes comunes. Escenario 2026 sin efectos jurídicos ni vínculos con contratos reales.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.legal-lots"}]}),
+  fact({"id": "risks", "section": "context", "label": "Perfil de riesgos de ejemplo", "value": "Inundación baja · radón 3", "scope": "Parcela", "note": "Perfil ficticio para la parcela de demostración en 2026: exposición baja a inundación y radón de nivel 3. No describe los riesgos de Place Saint-Corentin ni constituye un estado de riesgos.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.risks"}]}),
+  fact({"id": "planning", "section": "context", "label": "Urbanismo de ejemplo", "value": "UA · uso residencial", "scope": "Parcela", "note": "Zonificación ficticia de 2026: vivienda y comercio local, con conservación del aspecto de las fachadas. Reglas creadas para la demo, sin atribuirlas al planeamiento de Quimper.", "status": "demo", "review": "checked", "evidence": [{"sourceId": "demo-scenario", "locator": "demo-evidence.json#values.planning"}]}),
 ]
 
-export const dossierQuestions: DossierQuestion[] = [
-  {
-    "id": "floor-discrepancy",
-    "title": "Validar la planta en un caso real",
-    "description": "La tercera planta de esta demo es una hipótesis explícita. No representa un diagnóstico ni una discrepancia documental real.",
-    "needed": "Plano autorizado, designación del lote y referencia de acceso o cota.",
-    "sourceIds": [
-      "plan",
-      "model",
-      "copropriete"
-    ]
-  },
-  {
-    "id": "original-area",
-    "title": "Contrastar superficies",
-    "description": "La suma de los ambientes conserva los valores del ejemplo. La geometría no certifica una superficie legal.",
-    "needed": "Medición o certificado autorizado, con definición de superficie y unidades.",
-    "sourceIds": [
-      "plan",
-      "model"
-    ]
-  },
-  {
-    "id": "geometry",
-    "title": "Calibrar dimensiones y orientación",
-    "description": "Muros, aberturas, altura y colocación son aproximaciones del modelo.",
-    "needed": "Plano acotado y orientado, espesores, alturas, medidas de aberturas y revisión visual.",
-    "sourceIds": [
-      "model",
-      "ign",
-      "visual"
-    ]
-  },
-  {
-    "id": "individual-dpe",
-    "title": "Verificar energía sin mezclar fuentes",
-    "description": "Un diagnóstico convencional, una factura y una simulación responden preguntas diferentes.",
-    "needed": "DPE autorizado para el caso real y facturas con períodos; documentar por separado hipótesis de simulación.",
-    "sourceIds": [
-      "ademe",
-      "model"
-    ]
-  },
-  {
-    "id": "parcel-context",
-    "title": "Investigar el contexto de un caso real",
-    "description": "La parcela pública de demostración no está asociada a un registro ni una zona real.",
-    "needed": "Consulta autorizada de riesgos y reglas urbanísticas, conservando fecha, versión y ámbito.",
-    "sourceIds": [
-      "cadastre",
-      "georisques",
-      "planning"
-    ]
-  }
-]
+export const dossierQuestions: DossierQuestion[] = []
 
 export const dossierObservations: DossierObservation[] = [
   {
     "id": "hall-condition",
     "room": "Entrada",
     "title": "Suelo y servicios visibles",
-    "description": "Se observa una zona de suelo levantado o roto junto al acceso a baño/WC, tuberías vistas y un tablero sobre el paso al living. La causa y extensión exacta del daño no están establecidas.",
+    "description": "Desgaste localizado del suelo junto al acceso al baño/WC, tuberías vistas y un tablero sobre el paso al living. Son detalles representados en el modelo ilustrativo.",
     "evidence": "Modelo público · hall-condition",
     "status": "observed",
     "sourceIds": [
@@ -315,7 +263,7 @@ export const dossierObservations: DossierObservation[] = [
     "id": "living-condition",
     "room": "Living",
     "title": "Parquet, placard y salida al balcón",
-    "description": "Parquet con desgaste, panel de placard roto, radiador junto a cocina y puerta vidriada de dos hojas hacia el balcón. Se documenta su presencia; no las medidas exactas.",
+    "description": "Parquet con desgaste, panel de placard roto, radiador junto a cocina y puerta vidriada de dos hojas hacia el balcón. Sus proporciones corresponden al modelo de ejemplo.",
     "evidence": "Modelo público · living-condition",
     "status": "observed",
     "sourceIds": [
@@ -327,7 +275,7 @@ export const dossierObservations: DossierObservation[] = [
     "id": "bedroom-openings",
     "room": "Habitaciones",
     "title": "Ventanas y radiadores",
-    "description": "Dos ventanas de dos hojas, cajas de persiana, protección exterior y radiadores bajo ventana. La asociación de cada visita a la habitación de 11,81 o 9,32 m² sigue apoyada en el plano.",
+    "description": "Dos dormitorios con ventanas de dos hojas, cajas de persiana, protección exterior y radiadores. La distribución se relaciona con las superficies del plano.",
     "evidence": "Modelo público · bedroom-openings",
     "status": "observed",
     "sourceIds": [
@@ -339,7 +287,7 @@ export const dossierObservations: DossierObservation[] = [
     "id": "kitchen-layout",
     "room": "Cocina",
     "title": "Equipamiento en U",
-    "description": "Mesadas y muebles bajos en U, pileta, heladera, horno/placa, campana, microondas y carcasa aparente de caldera. No se confirma un lavavajillas ni prestaciones de los equipos.",
+    "description": "Equipamiento en U con mesadas, muebles bajos, pileta, heladera, horno/placa, campana, microondas y caldera. Inventario visual del escenario de ejemplo.",
     "evidence": "Modelo público · kitchen-layout",
     "status": "observed",
     "sourceIds": [
@@ -351,7 +299,7 @@ export const dossierObservations: DossierObservation[] = [
     "id": "bathroom-fixtures",
     "room": "Baño",
     "title": "Lavabo, lavarropas y ducha",
-    "description": "Un lavabo circular sobre mesada, lavarropas frontal, espejo, ducha y partición de bloques de vidrio. El segundo lavabo aparente es un reflejo; el encaje métrico sigue pendiente.",
+    "description": "Lavabo circular sobre mesada, lavarropas frontal, espejo, ducha y tabique de bloques de vidrio. Distribución y proporciones del modelo ilustrativo.",
     "evidence": "Modelo público · bathroom-fixtures",
     "status": "observed",
     "sourceIds": [
@@ -363,7 +311,7 @@ export const dossierObservations: DossierObservation[] = [
     "id": "wc-door",
     "room": "WC",
     "title": "Recinto separado",
-    "description": "Inodoro con cisterna, ventilación alta y puerta que abre hacia la entrada. La dimensión real del recinto y el ancho de paso deben medirse.",
+    "description": "Inodoro con cisterna, ventilación alta y puerta que abre hacia la entrada. Recinto y paso representados con las proporciones estimadas del modelo.",
     "evidence": "Modelo público · wc-door",
     "status": "observed",
     "sourceIds": [
@@ -377,12 +325,14 @@ export const dossierObservations: DossierObservation[] = [
 export function buildDemoDossierEvidence() {
   return {
     formatVersion: 1,
-    datasetKind: 'generalized-demo',
+    datasetKind: 'complete-demo',
     reviewedAt: dossierReviewedAt,
-    purpose: 'Illustrative model values and methodology, not official property evidence.',
-    geolocation: { latitude: BUILDING_SITE.latitude, longitude: BUILDING_SITE.longitude, timeZone: BUILDING_SITE.timeZone, note: BUILDING_SITE.geolocationNote },
+    purpose: 'Complete fictional 2026 property scenario with illustrative model values; not official property evidence.',
+    geolocation: { ...DEMO_LOCATION, timeZone: BUILDING_SITE.timeZone, note: 'Public map reference only; not the location of the fictional residence or the reconstructed building.' },
+    solarReference: { latitude: BUILDING_SITE.latitude, longitude: BUILDING_SITE.longitude, timeZone: BUILDING_SITE.timeZone, note: BUILDING_SITE.geolocationNote },
+    scenario: { fictional: true, name: 'Résidence du Jardin · Quimper', period: '2026-01-01/2026-12-31' },
     attribution: BUILDING_SITE.attribution,
-    values: Object.fromEntries(dossierFacts.map(({ id, value, numericValue, unit, status, scope }) => [id, { value, numericValue, unit, status, scope }])),
+    values: Object.fromEntries(dossierFacts.map(({ id, value, numericValue, unit, status, review, scope, sourceIds, note }) => [id, { value, numericValue, unit, status, review, scope, sourceIds, note }])),
     sources: dossierSources,
   }
 }

@@ -1,10 +1,8 @@
-import { lazy, Suspense, useEffect, useState, type MouseEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type MouseEvent } from 'react'
 import { useSolarStudy } from './lib/useSolarStudy'
 import { useApartmentView } from './lib/useApartmentView'
-import { t3Apartment } from './data/t3'
 import { workspaceFromHash, type WorkspaceView } from './lib/workspace-view'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from './i18n/useLocale'
 import { ApplicationSettings } from './components/ApplicationSettings'
 import { listenForThemeChanges } from './lib/theme'
 import { PrivacyControls } from './components/PrivacyControls'
@@ -43,7 +41,7 @@ function PublicApp() {
   const { t, i18n } = useTranslation('common')
   const account = getPrivateCopy(i18n.resolvedLanguage)
   const privacy = privacyCopy[i18n.resolvedLanguage === 'es' || i18n.resolvedLanguage === 'fr' ? i18n.resolvedLanguage : 'en']
-  const { formatNumber } = useLocale()
+  const settingsTrigger = useRef<HTMLButtonElement>(null)
   const solar = useSolarStudy()
   const apartmentView = useApartmentView()
   const demoLayout = useDemoLayout()
@@ -98,19 +96,14 @@ function PublicApp() {
           {privacyPage ? <div className="privacy-brand-heading">T3 Designer</div> : <h1>T3 Designer <span className="stage-label">{t(`workspaces.${workspaceView}.title`)}</span></h1>}
         </div>
         <div className="header-actions tw:min-w-0 tw:flex-wrap tw:justify-end">
-          <div className="project-details">
-            <span className="estimate-badge"><span /> {t(`workspaces.${workspaceView}.badge`)}</span>
-            <div className="area-stat"><strong>{formatNumber(t3Apartment.metadata.reportedCarrezArea, 2)} m²</strong><span>{t('app.areaLabel')}</span></div>
-          </div>
           {backendEnabled && <a href="/app" className="tw:shrink-0 tw:rounded-lg tw:bg-[var(--settings-accent-soft)] tw:px-3 tw:py-2 tw:text-xs tw:font-medium tw:text-[color:var(--settings-accent)] tw:no-underline tw:hover:opacity-80">{account.projects} ↗</a>}
-          <ApplicationSettings />
+          <ApplicationSettings triggerRef={settingsTrigger} onOpenPrivacy={openPrivacy} />
         </div>
       </header>
 
       <nav className="workspace-switcher" aria-label={t('app.navigation')}>
         {(['apartment', 'walkthrough', 'building', 'documentation', 'assets'] as const).map(view => <button key={view} aria-pressed={!privacyPage && workspaceView === view} onClick={() => switchWorkspace(view)}>{t(`workspaces.${view}.nav`)}</button>)}
       </nav>
-      <PrivacyControls onOpenPrivacy={openPrivacy} privacyPage={privacyPage} />
       {privacyPage ? <PrivacyPage workspace={workspaceView} onReturn={event => {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
         event.preventDefault()
@@ -128,6 +121,7 @@ function PublicApp() {
         : <ApartmentExplorer solar={solar} state={apartmentView} layout={demoLayout} />}
       </Suspense>
       </>}
+      <PrivacyControls onOpenPrivacy={openPrivacy} onChoice={() => settingsTrigger.current?.focus({ preventScroll: true })} />
     </main>
   )
 }

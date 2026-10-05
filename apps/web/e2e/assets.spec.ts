@@ -39,7 +39,7 @@ test('the public asset gallery shows real saved examples without private APIs an
   await expect(detail.getByText('152 × 101 × 207 cm', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Historial de versiones').locator('option')).toHaveCount(1)
   expect(requests).toEqual([])
-  await page.getByRole('button', { name: 'Documentación', exact: true }).click()
+  await page.getByRole('button', { name: 'Ficha del inmueble', exact: true }).click()
   await expect(page.locator('.dossier-hero')).toBeVisible()
 })
 

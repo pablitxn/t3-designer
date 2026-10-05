@@ -1,3 +1,4 @@
+import { useUnits } from '../lib/useUnits'
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { Html, OrbitControls, useGLTF } from '@react-three/drei'
@@ -123,20 +124,25 @@ function SceneCamera({ snapshot, top, context, reset, cutaway }: { snapshot: Pro
   return <OrbitControls ref={controls} makeDefault minDistance={1} maxDistance={500} minPolarAngle={.001} maxPolarAngle={Math.PI / 2.02} enableDamping />
 }
 
-function NumberField({ label, value, minimum, onCommit, disabled }: { label: string; value: number; minimum?: number; onCommit: (value: number) => void; disabled: boolean }) {
-  return <label className="tw:grid tw:gap-1 tw:text-xs tw:text-[var(--settings-muted)]">{label}
-    <input key={value} type="number" className={input} min={minimum} step="any" defaultValue={Number(value.toFixed(3))} disabled={disabled}
+function NumberField({ label, value, minimum, onCommit, disabled, length = false }: { label: string; value: number; minimum?: number; onCommit: (value: number) => void; disabled: boolean; length?: boolean }) {
+  const units = useUnits()
+  const displayed = length ? units.toDisplayLength(value) : value
+  const rounded = Number(displayed.toFixed(3))
+  return <label className="tw:grid tw:gap-1 tw:text-xs tw:text-[var(--settings-muted)]">{length ? label.replace('(m)', `(${units.lengthUnit})`) : label}
+    <input key={`${value}-${length ? units.system : 'number'}`} type="number" className={input} min={minimum === undefined ? undefined : length ? units.toDisplayLength(minimum) : minimum} step="any" defaultValue={rounded} disabled={disabled}
       onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur() }}
       onBlur={event => {
-        const next = event.currentTarget.valueAsNumber
+        const raw = event.currentTarget.valueAsNumber
+        const next = length ? units.toMeters(raw) : raw
         if (event.currentTarget.validity.valid && Number.isFinite(next) && (minimum === undefined || next >= minimum)) {
-          if (Math.abs(next - value) > .0005) onCommit(next)
-        } else event.currentTarget.value = String(Number(value.toFixed(3)))
+          if (raw !== rounded && Math.abs(next - value) > .0005) onCommit(next)
+        } else event.currentTarget.value = String(rounded)
       }} />
   </label>
 }
 
 export function ProjectScene({ snapshot, onChange, readOnly }: ProjectSceneProps) {
+  const units = useUnits()
   const { i18n } = useTranslation('common')
   const locale = i18n.resolvedLanguage === 'es' || i18n.resolvedLanguage === 'fr' ? i18n.resolvedLanguage : 'en'
   const copy = sceneCopy[locale], mobilityCopy = editorCopy[locale]
@@ -214,11 +220,11 @@ export function ProjectScene({ snapshot, onChange, readOnly }: ProjectSceneProps
           </select>
         </label>
         {selected && <div className="tw:grid tw:gap-3" aria-label={copy.selected}>
-          <div><strong className="tw:text-sm">{selected.label}</strong>{selectedAsset && <p className="tw:mb-0 tw:mt-1 tw:text-xs tw:text-[var(--settings-muted)]">{selectedAsset.dimensions.map(value => Number((value * 100).toFixed(1))).join(' × ')} cm</p>}</div>
+          <div><strong className="tw:text-sm">{selected.label}</strong>{selectedAsset && <p className="tw:mb-0 tw:mt-1 tw:text-xs tw:text-[var(--settings-muted)]">{units.formatDimensions(selectedAsset.dimensions, 1)}</p>}</div>
           <p className="tw:m-0 tw:text-xs tw:text-[var(--settings-muted)]">{selectedMovable ? mobilityCopy.movableHint : mobilityCopy.fixedHint}</p>
           <label className="tw:grid tw:gap-1 tw:text-xs tw:text-[var(--settings-muted)]">{copy.room}<select className={input} value={selected.roomId} disabled={readOnly || !selectedMovable} onChange={event => { if (!readOnly && selectedMovable) onChange(updateProjectFixture(snapshot, selected.id, { roomId: event.target.value })) }}>{snapshot.apartment.rooms.map(room => <option key={room.id} value={room.id}>{room.name}</option>)}</select></label>
           <div className="tw:grid tw:grid-cols-2 tw:gap-3">
-            {([copy.x, copy.y, copy.z]).map((label, axis) => <NumberField key={`${selected.id}-${axis}`} label={label} value={selected.position[axis]} minimum={axis === 1 ? 0 : undefined} disabled={readOnly || !selectedMovable} onCommit={value => changePosition(axis, value)} />)}
+            {([copy.x, copy.y, copy.z]).map((label, axis) => <NumberField key={`${selected.id}-${axis}`} label={label} length value={selected.position[axis]} minimum={axis === 1 ? 0 : undefined} disabled={readOnly || !selectedMovable} onCommit={value => changePosition(axis, value)} />)}
             <NumberField key={`${selected.id}-rotation`} label={copy.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} onCommit={value => { if (!readOnly && selectedMovable) onChange(updateProjectFixture(snapshot, selected.id, { rotation: value * Math.PI / 180 })) }} />
           </div>
           {!readOnly && <button className={button} type="button" disabled={!selectedMovable} onClick={() => { if (!selectedMovable) return; onChange(removeProjectFixture(snapshot, selected.id)); setSelectedId(null) }}>{copy.remove}</button>}

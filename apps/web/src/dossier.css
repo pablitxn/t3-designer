@@ -104,6 +104,7 @@
 .status-pending { color: #9b8866; background: #f6f1e6; }
 .status-observed { color: #758579; background: #eaf0eb; }
 .status-derived { color: #6b8490; background: #ecf1f2; }
+.status-demo { color: #786693; background: #eee9f5; }
 .dossier-fact-value { font-size: 20px; font-weight: 500; letter-spacing: -.035em; margin: 12px 0 7px; overflow-wrap: anywhere; line-height: 1.45; }
 .dossier-fact-value > span { font-size: 13px; color: #8a9879; font-weight: 400; }
 .dossier-fact-value.value-long { font-size: 16px; line-height: 1.6; }

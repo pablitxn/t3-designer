@@ -6,7 +6,8 @@ const dossier = {
       "estimated": "Estimé",
       "observed": "Observé",
       "pending": "À documenter",
-      "derived": "Calculé"
+      "derived": "Calculé",
+      "demo": "Donnée fictive"
     },
     "review": {
       "original-pending": "Original à vérifier",
@@ -26,13 +27,13 @@ const dossier = {
       "building": "Bâtiment et parcelle",
       "energy": "Énergie et environnement",
       "sources": "Bibliothèque des sources",
-      "questions": "À compléter"
+      "questions": "Scénario complet"
     },
     "titles": {
       "overview": {
         "eyebrow": "01 / Le dossier",
-        "title": "Une vue complète.",
-        "description": "Un exemple complet avec géométrie réutilisable, surfaces illustratives et méthode de recherche. Sans adresse ni dossier d’un logement identifié."
+        "title": "Une démo complète.",
+        "description": "Identité, surfaces, annexes, énergie et environnement de la résidence fictive réunis dans une fiche prête à explorer."
       },
       "apartment": {
         "eyebrow": "02 / Échelle intérieure",
@@ -47,23 +48,23 @@ const dossier = {
       "energy": {
         "eyebrow": "04 / Contexte et performance",
         "title": "Énergie et environnement.",
-        "description": "Les sources disponibles et les éléments nécessaires pour aller plus loin."
+        "description": "Consommation, budget, lots, risques et urbanisme du scénario fictif de 2026."
       },
       "sources": {
         "eyebrow": "05 / Les preuves",
         "title": "Chaque donnée a une origine.",
-        "description": "Cet extrait contient les valeurs du modèle de démonstration. Les dossiers du cas réel ont été retirés ; les guides conservent la méthode et l’attribution."
+        "description": "Références du scénario fictif, géométrie du modèle et guides méthodologiques identifiés séparément."
       },
       "questions": {
-        "eyebrow": "06 / Prochaines pièces",
-        "title": "Un dossier qui s’étoffe.",
-        "description": "Les questions ouvertes et les documents qui aideront à y répondre."
+        "eyebrow": "06 / Scénario d’exemple",
+        "title": "Scénario complet.",
+        "description": "Données illustratives préparées pour parcourir toute la démo."
       }
     },
-    "heroKicker": "Dossier de démonstration",
-    "heroTitle": "Un lieu où vivre.<br/><accent>Et à connaître en détail.</accent>",
-    "heroDescription": "Un exemple complet avec géométrie réutilisable, surfaces illustratives et méthode de recherche. Sans adresse ni dossier d’un logement identifié.",
-    "reviewDate": "Démo révisée · 04 oct. 2026",
+    "heroKicker": "Fiche de démonstration complète",
+    "heroTitle": "Résidence du Jardin.<br/><accent>Une démo à explorer.</accent>",
+    "heroDescription": "Un T3 fictif à Quimper, avec surfaces, énergie, coûts et environnement renseignés. La carte utilise un repère public et les données du scénario sont identifiées comme des exemples.",
+    "reviewDate": "Démo révisée · 05 oct. 2026",
     "statsLabel": "Chiffres du dossier",
     "apartmentArea": "Surface du T3",
     "carrezReported": "Surface intérieure illustrative",
@@ -74,11 +75,11 @@ const dossier = {
     "accuracy": "précision",
     "evidenceGathered": "Références de l’exemple",
     "sources": "sources",
-    "recordsReferences": "Modèle et guides",
+    "recordsReferences": "Scénario, modèle et guides",
     "explore": "Explorer le dossier",
-    "documentationSections": "Rubriques documentaires",
+    "documentationSections": "Rubriques de la fiche du bien",
     "readData": "Comment lire les données",
-    "legend": "Les valeurs décrivent la démo. Les guides officiels expliquent une méthode sans certifier ce modèle.",
+    "legend": "Les données fictives complètent le scénario 2026 ; estimations et calculs décrivent le modèle. Les guides officiels expliquent des méthodes sans certifier cet exemple.",
     "print": "Imprimer cette rubrique",
     "searchInFile": "Recherche dans le dossier",
     "findInSources": "Chercher parmi les sources.",
@@ -92,7 +93,7 @@ const dossier = {
     "backToFile": "Retour au dossier",
     "factsHeading": "Données et caractéristiques",
     "sourcesHeading": "Sources",
-    "questionsHeading": "Questions ouvertes",
+    "questionsHeading": "Scénario complet",
     "observedHeading": "État observé",
     "aptLabel": "Appartement / T3",
     "eightRooms": "Huit pièces.<br/>Une même histoire.",
@@ -101,11 +102,11 @@ const dossier = {
     "reconstructedPlan": "Plan reconstitué · proportions estimées",
     "placeIdentity": "Identité de l’exemple",
     "oneBuilding": "Un bâtiment de démonstration",
-    "rnbRelation": "Identifiants locaux sans lien publié avec une adresse.",
+    "rnbRelation": "Références internes d’une résidence fictive, avec un point public d’exemple à Quimper.",
     "consultBuilding": "Consulter le bâtiment et la parcelle",
-    "floorConfirmation": "Une hypothèse à vérifier : l’étage.",
-    "floorDescription": "Le modèle utilise un troisième étage illustratif. Un cas réel nécessite des documents autorisés pour vérifier l’étage, la cote et le lot.",
-    "seePending": "Voir les éléments en attente et l’écart d’étage",
+    "floorConfirmation": "Troisième étage, balcon et cave.",
+    "floorDescription": "T3 au troisième étage avec deux chambres, un balcon côté cour et une cave séparée. Les surfaces des annexes sont présentées séparément de l’intérieur.",
+    "seePending": "Explorer la démo complète",
     "documentedIdentity": "Identité de démonstration",
     "allSources": "Voir toutes les sources",
     "tourApartment": "Parcourir l’appartement",
@@ -124,16 +125,16 @@ const dossier = {
     "plotFootprintVolume": "La parcelle, l’emprise<br/>et le volume.",
     "scalesDescription": "Ce sont différentes échelles du même lieu. Chaque surface et hauteur conserve la définition et la précision de sa source.",
     "view3d": "Voir le contexte en 3D",
-    "mapLabel": "Contexte local de démonstration · nord en haut",
-    "nextLayer": "La prochaine couche du dossier",
-    "learnPerformance": "Comprendre ses performances<br/>à partir de ses documents.",
-    "dpeMissing": "La démo n’a pas de DPE. Dans un cas réel, un diagnostic de bâtiment ne s’applique pas automatiquement à chaque appartement.",
-    "energyDiagnosis": "Diagnostic énergétique",
-    "conventionalPerformance": "Performances conventionnelles et méthode du DPE.",
-    "estimatedCost": "Coût estimé",
-    "diagnosisRange": "Fourchette du diagnostic et prix de référence.",
-    "actualUse": "Consommation réelle",
-    "billsEnergyPeriod": "Factures, énergie et période mesurée.",
+    "mapLabel": "Place Saint-Corentin · Quimper · repère public d’exemple",
+    "nextLayer": "Le scénario énergétique de la démo",
+    "learnPerformance": "Énergie et coûts.<br/>Une année d’exemple.",
+    "dpeMissing": "DPE D, 6 200 kWh et un budget de 900–1 200 € pour 2026 : des valeurs fictives pour explorer la fiche, distinctes des simulations solaires.",
+    "energyDiagnosis": "DPE fictif",
+    "conventionalPerformance": "Classe D fictive · scénario du T3 en 2026.",
+    "estimatedCost": "Coût annuel fictif",
+    "diagnosisRange": "900–1 200 € pendant 2026, énergie et abonnements inclus.",
+    "actualUse": "Consommation annuelle fictive",
+    "billsEnergyPeriod": "6 200 kWh d’énergie finale pour tout le T3 en 2026.",
     "sourceEvidence": "Fiche de preuve",
     "closeSource": "Fermer la fiche source",
     "sourceType": "Type de source",
@@ -141,18 +142,18 @@ const dossier = {
     "originalSource": "Ouvrir le guide de méthode",
     "availableCopy": "Voir l’exemple documenté",
     "linkedFacts": "Données liées",
-    "dateCaveat": "La date indique la révision de l’exemple. Un guide général n’est pas une preuve propre à un bien.",
+    "dateCaveat": "La date indique la révision de l’exemple. Les valeurs fictives proviennent du scénario 2026 ; les guides généraux ne certifient pas un bien.",
     "sourceCard": "Voir la fiche source",
     "tableCaption": "Surfaces illustratives partagées avec le modèle",
     "room": "Pièce",
     "area": "Surface",
     "reportedTotal": "Total intérieur illustratif",
     "areaSumCaption": "La somme conserve les valeurs du modèle ; elle ne certifie ni la surface Carrez ni une surface nette.",
-    "libraryNote": "Cet extrait contient les valeurs du modèle de démonstration. Les dossiers du cas réel ont été retirés ; les guides conservent la méthode et l’attribution.",
+    "libraryNote": "Le scénario fictif, la géométrie et les calculs disposent de leurs propres références. Les guides officiels servent de documentation méthodologique et ne justifient pas les valeurs inventées.",
     "downloadExtract": "Télécharger les données d’exemple",
-    "questionsIntro": "Le prochain document peut transformer une hypothèse en donnée étayée. Ces questions rendent visibles les points encore inconnus.",
-    "footerTitle": "T3 · Dossier de démonstration",
-    "footerDescription": "Géométrie réutilisable, valeurs illustratives et méthodes documentées.",
+    "questionsIntro": "Le scénario est complet et ses données fictives sont distinguées des estimations du modèle.",
+    "footerTitle": "Résidence du Jardin · Démo complète",
+    "footerDescription": "Scénario fictif de 2026, géométrie illustrative et références méthodologiques.",
     "footerDate": "Démo · octobre 2026",
     "sitePlanAlt": "Plan local de la parcelle et du bâtiment de démonstration, nord en haut",
     "apartmentPlanAlt": "Plan schématique de l’appartement : surfaces déclarées et formes estimées",
@@ -177,9 +178,9 @@ const dossier = {
   },
   "facts": {
     "official-address": {
-      "label": "Nom du scénario",
-      "value": "T3 · Appartement de démonstration",
-      "note": "Valeur conservée comme exemple du modèle. Ce n’est ni une caractéristique vérifiée d’un bien identifié ni une mesure indépendante."
+      "label": "Nom de la résidence fictive",
+      "value": "{{value}}",
+      "note": "Nom créé pour cette démo. Le repère public de la carte permet d’explorer Quimper et ne désigne ni bien ni propriétaire réels."
     },
     "ban-address-id": {
       "label": "Identifiant local du scénario",
@@ -187,9 +188,9 @@ const dossier = {
       "note": "Valeur conservée comme exemple du modèle. Ce n’est ni une caractéristique vérifiée d’un bien identifié ni une mesure indépendante."
     },
     "address-point": {
-      "label": "Origine solaire régionale approximative",
+      "label": "Point de référence de la carte",
       "value": "{{value}}",
-      "note": "Valeur conservée comme exemple du modèle. Ce n’est ni une caractéristique vérifiée d’un bien identifié ni une mesure indépendante."
+      "note": "Repère public sur la place Saint-Corentin, à Quimper. Il situe la carte, pas la résidence fictive ; la référence solaire régionale est documentée séparément."
     },
     "rnb-id": {
       "label": "Référence locale du bâtiment",
@@ -309,7 +310,7 @@ const dossier = {
     "floor-model": {
       "label": "Étage du modèle",
       "value": "Troisième étage illustratif",
-      "note": "Valeur conservée comme exemple du modèle. Ce n’est ni une caractéristique vérifiée d’un bien identifié ni une mesure indépendante."
+      "note": "Troisième étage illustratif avec balcon donnant sur la cour. La cave est présentée comme une annexe distincte de l’intérieur."
     },
     "living-orientation": {
       "label": "Séjour et cuisine côté cour",
@@ -322,34 +323,34 @@ const dossier = {
       "note": "Valeur conservée comme exemple du modèle. Ce n’est ni une caractéristique vérifiée d’un bien identifié ni une mesure indépendante."
     },
     "apartment-dpe": {
-      "label": "DPE de l’appartement",
-      "value": "Identification en attente",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "DPE fictif",
+      "value": "D",
+      "note": "Classe D fictive pour le T3 du scénario 2026. Cette catégorie illustrative ne correspond ni à un diagnostic établi ni à une déduction de la consommation."
     },
     "actual-energy-use": {
-      "label": "Consommation réelle",
-      "value": "Aucune facture ajoutée",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "Consommation annuelle fictive",
+      "value": "{{value}}",
+      "note": "Énergie finale fictive pour tout le T3, du 1er janvier au 31 décembre 2026. Chauffage, eau chaude et électricité domestique inclus ; valeur distincte de la consommation conventionnelle du DPE."
     },
     "energy-cost": {
-      "label": "Dépense énergétique",
-      "value": "Aucune donnée ajoutée",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "Coût énergétique annuel fictif",
+      "value": "{{value}}",
+      "note": "Budget fictif pour tout le T3 de janvier à décembre 2026, énergie et abonnements inclus. La fourchette accompagne le scénario de 6 200 kWh ; ce ne sont ni des factures ni un tarif commercial."
     },
     "legal-lots": {
-      "label": "Lots et copropriété",
-      "value": "Documents en attente",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "Lots et copropriété fictifs",
+      "value": "12 · appartement / 42 · cave",
+      "note": "Lots fictifs 12 (T3) et 42 (cave), avec une quote-part illustrative totale de 21/1 000 des parties communes. Scénario 2026 sans effet juridique ni lien avec des contrats réels."
     },
     "risks": {
-      "label": "Risques de la parcelle",
-      "value": "Recherche spécifique en attente",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "Profil de risques fictif",
+      "value": "Inondation faible · radon 3",
+      "note": "Profil fictif de la parcelle de démonstration pour 2026 : faible exposition aux inondations et radon de niveau 3. Il ne décrit pas les risques de la place Saint-Corentin et ne constitue pas un état des risques."
     },
     "planning": {
-      "label": "Urbanisme et patrimoine",
-      "value": "Zonage à vérifier",
-      "note": "Aucun document propre à un bien n’est inclus. Pour un dossier réel, utiliser des preuves autorisées et distinguer consommation mesurée, diagnostic et hypothèses de simulation."
+      "label": "Urbanisme fictif",
+      "value": "UA · usage résidentiel",
+      "note": "Zonage fictif de 2026 : logements et commerces de proximité, avec conservation de l’aspect des façades. Règles créées pour la démo, sans les attribuer au règlement d’urbanisme de Quimper."
     },
     "room-area-bedroom-1": {
       "label": "Surface : {{room}}",
@@ -394,8 +395,8 @@ const dossier = {
   },
   "sources": {
     "ban": {
-      "title": "Localisation de démonstration",
-      "description": "Origine régionale approximative pour les calculs solaires. Elle ne désigne ni adresse ni emplacement réel.",
+      "title": "Localisation de l’exemple",
+      "description": "Repère public sur la place Saint-Corentin, à Quimper, choisi pour naviguer sur la carte. Il ne situe ni la résidence fictive ni le bâtiment reconstitué.",
       "label": "Modèle de démonstration"
     },
     "rnb": {
@@ -434,13 +435,13 @@ const dossier = {
       "label": "Modèle de démonstration"
     },
     "ademe": {
-      "title": "Comment vérifier un DPE",
-      "description": "Guide général de vérification. Un diagnostic réel nécessite ses propres documents autorisés et ne se déduit pas de cette démo.",
+      "title": "Comment lire un DPE",
+      "description": "Guide général pour comprendre un DPE. La classe D de l’exemple provient du scénario fictif, pas d’un diagnostic établi.",
       "label": "Guide de méthode"
     },
     "georisques": {
       "title": "Méthode de recherche des risques",
-      "description": "Guide général de méthode, sans conclusion de risque propre au scénario de démonstration.",
+      "description": "Guide général de la terminologie des risques. Le profil de la démo provient du scénario fictif, pas de ce guide.",
       "label": "Guide de méthode"
     },
     "copropriete": {
@@ -450,8 +451,13 @@ const dossier = {
     },
     "planning": {
       "title": "Méthode de recherche urbanistique",
-      "description": "Recherche des plans et règlements pour un futur dossier autorisé. La démo n’identifie pas de parcelle cadastrale réelle.",
+      "description": "Guide général des plans et règlements. Le zonage de la démo appartient au scénario fictif et ne désigne pas une parcelle réelle.",
       "label": "Guide de méthode"
+    },
+    "demo-scenario": {
+      "title": "Scénario fictif complet · 2026",
+      "description": "Identité, énergie, coûts, lots, risques et urbanisme créés pour cette démo. Période illustrative du 1er janvier au 31 décembre 2026, sans documents ni propriétaires réels.",
+      "label": "Données fictives · scénario 2026"
     }
   },
   "questions": {
@@ -485,32 +491,32 @@ const dossier = {
     "hall-condition": {
       "room": "Entrée",
       "title": "Sol et équipements visibles",
-      "description": "Une zone de sol soulevée ou cassée est visible près de l’accès salle d’eau/WC, avec des tuyaux apparents et un panneau au-dessus du passage vers le séjour. La cause et l’étendue exacte des dégâts ne sont pas établies."
+      "description": "Usure localisée du sol près de l’accès salle d’eau/WC, tuyaux apparents et panneau au-dessus du passage vers le séjour. Détails représentés dans le modèle illustratif."
     },
     "living-condition": {
       "room": "Séjour",
       "title": "Parquet, placard et accès au balcon",
-      "description": "Parquet usé, panneau de placard cassé, radiateur près de la cuisine et porte vitrée à deux vantaux vers le balcon. Leur présence est documentée, pas leurs dimensions exactes."
+      "description": "Parquet usé, panneau de placard cassé, radiateur près de la cuisine et porte vitrée à deux vantaux vers le balcon. Les proportions appartiennent au modèle d’exemple."
     },
     "bedroom-openings": {
       "room": "Chambres",
       "title": "Fenêtres et radiateurs",
-      "description": "Deux fenêtres à deux vantaux, caissons de volets, protection extérieure et radiateurs sous les fenêtres. L’association avec la chambre de 11,81 ou 9,32 m² repose encore sur le plan."
+      "description": "Deux chambres avec fenêtres à deux vantaux, caissons de volets, protections extérieures et radiateurs. Leur disposition suit les surfaces représentées sur le plan."
     },
     "kitchen-layout": {
       "room": "Cuisine",
       "title": "Équipement en U",
-      "description": "Plans de travail et meubles bas en U, évier, réfrigérateur, four/plaques, hotte, micro-ondes et habillage apparent de chaudière. Le lave-vaisselle et les performances des appareils ne sont pas confirmés."
+      "description": "Équipement en U : plans de travail, meubles bas, évier, réfrigérateur, four/plaques, hotte, micro-ondes et chaudière. Inventaire visuel du scénario d’exemple."
     },
     "bathroom-fixtures": {
       "room": "Salle d’eau",
       "title": "Lavabo, lave-linge et douche",
-      "description": "Lavabo rond sur meuble, lave-linge frontal, miroir, douche et cloison en briques de verre. Le second lavabo apparent est un reflet ; l’ajustement métrique reste à vérifier."
+      "description": "Lavabo rond sur meuble, lave-linge frontal, miroir, douche et cloison en briques de verre. Disposition et proportions du modèle illustratif."
     },
     "wc-door": {
       "room": "WC",
       "title": "Pièce séparée",
-      "description": "Toilettes avec réservoir, ventilation haute et porte ouvrant vers l’entrée. Les dimensions réelles de la pièce et la largeur de passage restent à mesurer."
+      "description": "Toilettes avec réservoir, ventilation haute et porte ouvrant vers l’entrée. Pièce et passage suivent les proportions estimées du modèle."
     }
   },
   "publishers": {
@@ -525,7 +531,8 @@ const dossier = {
     "ademe": "ADEME · Service Public",
     "georisques": "Géorisques",
     "copropriete": "Service Public",
-    "planning": "Géoportail de l’urbanisme"
+    "planning": "Géoportail de l’urbanisme",
+    "demo-scenario": "T3 Designer"
   },
   "evidenceLocators": {
     "official-address": [
@@ -616,22 +623,22 @@ const dossier = {
       "demo-evidence.json#values.ceiling-height"
     ],
     "apartment-dpe": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.apartment-dpe"
     ],
     "actual-energy-use": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.actual-energy-use"
     ],
     "energy-cost": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.energy-cost"
     ],
     "legal-lots": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.legal-lots"
     ],
     "risks": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.risks"
     ],
     "planning": [
-      "Guía de método; sin documentos del inmueble"
+      "demo-evidence.json#values.planning"
     ],
     "room-area-bedroom-1": [
       "t3Apartment.rooms[id=bedroom-1].reportedArea"
