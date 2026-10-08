@@ -125,8 +125,8 @@ export function EnergyWorkbench({ value, onChange, site, date, minutes, onTimeCh
       <div className="energy-panel-heading"><h3>{title}</h3><p>{intro}</p></div>
       {tab === 'day' && <>
         <div className="energy-day-controls">
-          {onDateChange && <div className="energy-field"><label htmlFor={`${id}-date`}>{c.date}</label><input type="date" id={`${id}-date`} value={date} min="1900-01-01" max="2100-12-31" onChange={event => { if (event.target.validity.valid && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)) onDateChange(event.target.value) }} /></div>}
-          <div className="energy-clock"><label htmlFor={`${id}-time`}>{c.time} <strong>{clockLabel(minutes)}</strong></label>{onTimeChange ? <input id={`${id}-time`} type="range" min={0} max={1439} value={minutes} onChange={event => onTimeChange(Number(event.target.value))} aria-valuetext={clockLabel(minutes)} /> : <p>{site.timeZone}</p>}</div>
+          {onDateChange && <div className="energy-field"><label htmlFor={`${id}-date`}>{c.date}</label><input type="date" id={`${id}-date`} value={date} min="1900-01-01" max="2100-12-31" disabled={readOnly} onChange={event => { if (event.target.validity.valid && /^\d{4}-\d{2}-\d{2}$/.test(event.target.value)) onDateChange(event.target.value) }} /></div>}
+          <div className="energy-clock"><label htmlFor={`${id}-time`}>{c.time} <strong>{clockLabel(minutes)}</strong></label>{onTimeChange ? <input id={`${id}-time`} type="range" min={0} max={1439} value={minutes} disabled={readOnly} onChange={event => onTimeChange(Number(event.target.value))} aria-valuetext={clockLabel(minutes)} /> : <p>{site.timeZone}</p>}</div>
         </div>
         <div className="energy-inline-metrics"><Metric label={c.dayEnergy} value={formatNumber(daily.kwh, 1)} unit="kWh" /><Metric label={c.currentPower} value={formatNumber(current?.powerKw ?? 0, 2)} unit="kW" /><Metric label={c.clearSky} value={formatNumber(daily.clearSkyKwh, 1)} unit="kWh" /></div>
         <div className="energy-legend"><span><i />{c.scenario}</span><span><i className="energy-legend-clear" />{c.clearSky}</span><span>kW</span></div>

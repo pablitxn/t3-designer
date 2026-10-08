@@ -14,6 +14,33 @@ function building(): Extract<FoundationCandidate, { target: 'building' }> {
 
 const invalidUrls = ['', 'not a URL', '/relative/parcel', 'https://', 'https://[invalid', 'javascript:alert(1)', 'file:///tmp/plan', 'ftp://example.test/parcel']
 
+test('dwelling registration is optional, bounded and explicit without rotation or scale', () => {
+  const value = building(), registration = { dwellingVersionId: '23fe1dc6-642e-4d99-9b6c-fd853a42a960', position: [0, -.127, 6.375], evidence: { confidence: 'user', note: 'Plan origins share the documented common datum.' } }
+  assert.deepEqual(FoundationCandidateSchema.parse({ ...value, dwellingRegistration: registration }), { ...value, dwellingRegistration: registration })
+  for (const invalid of [
+    { ...registration, dwellingVersionId: 'unknown' }, { ...registration, position: [0, 0] },
+    { ...registration, position: [Infinity, 0, 0] }, { ...registration, position: [0, 0, 10001] },
+    { ...registration, rotationY: 90 }, { ...registration, scale: 1 },
+    { ...registration, evidence: { ...registration.evidence, confidence: 'official' } },
+    { ...registration, evidence: { ...registration.evidence, note: '' } },
+  ]) assert.equal(FoundationCandidateSchema.safeParse({ ...value, dwellingRegistration: invalid }).success, false)
+  assert.deepEqual(FoundationCandidateSchema.parse(value), value)
+})
+
+test('building ridge axes are optional for old candidates and canonical when explicit', () => {
+  assert.deepEqual(FoundationCandidateSchema.parse(building()), building())
+  for (const azimuth of [0, 37.5, 90, 179.99]) {
+    const value = building(); value.buildings[0].roofRidgeAzimuthDeg = azimuth
+    assert.deepEqual(FoundationCandidateSchema.parse(value), value)
+  }
+  for (const azimuth of [-1, 180, 360, NaN, Infinity, null, 'north']) {
+    const value = building()
+    const parsed = FoundationCandidateSchema.safeParse({ ...value, buildings: [{ ...value.buildings[0], roofRidgeAzimuthDeg: azimuth }] })
+    assert.equal(parsed.success, false)
+    if (!parsed.success) assert.ok(parsed.error.issues.some(issue => issue.path.join('.') === 'buildings.0.roofRidgeAzimuthDeg'))
+  }
+})
+
 test('invalid source links return validation issues instead of escaping safeParse', () => {
   for (const url of invalidUrls) {
     const value = building()

@@ -1,3 +1,5 @@
+import { withUsage, type UsageStore } from './usage.ts'
+import { acquireGenerationSlot } from './generation-coordinator.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import type { ProjectSnapshot } from '@t3-designer/scene-schema'
@@ -15,6 +17,7 @@ export interface ProjectGenerationJob {
 type Row = ProjectGenerationJob & { userId: string; requestKey: string; fingerprint: string }
 type Generator = (id: string, input: ProjectGenerationInput, options: { signal: AbortSignal; onInference: () => void }) => Promise<ProjectSnapshot>
 export class ProjectGenerations {
+  private usage?: UsageStore
   private db: DatabaseSync
   private accounts: AppDatabase
   private credits: CreditService
@@ -27,8 +30,9 @@ export class ProjectGenerations {
   private current: { id: string; controller: AbortController } | null = null
   private stopped = false
   private queue: Promise<unknown> = Promise.resolve()
-  constructor(options: { path: string; database: AppDatabase; credits: CreditService; store: AssetStore; projects: Projects; enabled: boolean; limits: { dailyLimit: number; globalDailyLimit: number; pendingLimit: number }; generate?: Generator }) {
+  constructor(options: { usage?: UsageStore; path: string; database: AppDatabase; credits: CreditService; store: AssetStore; projects: Projects; enabled: boolean; limits: { dailyLimit: number; globalDailyLimit: number; pendingLimit: number }; generate?: Generator }) {
     this.db = new DatabaseSync(options.path)
+    this.usage = options.usage
     this.accounts = options.database; this.credits = options.credits; this.store = options.store; this.projects = options.projects
     this.enabled = options.enabled; this.limits = options.limits; this.generate = options.generate ?? generateProjectScene
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -40,7 +44,10 @@ export class ProjectGenerations {
   }
   private rows(): Row[] { return this.db.prepare('SELECT document FROM project_generation').all().map(row => JSON.parse(String(row.document)) as Row) }
   private row(id: string): Row | null { const row = this.db.prepare('SELECT document FROM project_generation WHERE id=?').get(id); return row ? JSON.parse(String(row.document)) as Row : null }
-  private write(row: Row): void { this.db.prepare('UPDATE project_generation SET document=? WHERE id=?').run(JSON.stringify(row), row.id) }
+  private write(row: Row): void {
+    this.db.prepare('UPDATE project_generation SET document=? WHERE id=?').run(JSON.stringify(row), row.id)
+    if (['completed', 'failed', 'cancelled'].includes(row.status)) this.usage?.settleOperation(`architecture:${row.id}`, row.status === 'completed' ? 'succeeded' : row.status === 'cancelled' ? 'cancelled' : 'failed')
+  }
   private visible(row: Row): ProjectGenerationJob { return { id: row.id, status: row.status, input: row.input, projectId: row.projectId, createdAt: row.createdAt, updatedAt: row.updatedAt, error: row.error } }
   list(userId: string): ProjectGenerationJob[] { return this.rows().filter(row => row.userId === userId).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 100).map(row => this.visible(row)) }
   get(userId: string, id: string): ProjectGenerationJob { const row = this.row(id); if (!row || row.userId !== userId) throw new AccountError(404, 'Generación no encontrada.'); return this.visible(row) }
@@ -61,9 +68,10 @@ export class ProjectGenerations {
       try {
         if (!this.store.reserveGeneration(user.id, this.limits.dailyLimit, this.limits.globalDailyLimit, this.limits.pendingLimit)) throw new AccountError(429, 'Alcanzaste el límite diario de generación.')
         const row: Row = { id, userId: user.id, requestKey, fingerprint, input, status: 'queued', projectId: null, createdAt: now, updatedAt: now, error: null }
+        this.usage?.operation({ id: operationId, userId: user.id, kind: input.kind, projectId: id, projectLabel: input.name, jobId: null, runId: id, assetId: null, attempt: 1, parentId: null })
         this.db.prepare('INSERT INTO project_generation(id,user_id,request_key,document) VALUES(?,?,?,?)').run(id, user.id, requestKey, JSON.stringify(row))
         return this.visible(row)
-      } catch (error) { await this.credits.refund(operationId); throw error }
+      } catch (error) { this.usage?.settleOperation(operationId, 'failed'); await this.credits.refund(operationId); throw error }
     })
     this.kick(); return job
   }
@@ -88,6 +96,7 @@ export class ProjectGenerations {
         await this.credits.commit(reservation.id)
       } else {
         if (row && ['queued', 'running'].includes(row.status)) this.write({ ...row, status: 'failed', error: 'El servidor se reinició. Se devolvieron los créditos; podés crear otro intento.', updatedAt: new Date().toISOString() })
+        this.usage?.settleOperation(reservation.id, 'failed')
         await this.credits.refund(reservation.id)
       }
     }
@@ -128,7 +137,10 @@ export class ProjectGenerations {
       const row = this.rows().filter(row => row.status === 'queued').sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0]
       if (!row) return
       const controller = new AbortController(); this.current = { id: row.id, controller }
+      let releaseSlot: (() => void) | undefined
       try {
+        releaseSlot = await acquireGenerationSlot(controller.signal)
+        controller.signal.throwIfAborted()
         // Persist ownership of this attempt before an asynchronous DB lookup.
         // A disconnected account DB must not spin forever on the same queued row.
         this.write({ ...row, status: 'running', updatedAt: new Date().toISOString() })
@@ -138,7 +150,7 @@ export class ProjectGenerations {
         const reservation = await this.credits.reservation(`architecture:${row.id}`)
         if (reservation?.state !== 'reserved' || reservation.userId !== row.userId || reservation.kind !== row.input.kind) throw new Error('La reserva de créditos ya no está disponible.')
         controller.signal.throwIfAborted()
-        const scene = await this.generate(row.id, row.input, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(180000)]), onInference() {} })
+        const scene = await withUsage(this.usage, `architecture:${row.id}`, () => this.generate(row.id, row.input, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(180000)]), onInference() {} }))
         controller.signal.throwIfAborted()
         if (scene.project.id !== row.id) throw new Error('La identidad de la propuesta no coincide con el trabajo.')
         // Publication and cancellation serialize; completed projects survive a crash
@@ -165,7 +177,7 @@ export class ProjectGenerations {
             if (reservation?.state === 'reserved') await this.credits.refund(reservation.id)
           }
         } catch { throw new Error('Project credit settlement deferred until reconciliation') }
-      } finally { this.current = null }
+      } finally { releaseSlot?.(); this.current = null }
     }
   }
   async close(): Promise<void> { this.stopped = true; this.current?.controller.abort(); await this.queue; await this.running; this.db.close() }

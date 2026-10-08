@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import { createHash, randomUUID } from 'node:crypto'
 import test from 'node:test'
-import { createProjectFoundations, foundationInputFingerprintValue, FoundationCandidateSchema, ProjectSnapshotSchema, type FoundationCandidate, type FoundationVersion } from '@t3-designer/scene-schema'
+import { createProjectFoundations, defaultDesignCustomization, foundationInputFingerprintValue, FoundationCandidateSchema, ProjectSnapshotSchema, type FoundationCandidate, type FoundationVersion } from '@t3-designer/scene-schema'
 import { polygonCentroid, segmentWall, wallLength } from '../../../packages/geometry/src/index.ts'
 import { assembleFoundationScenes, rebaseBuildingFoundation, updateFoundationFloor } from '../../web/src/private/foundation-scenes.ts'
+import { buildSiteSolarSnapshot } from '../../web/src/lib/solar-snapshot.ts'
 import { AccountError, createAccounts, type User } from '../src/accounts.ts'
 import { openAppDatabase } from '../src/app-database.ts'
 import { buildGeneratedProjectScene } from '../src/project-generation-model.ts'
@@ -35,6 +36,107 @@ function version(project: ProjectDocument, candidate: FoundationCandidate): Foun
     iterations: [{ index: 1, candidate, review: { passed: true, summary: 'Datos de prueba revisados.', issues: [] } }],
   }
 }
+
+function asymmetricCandidates() {
+  const result = candidates(), apartment = result.dwelling.levels[0].apartment
+  apartment.perimeter = [[-6, -2], [0, -2], [0, 0], [8, 0], [8, 6], [0, 6], [0, 2], [-6, 2]]
+  const evidence = { confidence: 'inferred' as const, note: 'Anexo bajo de prueba en el mismo origen que el cuerpo principal.' }
+  apartment.floorRegions = [
+    { id: 'main', polygon: [[0, 0], [8, 0], [8, 6], [0, 6]], floorElevation: 0, ceilingElevation: 2.6, evidence },
+    { id: 'annex', polygon: [[-6, -2], [0, -2], [0, 2], [-6, 2]], floorElevation: -.25, ceilingElevation: 2.35, evidence },
+  ]
+  result.building.buildings[0].footprint = [[0, 0], [8, 0], [8, 6], [0, 6]]
+  return result
+}
+
+function registration(position: [number, number, number]) {
+  return { dwellingVersionId: '859d2581-e3eb-4dfb-a190-5b793cf2def1', position, evidence: { confidence: 'inferred' as const, note: 'Registro estimado de prueba con ejes comunes, sin giro ni escala.' } }
+}
+
+test('explicit shared origin preserves an asymmetric annex; absence keeps the exact legacy centering', () => {
+  const { dwelling, building } = asymmetricCandidates(), before = structuredClone({ dwelling, building })
+  const legacy = assembleFoundationScenes(projectId, 'Casa asimétrica', dwelling, building, date)
+  assert.deepEqual(legacy.map(level => level.scene.placement.position), [[3, 0, 1], [3, 2.8, 1], [3, -2.8, 1]])
+  assert.deepEqual({ dwelling, building }, before)
+
+  building.dwellingRegistration = registration([0, 0, 0])
+  const registeredBefore = structuredClone(building)
+  const registered = assembleFoundationScenes(projectId, 'Casa asimétrica', dwelling, building, date)
+  assert.deepEqual(registered.map(level => level.scene.placement.position), [[0, 0, 0], [0, 2.8, 0], [0, -2.8, 0]])
+  for (const [index, level] of registered.entries()) {
+    assert.deepEqual(level.scene.geometry.contextSections.apartmentBand, dwelling.levels[index].apartment.perimeter)
+    assert.deepEqual(level.scene.apartment, dwelling.levels[index].apartment)
+    assert.equal(level.scene.placement.rotationY, 0)
+    assert.match(level.scene.placement.assumption, /Registro explícito por traslación común/)
+    assert.match(level.scene.placement.assumption, /Registro estimado de prueba/)
+  }
+  assert.deepEqual(building, registeredBefore); assert.deepEqual(dwelling, before.dwelling)
+  delete building.dwellingRegistration
+  assert.deepEqual(assembleFoundationScenes(projectId, 'Casa asimétrica', dwelling, building, date), legacy)
+})
+
+test('registration translates every floor and context band while preserving local split-level heights', () => {
+  const { dwelling, building } = asymmetricCandidates()
+  building.dwellingRegistration = registration([-7, 1.25, 11])
+  const levels = assembleFoundationScenes(projectId, 'Casa trasladada', dwelling, building, date)
+  assert.deepEqual(levels.map(level => level.scene.placement.position), [[-7, 1.25, 11], [-7, 4.05, 11], [-7, -1.5499999999999998, 11]])
+  assert.deepEqual(levels[0].scene.geometry.contextSections.apartmentBand, [[-13, 9], [-7, 9], [-7, 11], [1, 11], [1, 17], [-7, 17], [-7, 13], [-13, 13]])
+  assert.deepEqual(levels[1].scene.geometry.contextSections.apartmentBand, [[-7, 11], [1, 11], [1, 17], [-7, 17]])
+  assert.equal(levels[0].scene.geometry.floor.elevation, -.25)
+  assert.equal(levels[0].scene.geometry.ceiling.elevation, 2.6)
+  assert.equal(levels[0].scene.geometry.contextSections.belowTop, .85)
+  assert.equal(levels[0].scene.geometry.contextSections.ceilingBase, 3.85)
+  for (const [index, level] of levels.entries()) {
+    assert.equal(level.scene.placement.floorElevation, dwelling.levels[index].elevation + 1.25)
+    assert.deepEqual(level.scene.apartment, dwelling.levels[index].apartment)
+    assert.deepEqual(ProjectSnapshotSchema.parse(level.scene), level.scene)
+  }
+})
+
+test('a new explicit registration corrects saved placement without rebuilding furniture, variants or energy', () => {
+  const { dwelling, building } = asymmetricCandidates()
+  const levels = assembleFoundationScenes(projectId, 'Casa con variantes', dwelling, building, date)
+  const models = { dwelling: { versionId: registration([0, 0, 0]).dwellingVersionId, candidate: dwelling }, building: { versionId: randomUUID(), candidate: building }, levels, activeLevelId: 'upper-floor' }
+  for (const { scene } of levels) {
+    scene.apartment.name += ' editada'
+    scene.assets.push({ id: 'table', label: 'Mesa', url: '/models/table.glb', repoPath: 'assets/table.glb', dimensions: [1, .7, 1], evidence: 'Test asset.', dimensionalStatus: 'estimated' })
+    scene.fixtures.push({ id: 'placed-table', assetId: 'table', roomId: scene.apartment.rooms[0].id, label: 'Mesa propia', position: [2, 0, 2], rotation: 0, evidence: 'Posición del usuario.', placementStatus: 'estimated' })
+    scene.customization = defaultDesignCustomization()
+    scene.customization.lighting.naturalEnabled = false
+    scene.editor = { schemaVersion: 1, activeArchitectureId: 'original', architectures: [{
+      id: 'original', name: 'Original', apartment: structuredClone(scene.apartment), partitionWallIds: [], activeLayoutId: 'active', layouts: [
+        { id: 'active', name: 'Con mesa', fixtures: structuredClone(scene.fixtures), customization: structuredClone(scene.customization) },
+        { id: 'empty', name: 'Sin mesa', fixtures: [], customization: defaultDesignCustomization() },
+      ],
+    }] }
+    scene.buildingEnergy = { buildingId: building.site.targetId, currency: 'EUR', installation: { panelCount: 4, panelWattPeak: 400, tiltDeg: 25, azimuthDeg: 180, inverterKw: 2, systemLossPct: 14, shadingLossPct: 5, monthlyTransmission: Array(12).fill(.7), climateSource: 'custom' }, finance: { annualConsumptionKwh: 3000, selfConsumptionPct: 60, importTariffPerKwh: .25, exportTariffPerKwh: .08, capex: 2500, incentive: 100, annualMaintenance: 20, degradationPct: .5, discountRatePct: 3, horizonYears: 20 } }
+  }
+  const before = structuredClone(models), registeredBuilding = structuredClone(building)
+  registeredBuilding.dwellingRegistration = registration([-7, 1.25, 11])
+  const assembled = assembleFoundationScenes(projectId, 'Casa con variantes', dwelling, registeredBuilding, date)
+  const rebased = rebaseBuildingFoundation(models, assembled, registeredBuilding.dwellingRegistration)
+  for (const [index, { scene }] of rebased.entries()) {
+    const original = levels[index].scene
+    assert.deepEqual(scene.placement.position, assembled[index].scene.placement.position, 'new registration wins although the target footprint did not move')
+    assert.equal(scene.placement.floorElevation, assembled[index].scene.placement.floorElevation)
+    assert.equal(scene.placement.assumption, assembled[index].scene.placement.assumption)
+    assert.deepEqual(scene.geometry.contextSections.apartmentBand, assembled[index].scene.geometry.contextSections.apartmentBand)
+    assert.equal(scene.geometry.contextSections.belowTop, original.geometry.contextSections.belowTop + 1.25)
+    assert.equal(scene.geometry.contextSections.ceilingBase, original.geometry.contextSections.ceilingBase + 1.25)
+    assert.deepEqual(scene.apartment, original.apartment)
+    assert.deepEqual(scene.geometry.walls, original.geometry.walls)
+    assert.deepEqual(scene.geometry.floor, original.geometry.floor); assert.deepEqual(scene.geometry.ceiling, original.geometry.ceiling)
+    assert.deepEqual(scene.assets, original.assets); assert.deepEqual(scene.fixtures, original.fixtures)
+    assert.deepEqual(scene.editor, original.editor); assert.deepEqual(scene.customization, original.customization)
+    assert.deepEqual(scene.buildingEnergy, original.buildingEnergy)
+    assert.deepEqual(ProjectSnapshotSchema.parse(scene), scene)
+  }
+  assert.deepEqual(models, before)
+  const corrected = structuredClone(registeredBuilding)
+  corrected.buildings[0].height += 1
+  const afterHeightEdit = rebaseBuildingFoundation({ ...models, levels: rebased, building: { versionId: randomUUID(), candidate: registeredBuilding } }, assembleFoundationScenes(projectId, 'Casa con variantes', dwelling, corrected, date), corrected.dwellingRegistration)
+  assert.deepEqual(afterHeightEdit.map(level => level.scene.placement), rebased.map(level => level.scene.placement))
+})
 
 test('assembly materializes simultaneous floors and basement as valid independent scenes', () => {
   const { dwelling, building } = candidates(), before = JSON.stringify({ dwelling, building })
@@ -165,6 +267,57 @@ test('updating the active floor preserves the inactive floors and original model
   assert.deepEqual(next.levels[0].scene.apartment, models.levels[0].scene.apartment); assert.deepEqual(next.levels[2].scene.apartment, models.levels[2].scene.apartment)
 })
 
+test('changing the solar moment shares it across floors without replacing their layouts', () => {
+  const { dwelling, building } = candidates(), levels = assembleFoundationScenes(projectId, 'Casa', dwelling, building, date)
+  const models = { dwelling: { versionId: randomUUID(), candidate: dwelling }, building: { versionId: randomUUID(), candidate: building }, levels, activeLevelId: 'upper-floor' }
+  for (const [index, { scene }] of levels.entries()) {
+    scene.assets.push({ id: 'table', label: 'Mesa', url: '/models/table.glb', repoPath: 'assets/table.glb', dimensions: [1, .7, 1], evidence: 'Test asset.', dimensionalStatus: 'estimated' })
+    scene.fixtures.push({ id: 'placed-table', assetId: 'table', roomId: scene.apartment.rooms[0].id, label: `Mesa planta ${index}`, position: [2, 0, 2], rotation: 0, evidence: 'Posición del usuario.', placementStatus: 'estimated' })
+    scene.editor = { schemaVersion: 1, activeArchitectureId: 'original', architectures: [{ id: 'original', name: 'Original', apartment: structuredClone(scene.apartment), partitionWallIds: [], activeLayoutId: 'active', layouts: [
+      { id: 'active', name: 'Con mesa', fixtures: structuredClone(scene.fixtures) }, { id: 'empty', name: 'Sin mesa', fixtures: [] },
+    ] }] }
+  }
+  const before = structuredClone(models), changed = structuredClone(levels[1].scene)
+  changed.solar = buildSiteSolarSnapshot(changed.site, { date: '2026-12-01', minutes: 1439 })
+  const next = updateFoundationFloor(models, changed)
+  for (const [index, { scene }] of next.levels.entries()) {
+    assert.deepEqual(scene.solar, changed.solar)
+    assert.notEqual(scene.solar, changed.solar)
+    assert.deepEqual(scene.apartment, before.levels[index].scene.apartment)
+    assert.deepEqual(scene.fixtures, before.levels[index].scene.fixtures)
+    assert.deepEqual(scene.editor, before.levels[index].scene.editor)
+    assert.deepEqual(ProjectSnapshotSchema.parse(scene), scene)
+  }
+  assert.notEqual(next.levels[0].scene.solar, next.levels[1].scene.solar)
+  assert.deepEqual(models, before)
+})
+
+test('building rebase preserves the selected solar instant and recomputes for the new site, including repeated clock hours', () => {
+  const { dwelling, building } = candidates(), levels = assembleFoundationScenes(projectId, 'Casa', dwelling, building, date)
+  const models = { dwelling: { versionId: randomUUID(), candidate: dwelling }, building: { versionId: randomUUID(), candidate: building }, levels, activeLevelId: 'upper-floor' }
+  // 06:30 UTC falls in New York's second 01:30 when DST ends on this date.
+  const selected = buildSiteSolarSnapshot(building.site, { date: '2026-11-01', minutes: 210 })
+  assert.equal(selected.selected.utc, '2026-11-01T06:30:00.000Z')
+  for (const { scene } of levels) scene.solar = structuredClone(selected)
+  const before = structuredClone(models), sameSite = structuredClone(building)
+  sameSite.buildings[0].height += 1
+  const heightEdit = rebaseBuildingFoundation(models, assembleFoundationScenes(projectId, 'Casa', dwelling, sameSite, date))
+  assert.ok(heightEdit.every(level => level.scene.solar.selected.utc === selected.selected.utc))
+  assert.ok(heightEdit.every(level => level.scene.solar.date === '2026-11-01' && level.scene.solar.selected.minutes === 210))
+
+  const changedSite = structuredClone(building)
+  changedSite.site.latitude = 40.7128; changedSite.site.longitude = -74.006; changedSite.site.timeZone = 'America/New_York'
+  const relocated = rebaseBuildingFoundation(models, assembleFoundationScenes(projectId, 'Casa', dwelling, changedSite, date))
+  const expected = buildSiteSolarSnapshot(changedSite.site, { date: '2026-11-01', minutes: 90, disambiguation: 'later' })
+  for (const { scene } of relocated) {
+    assert.deepEqual(scene.solar, expected)
+    assert.equal(scene.solar.selected.utc, selected.selected.utc)
+    assert.notDeepEqual(scene.solar.selected.direction, selected.selected.direction)
+    assert.deepEqual(ProjectSnapshotSchema.parse(scene), scene)
+  }
+  assert.deepEqual(models, before)
+})
+
 test('building-only revisions preserve interior edits, assets and financial scenarios on every floor', () => {
   const { dwelling, building } = candidates(), levels = assembleFoundationScenes(projectId, 'Casa', dwelling, building, date)
   const models = { dwelling: { versionId: randomUUID(), candidate: dwelling }, building: { versionId: randomUUID(), candidate: building }, levels, activeLevelId: 'upper-floor' }
@@ -209,6 +362,7 @@ test('reviewed bases unlock together, save floors with revision checks and clone
   const projects = await createProjects({ database, accounts, bundledScenePath: '/no-demo-read-is-needed.json' })
   let project = await projects.create(owner, { name: 'Casa' })
   const { dwelling, building } = candidates(), foundations = createProjectFoundations()
+  building.buildings[0].roofRidgeAzimuthDeg = 0
   foundations.dwelling.kind = 'house'
   foundations.dwelling.levels = dwelling.levels.map(level => ({ id: level.levelId, name: level.name, levelIndex: level.levelIndex, elevation: level.elevation, ceilingHeight: level.ceilingHeight, width: 8, depth: 6, notes: '', planReferences: [] }))
   project = await projects.save(owner, project.id, { revision: project.revision, foundations })
@@ -219,6 +373,11 @@ test('reviewed bases unlock together, save floors with revision checks and clone
   project = await projects.applyFoundationVersion(owner, project.id, buildingVersion, project.revision)
   assert.equal(project.stage, 'ready'); assert.equal(project.foundationModels!.levels.length, 3)
   assert.equal(project.foundationModels!.activeLevelId, 'ground-floor')
+  const persisted = await projects.get(owner, project.id)
+  const persistedBuilding = persisted.foundationModels!.building!.candidate
+  assert.ok(persistedBuilding.target === 'building')
+  assert.equal(persistedBuilding.buildings[0].roofRidgeAzimuthDeg, 0)
+  assert.ok(persisted.foundationModels!.levels.every(level => level.scene.buildings[0].roofRidgeAzimuthDeg === 0))
   const levels = structuredClone(project.foundationModels!.levels)
   levels[1].scene.apartment.name = 'Dormitorios personalizados'
   project = await projects.save(owner, project.id, { revision: project.revision, levels, activeLevelId: 'upper-floor' })
@@ -234,8 +393,10 @@ test('reviewed bases unlock together, save floors with revision checks and clone
   assert.equal((await projects.get(owner, project.id)).scene!.apartment.name, 'Dormitorios personalizados')
   const priorAddress = project.scene!.site.address, correctedBuilding = structuredClone(building)
   correctedBuilding.site.address = 'Dirección corregida desde el chat'
+  correctedBuilding.buildings[0].roofRidgeAzimuthDeg = 90
   project = await projects.applyFoundationVersion(owner, project.id, version(project, correctedBuilding), project.revision)
   assert.equal(project.scene!.site.address, correctedBuilding.site.address)
+  assert.ok(project.foundationModels!.levels.every(level => level.scene.buildings[0].roofRidgeAzimuthDeg === 90))
   assert.equal(project.scene!.apartment.name, 'Dormitorios personalizados', 'building revision preserves the edited active interior')
   assert.equal(project.foundationModels!.activeLevelId, 'upper-floor')
   const checkpoints = await projects.listCheckpoints(owner, project.id)
@@ -243,6 +404,7 @@ test('reviewed bases unlock together, save floors with revision checks and clone
   await assert.rejects(projects.restoreCheckpoint(owner, project.id, checkpoints[0].id, project.revision - 1), error => error instanceof AccountError && error.status === 409)
   project = await projects.restoreCheckpoint(owner, project.id, checkpoints[0].id, project.revision)
   assert.equal(project.scene!.site.address, priorAddress)
+  assert.ok(project.foundationModels!.levels.every(level => level.scene.buildings[0].roofRidgeAzimuthDeg === 0))
   assert.equal(project.scene!.apartment.name, 'Dormitorios personalizados')
   assert.equal((await projects.listCheckpoints(owner, project.id)).length, 2, 'restoration itself is recoverable')
   project = await projects.applyFoundationVersion(owner, project.id, version(project, dwelling), project.revision)

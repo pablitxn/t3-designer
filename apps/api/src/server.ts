@@ -1,3 +1,4 @@
+import type { UsageStore } from './usage.ts'
 import { createReadStream } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import { realpath, stat } from 'node:fs/promises'
@@ -84,6 +85,7 @@ const mime: Record<string, string> = {
 }
 
 export function createApi(options: {
+  usage?: { report: (userId: string, query: URLSearchParams) => ReturnType<UsageStore['report']> }
   store: AssetStore
   worker: AssetWorker
   health: () => Promise<Omit<Health, 'activeJobId'>>
@@ -205,8 +207,15 @@ export function createApi(options: {
       validate()
       if (!generationAllowed(user)) throw new HttpError(403, 'La generación no está habilitada para esta cuenta.')
       const reservation = await options.metering?.reserve(user.id, jobId, kind)
-      try { requireQueueSpace(user); return store.queueMutation(action, typeof key === 'string' ? { userId: user.id, key, fingerprint, jobId } : undefined) }
-      catch (error) { if (reservation) await options.credits!.refund(reservation); throw error }
+      try {
+        requireQueueSpace(user)
+        const result = store.queueMutation(action, typeof key === 'string' ? { userId: user.id, key, fingerprint, jobId } : undefined)
+        options.metering?.queued(jobId)
+        return result
+      } catch (error) {
+        if (reservation) { options.metering?.rejected(reservation); await options.credits!.refund(reservation) }
+        throw error
+      }
     }
     return options.metering ? options.metering.exclusive(work) : work()
   }
@@ -243,6 +252,7 @@ export function createApi(options: {
       if (match?.[2] && method === 'POST') { await readJson(request); sendJson(response, 200, { job: await options.projectGenerations.cancel(user.id, match[1]) }); return }
       throw new HttpError(404, 'Generación no encontrada.')
     }
+    if (url.pathname === '/api/usage' && method === 'GET' && options.usage) { sendJson(response, 200, await options.usage.report(user.id, url.searchParams)); return }
     if (url.pathname === '/api/credits' && method === 'GET' && options.credits) { sendJson(response, 200, await options.credits.summary(user.id)); return }
     if (options.billing && url.pathname.startsWith('/api/billing')) {
       if (url.pathname === '/api/billing' && method === 'GET') { sendJson(response, 200, await options.billing.status(user.id)); return }

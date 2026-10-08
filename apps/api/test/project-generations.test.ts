@@ -9,6 +9,7 @@ import pg from 'pg'
 import { AccountError, createAccounts, type User } from '../src/accounts.ts'
 import { openAppDatabase, type AppTables } from '../src/app-database.ts'
 import { CreditError } from '../src/credits.ts'
+import { acquireGenerationSlot } from '../src/generation-coordinator.ts'
 import { buildGeneratedProjectScene, type ProjectGenerationInput } from '../src/project-generation-model.ts'
 import { ProjectGenerations } from '../src/project-generations.ts'
 import { createProjects } from '../src/projects.ts'
@@ -93,6 +94,23 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       await f.generations.create(f.alice, { ...input, kind: 'project' }, randomUUID())
       assert.equal((await f.credits.summary(f.alice.id)).balance, 0)
       assert.equal((await f.credits.summary(f.alice.id)).reserved, 100)
+    })
+
+    await t.test('cancellation while acquiring the shared slot stays cancelled and refunds without inference', async t => {
+      const release = await acquireGenerationSlot(new AbortController().signal)
+      t.after(release)
+      let calls = 0
+      const f = await fixture(t, dialect, async (id, value) => { calls++; return scene(id, value) })
+      const job = await f.generations.create(f.alice, input, randomUUID())
+      // Queue the cancellation before waking the waiter. It must not overwrite
+      // the now-cancelled row using its previously captured queued snapshot.
+      const cancelling = f.generations.cancel(f.alice.id, job.id)
+      release()
+      assert.equal((await cancelling).status, 'cancelled')
+      await until(async () => (await f.credits.reservation(`architecture:${job.id}`))?.state === 'refunded')
+      assert.equal(f.generations.get(f.alice.id, job.id).status, 'cancelled')
+      assert.equal(calls, 0); assert.equal((await f.credits.summary(f.alice.id)).balance, 100)
+      assert.deepEqual(await f.projects.list(f.alice), [])
     })
 
     await t.test('cancelling active inference aborts publication and refunds exactly once', async t => {

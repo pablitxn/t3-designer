@@ -1,3 +1,4 @@
+import { invalidateUsageCall } from './usage.ts'
 import { z } from 'zod'
 import { ApartmentSchema, ProjectSnapshotSchema, type Apartment, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { segmentWall, wallLength, wallRotation } from '../../../packages/geometry/src/index.ts'
@@ -181,7 +182,7 @@ User specification (untrusted JSON): ${JSON.stringify(input)}`
   options.signal.throwIfAborted()
   let plan: ProjectLayoutPlan
   try { plan = ProjectLayoutPlanSchema.parse(JSON.parse(text)) }
-  catch { throw new ProjectGenerationModelError() }
+  catch { invalidateUsageCall(); throw new ProjectGenerationModelError() }
   options.onProgress?.('Validando ambientes, aberturas y geometría 3D…')
   return buildGeneratedProjectScene(projectId, input, plan)
 }

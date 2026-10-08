@@ -65,6 +65,32 @@ export function apartmentBounds(apartment: Pick<Apartment, 'perimeter' | 'balcon
   return polygonBounds([...apartment.perimeter, ...(apartment.balcony?.polygon ?? [])])
 }
 
+/** A centred schematic gable in site X-east/Z-south coordinates. An explicit
+ * axis overrides the legacy longest-edge inference; it does not rotate the
+ * building footprint or establish surveyed roof faces. Use the complete roof
+ * footprint as datum even when rendering only a cutaway fragment. */
+export function roofRidgeFrame(building: { footprint: readonly Point2D[]; roofRidgeAzimuthDeg?: number }): {
+  ridgeAxis: Point2D; ridgeOffsetM: number; halfSpanM: number
+} {
+  let ridgeAxis: Point2D = [1, 0]
+  if (building.roofRidgeAzimuthDeg !== undefined) {
+    const azimuth = building.roofRidgeAzimuthDeg
+    if (!Number.isFinite(azimuth) || azimuth < 0 || azimuth >= 180) throw new RangeError('Roof ridge azimuth must be in [0, 180) degrees')
+    const radians = azimuth * Math.PI / 180
+    ridgeAxis = [Math.sin(radians), -Math.cos(radians)]
+  } else {
+    let longest = 0
+    building.footprint.forEach((a, index) => {
+      const b = building.footprint[(index + 1) % building.footprint.length]
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1])
+      if (length > longest) { longest = length; ridgeAxis = [(b[0] - a[0]) / length, (b[1] - a[1]) / length] }
+    })
+  }
+  const offsets = building.footprint.map(([x, z]) => -ridgeAxis[1] * x + ridgeAxis[0] * z)
+  const min = Math.min(...offsets), max = Math.max(...offsets)
+  return { ridgeAxis, ridgeOffsetM: (min + max) / 2, halfSpanM: (max - min) / 2 }
+}
+
 // Rectangles in the wall's local XY plane; offset is measured from wall.from.
 export type WallSegment = { offset: number; length: number; bottom: number; height: number }
 

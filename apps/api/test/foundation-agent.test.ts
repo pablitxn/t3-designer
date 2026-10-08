@@ -12,11 +12,13 @@ import type { FoundationCandidate, FoundationGenerationResult, FoundationOfficia
 import { AccountError, createAccounts, type User } from '../src/accounts.ts'
 import { openAppDatabase } from '../src/app-database.ts'
 import { FoundationAgent, type FoundationGenerator } from '../src/foundation-agent.ts'
+import { acquireGenerationSlot } from '../src/generation-coordinator.ts'
 import { buildGeneratedProjectScene } from '../src/project-generation-model.ts'
 import { createProjects } from '../src/projects.ts'
 import { createApi } from '../src/server.ts'
 import { AssetStore } from '../src/store.ts'
 import { AssetWorker } from '../src/worker.ts'
+import { UsageStore } from '../src/usage.ts'
 
 function candidate(projectId: string, target: 'dwelling' | 'building' = 'dwelling'): FoundationCandidate {
   const scene = buildGeneratedProjectScene(projectId, {
@@ -78,10 +80,11 @@ async function fixture(t: TestContext, dialect: string, generate: FoundationGene
   }
   const alice = await addUser(), bob = await addUser(), store = new AssetStore(':memory:'), projects = await createProjects({ database, accounts })
   const project = await projects.create(alice, { name: 'Casa' })
-  const options = { path, database, credits, store, projects, enabled: true, limits: { dailyLimit: 100, globalDailyLimit: 100, pendingLimit: 10 }, generate, timeoutMs }
+  const usage = new UsageStore(join(directory, 'usage.sqlite'))
+  const options = { path, database, credits, store, projects, usage, enabled: true, limits: { dailyLimit: 100, globalDailyLimit: 100, pendingLimit: 10 }, generate, timeoutMs }
   let agent = new FoundationAgent(options)
-  t.after(async () => { await agent.close(); store.close(); await database.close(); await cleanup?.(); await rm(directory, { recursive: true, force: true }) })
-  return { database, accounts, credits, alice, bob, store, projects, project, directory, path, agent, async restart() {
+  t.after(async () => { await agent.close(); usage.close(); store.close(); await database.close(); await cleanup?.(); await rm(directory, { recursive: true, force: true }) })
+  return { database, accounts, credits, alice, bob, store, usage, projects, project, directory, path, agent, async restart() {
     await agent.close(); agent = new FoundationAgent(options); await agent.recover(); return agent
   } }
 }
@@ -253,6 +256,58 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       assert.equal((await f.projects.get(f.alice, f.project.id)).foundations?.building.status, 'draft')
     })
 
+    await t.test('registration binds acceptance to its dwelling version and preserves the old scene while a changed dwelling awaits building correction', async t => {
+      let dwellings = 0
+      const f = await fixture(t, dialect, async ({ project, target }, options) => {
+        options.onInference()
+        const generated = result(project.id, target)
+        if (generated.candidate?.target === 'dwelling') generated.candidate.levels[0].apartment.name = `Accepted interior ${++dwellings}`
+        else if (generated.candidate?.target === 'building') generated.candidate.dwellingRegistration = {
+          dwellingVersionId: project.foundationModels!.dwelling!.versionId, position: [0, 0, 0],
+          evidence: { confidence: 'user', note: 'The supplied source documents a common origin for dwelling and building.' },
+        }
+        await options.onIteration(generated.iterations[0])
+        return generated
+      })
+      const generate = async (target: 'dwelling' | 'building', revision: number) => {
+        const run = await f.agent.create(f.alice, f.project.id, { ...input(revision), target }, randomUUID())
+        await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'committed')
+        return f.agent.getVersion(f.alice, f.project.id, run.id)
+      }
+      const dwelling = await generate('dwelling', 1)
+      let current = await f.projects.applyFoundationVersion(f.alice, f.project.id, dwelling, 1)
+      const building = await generate('building', current.revision)
+      current = await f.projects.applyFoundationVersion(f.alice, f.project.id, building, current.revision)
+      assert.equal(current.stage, 'ready'); assert.deepEqual(current.scene!.placement.position, [0, 0, 0])
+      const oldScene = structuredClone(current.scene), oldLevels = structuredClone(current.foundationModels!.levels)
+      const changed = await generate('dwelling', current.revision)
+      current = await f.projects.applyFoundationVersion(f.alice, f.project.id, changed, current.revision)
+      assert.equal(current.stage, 'setup'); assert.equal(current.foundations!.building.status, 'draft')
+      assert.equal(current.foundationModels!.dwelling!.versionId, changed.id)
+      assert.equal(current.foundationModels!.building!.versionId, building.id)
+      assert.deepEqual(current.scene, oldScene); assert.deepEqual(current.foundationModels!.levels, oldLevels)
+      await assert.rejects(f.projects.applyFoundationVersion(f.alice, f.project.id, building, current.revision), error => error instanceof AccountError && error.status === 409 && /otra versión de vivienda/.test(error.message))
+      const omitted = structuredClone(building)
+      if (omitted.candidate?.target !== 'building') throw new Error('Missing building')
+      delete omitted.candidate.dwellingRegistration
+      omitted.iterations.at(-1)!.candidate = structuredClone(omitted.candidate)
+      await assert.rejects(f.projects.applyFoundationVersion(f.alice, f.project.id, omitted, current.revision), error => error instanceof AccountError && error.status === 409 && /no se puede omitir/.test(error.message))
+      const restored = await f.restart()
+      assert.deepEqual((await f.projects.get(f.alice, f.project.id)).scene, oldScene)
+      const checkpoints = await f.projects.listCheckpoints(f.alice, f.project.id)
+      assert.ok(checkpoints.some(checkpoint => checkpoint.reason === 'dwelling'))
+      // The next building uses the new accepted dwelling. The old materialized
+      // interior must not be rebased over the newly accepted apartment.
+      const nextRun = await restored.create(f.alice, f.project.id, { ...input(current.revision), target: 'building' }, randomUUID())
+      await until(async () => (await f.credits.reservation(reserved(nextRun.id)))?.state === 'committed')
+      const agent = await f.restart(), next = await agent.getVersion(f.alice, f.project.id, nextRun.id)
+      current = await f.projects.applyFoundationVersion(f.alice, f.project.id, next, current.revision)
+      assert.equal(current.stage, 'ready'); assert.equal(current.scene!.apartment.name, 'Accepted interior 2')
+      assert.equal(current.foundationModels!.building!.candidate.target === 'building' && current.foundationModels!.building!.candidate.dwellingRegistration?.dwellingVersionId, changed.id)
+      assert.deepEqual(current.scene!.placement.position, [0, 0, 0])
+      assert.equal((await agent.list(f.alice, f.project.id)).versions.length, 4)
+    })
+
     await t.test('failed repair preserves every iteration as an unready chat parent and refunds the attempt', async t => {
       let calls = 0
       const f = await fixture(t, dialect, async (value, options) => {
@@ -325,6 +380,45 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       await until(async () => (await f.credits.reservation(reserved(continued.id)))?.state === 'committed')
       assert.equal((await f.agent.getVersion(f.alice, f.project.id, continued.id)).parentVersionId, version.id)
       assert.equal((await f.agent.list(f.alice, f.project.id)).versions.length, 2)
+    })
+
+    await t.test('cancellation while acquiring the shared slot stays cancelled and refunds without inference', async t => {
+      const release = await acquireGenerationSlot(new AbortController().signal)
+      t.after(release)
+      let calls = 0
+      const f = await fixture(t, dialect, async (value, options) => { calls++; return defaultGenerator(value, options) })
+      const run = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+      const originalGet = f.agent.get.bind(f.agent)
+      const get = t.mock.method(f.agent, 'get', async (...args: Parameters<FoundationAgent['get']>) => {
+        const current = await originalGet(...args)
+        // Finish the other workshop after cancel's final lookup, before its
+        // continuation. The acquired waiter resumes after cancellation writes.
+        queueMicrotask(release)
+        return current
+      })
+      const cancelled = await f.agent.cancel(f.alice, f.project.id, run.id)
+      get.mock.restore()
+      assert.equal(cancelled.status, 'cancelled')
+      await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'refunded')
+      assert.equal((await f.agent.get(f.alice, f.project.id, run.id)).status, 'cancelled')
+      assert.equal(calls, 0)
+      assert.equal((await f.credits.summary(f.alice.id)).balance, 1000)
+      const report = await f.usage.report(f.database, f.alice.id, new URLSearchParams())
+      assert.equal(report.operations[0].status, 'cancelled'); assert.equal(report.totals.calls, 0)
+    })
+
+    await t.test('an extended local workflow deadline can complete normally without changing credits or result validation', async t => {
+      const f = await fixture(t, dialect, defaultGenerator, 60 * 60_000)
+      const run = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+      await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'committed')
+      assert.equal((await f.agent.get(f.alice, f.project.id, run.id)).status, 'completed')
+      assert.equal((await f.agent.getVersion(f.alice, f.project.id, run.id)).status, 'ready')
+      assert.equal((await f.credits.summary(f.alice.id)).balance, 950)
+      assert.throws(() => new FoundationAgent({
+        path: ':memory:', database: f.database, credits: f.credits, store: f.store, projects: f.projects,
+        enabled: true, limits: { dailyLimit: 100, globalDailyLimit: 100, pendingLimit: 10 }, generate: defaultGenerator,
+        timeoutMs: 2 * 60 * 60_000 + 1,
+      }), /T3_FOUNDATION_TIMEOUT_MS/)
     })
 
     await t.test('bounded timeout aborts inference and preserves the last reviewed draft without approving it', async t => {
@@ -465,6 +559,34 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       assert.equal((await f.credits.summary(f.alice.id)).balance, 950)
     })
 
+    await t.test('terminal activity suppresses only a matching final event and preserves distinct questions and prior history', async t => {
+      const summary = 'Contrasté las láminas; falta una medida de referencia.'
+      const scenarios = [
+        [{ kind: 'analysis' as const, message: 'Leyendo los planos.' }, { kind: 'question' as const, message: summary }],
+        [{ kind: 'question' as const, message: '¿Cuál es la altura?' }, { kind: 'question' as const, message: summary }],
+        [{ kind: 'analysis' as const, message: summary }],
+        [{ kind: 'question' as const, message: summary }, { kind: 'analysis' as const, message: 'Comprobando otra fuente.' }],
+      ]
+      let scenario = 0
+      const f = await fixture(t, dialect, async (_value, options) => {
+        options.onInference()
+        for (const event of scenarios[scenario++]) options.onEvent(event)
+        return { status: 'needs_input', candidate: null, summary, questions: ['¿Cuánto mide esta pared?'], iterations: [] }
+      })
+      const saved: { id: string; events: unknown }[] = []
+      for (let index = 0; index < scenarios.length; index++) {
+        const run = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+        await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'committed')
+        const recorded = await f.agent.get(f.alice, f.project.id, run.id)
+        const expected = [...scenarios[index], ...(index < 2 ? [] : [{ kind: 'question', message: summary }])]
+        assert.deepEqual(recorded.events.map(({ kind, message }) => ({ kind, message })), expected)
+        assert.deepEqual(recorded.events.map(event => event.id), expected.map((_event, id) => id + 1))
+        saved.push({ id: run.id, events: recorded.events })
+      }
+      const restarted = await f.restart()
+      for (const run of saved) assert.deepEqual((await restarted.get(f.alice, f.project.id, run.id)).events, run.events)
+    })
+
     await t.test('needs-input responses persist as chat versions and only charge when inference started', async t => {
       let calls = 0
       const f = await fixture(t, dialect, async (value, options) => {
@@ -481,6 +603,20 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       const second = await f.agent.create(f.alice, f.project.id, { ...input(), parentVersionId: first.id }, randomUUID())
       await until(async () => (await f.credits.reservation(reserved(second.id)))?.state === 'committed')
       assert.equal((await f.credits.summary(f.alice.id)).balance, 950)
+      const consumption = await f.usage.report(f.database, f.alice.id, new URLSearchParams())
+      assert.equal(consumption.operations.find(operation => operation.id === reserved(first.id))?.status, 'needs_input')
+      assert.equal(consumption.operations.find(operation => operation.id === reserved(second.id))?.status, 'needs_input')
+      assert.equal(consumption.totals.creditsConsumed, 50)
+      // Upgrade a known legacy outcome using its durable terminal run, never
+      // by guessing from a provider response or changing its committed credits.
+      const legacy = new DatabaseSync(join(f.directory, 'usage.sqlite'))
+      const document = legacy.prepare('SELECT document FROM model_usage_operation WHERE id=?').get(reserved(second.id))!
+      legacy.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify({ ...JSON.parse(String(document.document)), status: 'succeeded' }), reserved(second.id))
+      legacy.close()
+      await f.agent.reconcile()
+      const reconciled = await f.usage.report(f.database, f.alice.id, new URLSearchParams('status=needs_input'))
+      assert.equal(reconciled.operations.length, 2); assert.equal(reconciled.totals.creditsConsumed, 50)
+      assert.equal((await f.credits.reservation(reserved(second.id)))?.state, 'committed')
     })
 
     await t.test('restart recovery refunds abandoned work and retains completed versions and conversation', async t => {

@@ -7,6 +7,31 @@ import type { SitePoint } from '../src/data/building-site.ts'
 const rectangle = (width = 12, length = 10, rise = 0) => roofSurfaceFromBuilding({ footprint: [[-width / 2, -length / 2], [width / 2, -length / 2], [width / 2, length / 2], [-width / 2, length / 2]], height: 6, roofHeight: rise })
 const near = (actual: number, expected: number, tolerance = 1e-8) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} should equal ${expected}`)
 
+test('controlled Petersen rectangle uses the documented north-south ridge and clears solar panels', () => {
+  // Controlled geometry from source dimensions, not evidence of an E2E reconstruction.
+  const building = { footprint: [[0, 0], [11.0236, 0], [11.0236, 6.731], [0, 6.731]] as SitePoint[], height: 9.017, roofHeight: 2.1844 }
+  const legacy = roofSurfaceFromBuilding(building)
+  assert.deepEqual(legacy.ridgeAxis, [1, 0], 'omission retains the legacy E-W longest-edge inference')
+  near(roofHeightAt(legacy, [11.0236, 6.731 / 2]), 11.2014)
+  const roof = roofSurfaceFromBuilding({ ...building, roofRidgeAzimuthDeg: 0 })
+  assert.deepEqual(roof.ridgeAxis, [0, -1])
+  for (const z of [0, 6.731 / 2, 6.731]) {
+    near(roofHeightAt(roof, [0, z]), 9.017)
+    near(roofHeightAt(roof, [11.0236, z]), 9.017)
+    near(roofHeightAt(roof, [11.0236 / 2, z]), 11.2014)
+  }
+  const layout = createRoofSolarLayout(roof, { panelCount: 12, tiltDeg: 8, azimuthDeg: 90 })
+  assert.equal(layout.installedCount, 12)
+  for (const panel of layout.panels) {
+    const [a, b, , d] = panel.corners
+    for (let u = 0; u <= 4; u++) for (let v = 0; v <= 4; v++) {
+      const point = a.map((value, i) => value + (b[i] - value) * u / 4 + (d[i] - value) * v / 4)
+      assert.ok(point[1] - roofHeightAt(roof, [point[0], point[2]]) >= .15 - 1e-8)
+    }
+    for (const support of panel.supports) near(support.bottom[1], roofHeightAt(roof, [support.bottom[0], support.bottom[2]]))
+  }
+})
+
 test('the fitted installation caps requested production count and keeps every tilted module within setback', () => {
   const layout = createRoofSolarLayout(rectangle(), { panelCount: 1000, tiltDeg: 35, azimuthDeg: 147, edgeSetbackM: .75 })
   assert.ok(layout.installedCount > 0)

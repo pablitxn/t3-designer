@@ -46,6 +46,26 @@ const noInput = JSON.stringify({ status: 'needs_input', summary: 'El plano no ti
 const references = { file: async () => ({ path: '/fixture/plan.png', mime: 'image/png' }) }
 const options = () => ({ signal: new AbortController().signal })
 
+test('source-supported ridge axis survives building candidate normalization and independent review', async () => {
+  const candidate = building(); candidate.buildings[0].roofHeight = 2; candidate.buildings[0].roofRidgeAzimuthDeg = 0
+  candidate.assumptions.push('Eje de cumbrera norte-sur respaldado por la elevación de prueba.')
+  const outputs = [ready(candidate), accept], prompts: string[] = []
+  const generate = createFoundationGenerator({ references,
+    acquireGeodata: async () => ({ status: 'unsupported', summary: 'Controlled source fixture.', sources: [], questions: [], unknowns: [], geocode: null, context: null }),
+    turn: async input => {
+    prompts.push(input[0].type === 'text' ? input[0].text : '')
+    return outputs.shift()!
+  } })
+  const result = await generate({ project: project(), target: 'building', message: 'Reconstruí el edificio con la cumbrera norte-sur documentada.' }, options())
+  assert.equal(result.status, 'ready'); assert.deepEqual(result.candidate, candidate)
+  assert.equal(result.iterations[0].review.passed, true)
+  assert.equal(prompts.length, 2)
+  for (const prompt of prompts) {
+    assert.match(prompt, /roofRidgeAzimuthDeg/)
+    assert.match(prompt, /0 means north-south, 90 means east-west/)
+  }
+})
+
 test('real provider format and opening failures supply exact paths and the rejected candidate to repair', async () => {
   const malformed = structuredClone(dwelling()) as unknown as { levels: { apartment: { metadata: { source: unknown } } }[] }
   malformed.levels[0].apartment.metadata.source = ['uploaded plan']
@@ -222,6 +242,7 @@ test('three unsuccessful reviews preserve preview and findings without marking r
 
 test('building generation and review use web search and country-specific evidence constraints', async () => {
   let calls = 0
+  const value = foundations(); value.dwelling.levels[0].planReferences = []
   const proposed = building()
   proposed.officialResearch = { countryCode: 'AR', jurisdiction: 'Córdoba', summary: 'Untrusted model-made acquisition.', sources: [], unknowns: [], geocode: null, parcels: [], selectedParcelId: null, selectionEvidence: null }
   const generate = createFoundationGenerator({ references,
@@ -234,13 +255,173 @@ test('building generation and review use web search and country-specific evidenc
     assert.match(prompt, /Córdoba/)
     return calls === 1 ? ready(proposed) : accept
   } })
-  const result = await generate({ project: project(), target: 'building', message: 'Consultá las fuentes oficiales.' }, options())
+  const result = await generate({ project: project(value), target: 'building', message: 'Consultá las fuentes oficiales.' }, options())
   assert.equal(result.status, 'ready'); assert.equal(calls, 2)
   const candidate = result.candidate as ReturnType<typeof building>
   assert.equal(candidate.buildings[0].source, 'estimated'); assert.equal(candidate.sources[0].kind, 'official')
   assert.deepEqual(candidate.roads, [])
   assert.equal(candidate.officialResearch, undefined, 'model output cannot fabricate server-acquired research')
   assert.equal(result.officialResearch, undefined)
+})
+
+const unavailableGeodata = async () => ({ status: 'unsupported' as const, summary: 'Controlled unavailable source.', sources: [], questions: [], unknowns: [], geocode: null, context: null })
+
+test('building generation and review receive the same saved images and level labels without duplicate attachments', async () => {
+  const value = foundations(), upperReference = '5685a0dc-31af-440f-87c9-7438f3099560'
+  value.dwelling.levels.push({ ...structuredClone(value.dwelling.levels[0]), id: 'upper-floor', name: 'Planta alta', levelIndex: 1, elevation: 3,
+    planReferences: [{ id: referenceId, name: 'Shared section' }, { id: upperReference, name: 'Upper plan' }] })
+  const reads: string[] = [], attached: Parameters<typeof openaiVisualTurn>[0][] = []
+  const generate = createFoundationGenerator({ references: { file: async id => { reads.push(id); return { path: `/fixture/${id}.png`, mime: 'image/png' } } },
+    acquireGeodata: unavailableGeodata, turn: async input => {
+      attached.push(structuredClone(input.slice(1)))
+      return attached.length === 1 ? ready(building()) : accept
+    } })
+  const result = await generate({ project: project(value), target: 'building', message: 'Usá los planos guardados para reconstruir el edificio.' }, options())
+  assert.equal(result.status, 'ready'); assert.deepEqual(reads, [referenceId, upperReference])
+  assert.equal(attached.length, 2); assert.deepEqual(attached[1], attached[0])
+  assert.deepEqual(attached[0].filter(item => item.type === 'local_image').map(item => item.path), [`/fixture/${referenceId}.png`, `/fixture/${upperReference}.png`])
+  const labels = attached[0].filter(item => item.type === 'text').map(item => item.text).join('\n')
+  assert.match(labels, /ground-floor/); assert.match(labels, /upper-floor/); assert.match(labels, /already attached/)
+})
+
+test('unreadable optional building plans are disclosed and never claimed as attached', async () => {
+  for (const failure of ['missing', 'unsupported', 'read-error']) {
+    const value = foundations()
+    value.dwelling.levels.push({ ...structuredClone(value.dwelling.levels[0]), id: 'upper-floor', name: 'Planta alta', levelIndex: 1, elevation: 3 })
+    let reads = 0, calls = 0
+    const events: string[] = []
+    const generate = createFoundationGenerator({ references: { file: async () => {
+      reads++
+      if (failure === 'read-error') throw new Error('Controlled unreadable reference')
+      return failure === 'missing' ? null : { path: '/fixture/not-an-image.pdf', mime: 'application/pdf' }
+    } }, acquireGeodata: unavailableGeodata, turn: async input => {
+      assert.equal(input.filter(item => item.type === 'local_image').length, 0)
+      const labels = input.slice(1).filter(item => item.type === 'text').map(item => item.text).join('\n')
+      assert.match(labels, /UNAVAILABLE: no image is attached/); assert.match(labels, /Do not claim to have inspected/)
+      return calls++ === 0 ? ready(building()) : accept
+    } })
+    const result = await generate({ project: project(value), target: 'building', message: 'Consultá otras fuentes disponibles.' }, { ...options(), onEvent: event => events.push(event.message) })
+    assert.equal(result.status, 'ready'); assert.equal(calls, 2); assert.equal(reads, 1)
+    assert.equal(events.filter(message => message.startsWith('No se pudo adjuntar')).length, 1)
+  }
+})
+
+test('building receives identical compact accepted dwelling coordinates and local floor regions in generation and review', async () => {
+  const source = project(), accepted = dwelling()
+  source.foundations!.dwelling.status = 'ready'
+  accepted.levels[0].apartment.floorRegions = [
+    { id: 'main', polygon: [[0, 0], [4, 0], [4, 6], [0, 6]], floorElevation: 0, ceilingElevation: 2.7, evidence: { confidence: 'user', note: 'Main floor datum.' } },
+    { id: 'annex', polygon: [[4, 0], [8, 0], [8, 3], [4, 3]], floorElevation: -.127, ceilingElevation: 2.3368, evidence: { confidence: 'observed', note: 'Section A: lower annex.' } },
+  ]
+  accepted.levels.push({ ...structuredClone(accepted.levels[0]), levelId: 'upper-floor', name: 'Upper', levelIndex: 1, elevation: 3 })
+  source.foundationModels = { dwelling: { versionId: referenceId, candidate: accepted }, building: null, activeLevelId: null, levels: [] }
+  const before = JSON.stringify(source), contexts: unknown[] = []
+  const generate = createFoundationGenerator({ references, acquireGeodata: unavailableGeodata, turn: async input => {
+    const prompt = input[0].type === 'text' ? input[0].text : ''
+    const data = JSON.parse(prompt.split(contexts.length === 0 ? 'USER PROJECT DATA (JSON): ' : 'USER DATA (JSON): ')[1].split('\n')[0])
+    contexts.push(data.acceptedDwellingContext)
+    assert.match(prompt, /never independently recenter or rotate levels/)
+    assert.match(prompt, /Never overwrite server-owned SOURCE CONTEXT/)
+    return contexts.length === 1 ? ready(building()) : accept
+  } })
+  const result = await generate({ project: source, target: 'building', message: 'Contrastá la envolvente con mi vivienda aceptada.' }, options())
+  assert.equal(result.status, 'ready'); assert.equal(contexts.length, 2); assert.deepEqual(contexts[1], contexts[0])
+  assert.deepEqual(contexts[0], {
+    versionId: referenceId, evidenceKind: 'accepted estimated dwelling', geographicRegistration: 'unverified',
+    summary: accepted.summary, assumptions: accepted.assumptions, unknowns: accepted.unknowns, sources: accepted.sources,
+    levels: accepted.levels.map(level => ({ levelId: level.levelId, name: level.name, levelIndex: level.levelIndex, elevation: level.elevation,
+      ceilingHeight: level.ceilingHeight, scaleEvidence: level.scaleEvidence, coordinateSystem: level.apartment.coordinateSystem,
+      perimeter: level.apartment.perimeter, floorRegions: level.apartment.floorRegions })),
+  })
+  assert.doesNotMatch(JSON.stringify(contexts), /"rooms"|"walls"|"doors"|"windows"/)
+  assert.equal(JSON.stringify(source), before)
+})
+
+test('building receives no dwelling context until a dwelling candidate is accepted and ready', async () => {
+  for (const condition of ['absent', 'draft', 'wrong-target']) {
+    const source = project()
+    if (condition !== 'absent') source.foundationModels = { dwelling: { versionId: referenceId, candidate: condition === 'draft' ? dwelling() : building() }, building: null, activeLevelId: null, levels: [] }
+    if (condition === 'wrong-target') source.foundations!.dwelling.status = 'ready'
+    let calls = 0
+    const generate = createFoundationGenerator({ references, acquireGeodata: unavailableGeodata, turn: async input => {
+      const prompt = input[0].type === 'text' ? input[0].text : ''
+      const data = JSON.parse(prompt.split(calls === 0 ? 'USER PROJECT DATA (JSON): ' : 'USER DATA (JSON): ')[1].split('\n')[0])
+      assert.equal(Object.hasOwn(data, 'acceptedDwellingContext'), false)
+      return calls++ === 0 ? ready(building()) : accept
+    } })
+    assert.equal((await generate({ project: source, target: 'building', message: 'Reconstruí el edificio.' }, options())).status, 'ready')
+    assert.equal(calls, 2)
+  }
+})
+
+test('full and acquired building formats retain explicit registration and reuse it on unrelated corrections', async () => {
+  const source = project(), dwellingRegistration = { dwellingVersionId: referenceId, position: [0, 0, 0] as [number, number, number], evidence: { confidence: 'user' as const, note: 'The accepted plan and building use the same documented origin.' } }
+  source.foundations!.dwelling.status = 'ready'
+  source.foundationModels = { dwelling: { versionId: referenceId, candidate: dwelling() }, building: null, activeLevelId: null, levels: [] }
+  const first = building(); first.dwellingRegistration = dwellingRegistration
+  let calls = 0
+  const generate = createFoundationGenerator({ references, acquireGeodata: unavailableGeodata, turn: async input => {
+    const prompt = input[0].type === 'text' ? input[0].text : ''
+    if (calls % 2 === 1) assert.deepEqual(JSON.parse(prompt.split('CANDIDATE (JSON): ')[1]).dwellingRegistration, dwellingRegistration)
+    return calls++ % 2 === 0 ? ready(first) : accept
+  } })
+  const initial = await generate({ project: source, target: 'building', message: 'Usá el mismo origen para ambos modelos.' }, options())
+  assert.equal(initial.status, 'ready'); assert.deepEqual(initial.candidate?.target === 'building' && initial.candidate.dwellingRegistration, dwellingRegistration)
+  source.foundationModels.building = { versionId: projectId, candidate: initial.candidate! }
+  const corrected = createFoundationGenerator({ references, acquireGeodata: async () => { throw new Error('Reuse saved source only') }, turn: async input => {
+    const prompt = input[0].type === 'text' ? input[0].text : ''
+    if (calls++ % 2 === 0) {
+      assert.deepEqual(JSON.parse(prompt.split('USER PROJECT DATA (JSON): ')[1].split('\n')[0]).previous.dwellingRegistration, dwellingRegistration)
+      return JSON.stringify({ status: 'ready', summary: 'Registro conservado.', questions: [], measurementCorrections: [], buildingEdits: [], candidateJson: JSON.stringify({ target: 'building', summary: 'Sin cambios geométricos.', assumptions: [], unknowns: [], sources: [] }) })
+    }
+    assert.deepEqual(JSON.parse(prompt.split('CANDIDATE (JSON): ')[1]).dwellingRegistration, dwellingRegistration)
+    return accept
+  } })
+  const next = await corrected({ project: source, target: 'building', message: 'Revisá las fuentes manteniendo la geometría.' }, options())
+  assert.equal(next.status, 'ready'); assert.deepEqual(next.candidate?.target === 'building' && next.candidate.dwellingRegistration, dwellingRegistration)
+  assert.equal(calls, 4)
+})
+
+test('stale inherited registration cannot reach source review or silently fall back when omitted', async () => {
+  const source = project(), previous = building()
+  source.foundations!.dwelling.status = 'ready'
+  previous.dwellingRegistration = { dwellingVersionId: projectId, position: [0, 0, 0], evidence: { confidence: 'inferred', note: 'Registration refers to the previously accepted dwelling.' } }
+  source.foundationModels = { dwelling: { versionId: referenceId, candidate: dwelling() }, building: { versionId: projectId, candidate: previous }, activeLevelId: null, levels: [] }
+  let calls = 0
+  const generate = createFoundationGenerator({ references, turn: async input => {
+    const prompt = input[0].type === 'text' ? input[0].text : ''
+    assert.match(prompt, /USER PROJECT DATA/)
+    if (calls++) assert.match(prompt, /versión de vivienda actualmente aceptada/)
+    return JSON.stringify({ status: 'ready', summary: 'Omitted registration.', questions: [], measurementCorrections: [], buildingEdits: [], candidateJson: JSON.stringify({ target: 'building', summary: 'Conservar contexto.', assumptions: [], unknowns: [], sources: [] }) })
+  } })
+  const result = await generate({ project: source, target: 'building', message: 'Actualizá con mi vivienda actual.' }, options())
+  assert.equal(result.status, 'needs_input'); assert.equal(calls, 3)
+  assert.ok(result.iterations.every(iteration => !iteration.review.passed && iteration.review.issues.some(issue => issue.startsWith('dwellingRegistration:'))))
+  assert.deepEqual(result.candidate?.target === 'building' && result.candidate.dwellingRegistration, previous.dwellingRegistration)
+})
+
+test('accepted dwelling context cannot replace server acquired building geometry', async () => {
+  const source = project(), accepted = dwelling(), acquired = building()
+  const dwellingRegistration = { dwellingVersionId: referenceId, position: [0, 0, 0], evidence: { confidence: 'user', note: 'The accepted dwelling uses the documented site origin.' } }
+  source.foundations!.dwelling.status = 'ready'
+  source.foundationModels = { dwelling: { versionId: referenceId, candidate: accepted }, building: null, activeLevelId: null, levels: [] }
+  acquired.buildings[0].footprint = acquired.buildings[0].footprint.map(([x, z]) => [x + 100, z + 200])
+  const original = structuredClone(acquired)
+  let calls = 0
+  const generate = createFoundationGenerator({ references, acquireGeodata: async () => ({ status: 'available', summary: 'Controlled recorded geometry.', sources: acquired.sources, questions: [], unknowns: acquired.unknowns, geocode: null,
+    context: { site: acquired.site, buildings: acquired.buildings, roads: acquired.roads, parcel: acquired.parcel } }), turn: async input => {
+    const prompt = input[0].type === 'text' ? input[0].text : ''
+    assert.match(prompt, /acceptedDwellingContext/)
+    return calls++ === 0 ? JSON.stringify({ status: 'ready', summary: 'Contexto conservado.', questions: [], measurementCorrections: [], buildingEdits: [],
+      candidateJson: JSON.stringify({ target: 'building', summary: 'Geometría registrada conservada; alineación estimada.', assumptions: [], unknowns: [], sources: [], dwellingRegistration }) }) : accept
+  } })
+  const result = await generate({ project: source, target: 'building', message: 'Usá el contexto registrado disponible.' }, options())
+  assert.equal(result.status, 'ready'); assert.equal(calls, 2)
+  assert.equal(result.candidate?.target, 'building')
+  if (result.candidate?.target !== 'building') throw new Error('Missing building candidate')
+  assert.deepEqual(result.candidate.buildings, original.buildings); assert.deepEqual(result.candidate.parcel, original.parcel)
+  assert.deepEqual(result.candidate.dwellingRegistration, dwellingRegistration)
+  assert.deepEqual(acquired, original)
 })
 
 test('building cannot proceed with missing country or unsupported geometry', async () => {

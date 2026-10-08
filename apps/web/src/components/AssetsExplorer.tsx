@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEven
 import { useTranslation } from 'react-i18next'
 import { CreateJobInputSchema, type AnswersInput, type Asset, type Health, type Job, type ReferenceImage, type RevisionInput } from '@t3-designer/asset-schema'
 import { assetApi, AssetApiError, dimensionsFromCentimetres } from '../lib/asset-api'
+import { useWorkshopSelection } from '../lib/use-workshop-selection'
 import { useLocale } from '../i18n/useLocale'
 import { useUnits } from '../lib/useUnits'
 import { WorkshopActivity } from './WorkshopActivity'
@@ -146,8 +147,8 @@ export function AssetsExplorer() {
   const [references, setReferences] = useState<ReferenceImage[]>([])
   const [uploading, setUploading] = useState(false)
   const [revisionDrafts, setRevisionDrafts] = useState<Record<string, RevisionDraft>>({})
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(() => new URLSearchParams(window.location.search).get('assetId'))
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(() => new URLSearchParams(window.location.search).get('jobId'))
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -191,11 +192,15 @@ export function AssetsExplorer() {
 
   const connected = snapshot.connection === 'online'
   const ready = connected && snapshot.health?.generationEnabled !== false && snapshot.health?.codex.authenticated && snapshot.health?.blender.available
-  const selected = snapshot.assets.find(asset => asset.id === selectedId) ?? snapshot.assets[0]
-  const families = assetFamilies(snapshot.assets)
+  const assetSelection = useWorkshopSelection(selectedId, snapshot.assets, assetApi.asset, connected)
+  const selected = assetSelection.value
+  const assets = selected && !snapshot.assets.some(asset => asset.id === selected.id) ? [...snapshot.assets, selected] : snapshot.assets
+  const families = assetFamilies(assets)
   const versions = families.find(family => family.some(asset => asset.id === selected?.id)) ?? []
   const jobs = [...snapshot.jobs].sort((a, b) => Number(activeStatuses.has(b.status)) - Number(activeStatuses.has(a.status)) || b.createdAt.localeCompare(a.createdAt))
-  const selectedJob = jobs.find(job => job.id === selectedJobId) ?? jobs[0]
+  const jobSelection = useWorkshopSelection(selectedJobId, jobs, assetApi.job, connected, 3000)
+  const selectedJob = jobSelection.value
+  if (selectedJob && !jobs.some(job => job.id === selectedJob.id)) jobs.push(selectedJob)
 
   function focusActivity() {
     requestAnimationFrame(() => {
@@ -325,21 +330,22 @@ export function AssetsExplorer() {
       </aside>
       <div className="workshop-main">
         <div ref={activityPanel} tabIndex={-1} className="workshop-focus-target">
-          <WorkshopActivity job={selectedJob} jobs={jobs} assets={snapshot.assets} disabled={!connected || busy !== null} retryDisabled={!ready || !credits || creditsFailed || busy !== null} busy={busy === selectedJob?.id} onSelect={setSelectedJobId}
+          {selectedJobId && !selectedJob ? <section className="workshop-activity workshop-panel" aria-label={t('activity.title')}><p role={jobSelection.error ? 'alert' : 'status'}>{t(jobSelection.error === 'missing' ? 'selection.jobMissing' : jobSelection.error ? 'selection.unavailable' : 'selection.jobLoading')}</p><button type="button" className="workshop-text-button" onClick={() => setSelectedJobId(null)}>{t('selection.recent')}</button></section> : <WorkshopActivity job={selectedJob} jobs={jobs} assets={assets} disabled={!connected || busy !== null} retryDisabled={!ready || !credits || creditsFailed || busy !== null} busy={busy === selectedJob?.id} onSelect={setSelectedJobId}
             onCancel={() => { if (selectedJob) void action(selectedJob.id, () => assetApi.cancel(selectedJob.id)) }}
             onRetry={() => { if (selectedJob) void retry(selectedJob) }}
             onView={viewResult} onNew={() => { urlInput.current?.focus(); urlInput.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }}>
             {selectedJob?.status === 'needs_input' && <AnswerForm key={selectedJob.id} job={selectedJob} disabled={!connected || busy !== null} onAnswer={input => action(selectedJob.id, () => assetApi.answer(selectedJob.id, input))} />}
-          </WorkshopActivity>
+          </WorkshopActivity>}
         </div>
       <section className="workshop-library" aria-label={t('library.title')}>
         <div className="workshop-library-heading"><h3>{t('library.title')}</h3><span>{t('library.count', { count: families.length })}</span></div>
-        {snapshot.assets.length === 0 ? <div className="workshop-empty"><div className="workshop-empty-object" aria-hidden="true">◇</div><h3>{t('library.emptyTitle')}</h3><p>{t('library.emptyDescription')}</p></div> : <>
-          <div className="workshop-grid">{families.map(family => { const asset = family[0]; return <button className="workshop-card" key={asset.id} aria-label={t('library.select', { label: asset.label })} aria-pressed={selected ? assetFamilyId(selected, snapshot.assets) === assetFamilyId(asset, snapshot.assets) : false} onClick={() => setSelectedId(asset.id)}>
+        {selectedId && !selected && <div className="workshop-panel"><p role={assetSelection.error ? 'alert' : 'status'}>{t(assetSelection.error === 'missing' ? 'selection.assetMissing' : assetSelection.error ? 'selection.unavailable' : 'selection.assetLoading')}</p><button type="button" className="workshop-text-button" onClick={() => setSelectedId(null)}>{t('selection.recent')}</button></div>}
+        {assets.length === 0 && !selectedId ? <div className="workshop-empty"><div className="workshop-empty-object" aria-hidden="true">◇</div><h3>{t('library.emptyTitle')}</h3><p>{t('library.emptyDescription')}</p></div> : <>
+          <div className="workshop-grid">{families.map(family => { const asset = family[0]; return <button className="workshop-card" key={asset.id} aria-label={t('library.select', { label: asset.label })} aria-pressed={selected ? assetFamilyId(selected, assets) === assetFamilyId(asset, assets) : false} onClick={() => setSelectedId(asset.id)}>
             <img src={asset.files.preview} alt="" loading="lazy" />
             <div><span className="workshop-card-title">{asset.label}</span><span className="workshop-card-dimensions">{formatDimensions(asset.dimensions, 1)}</span><span className="workshop-draft">{t('library.draft')}</span>{family.length > 1 && <span className="workshop-card-versions">{t('revision.versions', { count: family.length })}</span>}</div>
           </button> })}</div>
-          {selected && <div ref={resultPanel} tabIndex={-1} className="workshop-focus-target"><AssetDetails key={selected.id} asset={selected} versions={versions} job={snapshot.jobs.find(job => job.id === selected.jobId)} draft={revisionDrafts[selected.id] ?? { feedback: '', references: [] }} disabled={!ready || !credits || creditsFailed || busy !== null} creditNote={credits ? `${a.cost}: ${credits.costs.revision} ${a.creditUnit}. ${a.retryCost}` : a.creditUnavailable} onSelect={setSelectedId} onDraft={draft => setRevisionDrafts(previous => ({ ...previous, [selected.id]: draft }))} onRevise={input => revise(selected, input)} /></div>}
+          {selected && <div ref={resultPanel} tabIndex={-1} className="workshop-focus-target"><AssetDetails key={selected.id} asset={selected} versions={versions} job={jobs.find(job => job.id === selected.jobId)} draft={revisionDrafts[selected.id] ?? { feedback: '', references: [] }} disabled={!ready || !credits || creditsFailed || busy !== null} creditNote={credits ? `${a.cost}: ${credits.costs.revision} ${a.creditUnit}. ${a.retryCost}` : a.creditUnavailable} onSelect={setSelectedId} onDraft={draft => setRevisionDrafts(previous => ({ ...previous, [selected.id]: draft }))} onRevise={input => revise(selected, input)} /></div>}
         </>}
       </section>
       </div>

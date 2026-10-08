@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { isIP } from 'node:net'
 import { inferenceProvider } from './openai.ts'
+import { DEFAULT_FOUNDATION_TIMEOUT_MS, validateFoundationTimeoutMs } from './foundation-limits.ts'
 
 export async function runtimeConfig(root: string) {
   const production = process.env.NODE_ENV === 'production'
@@ -26,6 +27,11 @@ export async function runtimeConfig(root: string) {
     && !(localContainer && host === '0.0.0.0')) throw new Error('El modo de desarrollo solo puede escuchar en loopback salvo T3_LOCAL_CONTAINER explícito.')
   const trustedProxyIPs = (process.env.T3_TRUSTED_PROXY_IPS ?? '').split(',').map(value => value.trim()).filter(Boolean)
   if (trustedProxyIPs.some(value => !isIP(value) || value.includes('%'))) throw new Error('T3_TRUSTED_PROXY_IPS acepta únicamente IPs exactas separadas por comas; no CIDR, hosts, zonas ni comodines.')
+  const foundationTimeoutOverride = process.env.T3_FOUNDATION_TIMEOUT_MS
+  if (foundationTimeoutOverride !== undefined && (production || !['127.0.0.1', 'localhost', '[::1]'].includes(origin.hostname))) {
+    throw new Error('T3_FOUNDATION_TIMEOUT_MS solo puede configurarse en desarrollo local con origen web loopback.')
+  }
+  const foundationTimeoutMs = validateFoundationTimeoutMs(foundationTimeoutOverride === undefined ? DEFAULT_FOUNDATION_TIMEOUT_MS : Number(foundationTimeoutOverride))
   await mkdir(accountDirectory, { recursive: true, mode: 0o700 })
   let secret = process.env.T3_AUTH_SECRET
   if (!secret && production) throw new Error('Production requiere T3_AUTH_SECRET aleatorio (mínimo 32 caracteres).')
@@ -77,5 +83,5 @@ export async function runtimeConfig(root: string) {
   }
   if (billingMode === 'sandbox' && (!billing.accessToken || !billing.webhookSecret || billing.webhookSecret.length < 32 || !billing.payerEmail || origin.protocol !== 'https:')) throw new Error('Mercado Pago sandbox requiere credenciales de prueba, firma webhook, email comprador de prueba y HTTPS.')
   const libraryMaxBytes = limit('T3_LIBRARY_MAX_MIB', 1536) * 1024 * 1024
-  return { libraryMaxBytes, creditConfig, billing, directory, accountDirectory, host, port, publicURL: origin.origin, secret, production, generation, trustedProxyIPs, databaseURL: process.env.T3_DATABASE_URL }
+  return { foundationTimeoutMs, libraryMaxBytes, creditConfig, billing, directory, accountDirectory, host, port, publicURL: origin.origin, secret, production, generation, trustedProxyIPs, databaseURL: process.env.T3_DATABASE_URL }
 }

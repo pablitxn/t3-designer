@@ -25,6 +25,9 @@ export const SiteBuildingSchema = z.object({
   id, rnbId: id.nullable(), isTarget: z.boolean(), label: id,
   footprint: polygon, holes: z.array(polygon).optional(),
   height: positive, roofHeight: nonnegative,
+  /** Undirected ridge axis, clockwise from site north: 0 N-S, 90 E-W.
+   * Omit when unsupported; older snapshots keep longest-edge inference. */
+  roofRidgeAzimuthDeg: number.min(0).lt(180).optional(),
   groundAltitude: number.nullable(), groundOffset: number,
   floors: nonnegative.int().nullable(),
   planarAccuracy: nonnegative.nullable(), verticalAccuracy: nonnegative.nullable(),

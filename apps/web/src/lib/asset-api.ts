@@ -37,8 +37,10 @@ async function request<T>(path: string, body?: unknown, signal?: AbortSignal, id
 export const assetApi = {
   health: (signal?: AbortSignal) => request<Health>('/health', undefined, signal),
   jobs: (signal?: AbortSignal) => request<{ jobs: Job[] }>('/jobs', undefined, signal),
+  job: (id: string, signal?: AbortSignal) => request<{ job: Job }>(`/jobs/${encodeURIComponent(id)}`, undefined, signal).then(result => result.job),
   events: (id: string, after = 0, signal?: AbortSignal) => request<{ events: JobEvent[] }>(`/jobs/${encodeURIComponent(id)}/events?after=${after}`, undefined, signal),
   assets: (signal?: AbortSignal) => request<{ assets: Asset[] }>('/assets', undefined, signal),
+  asset: (id: string, signal?: AbortSignal) => request<{ asset: Asset }>(`/assets/${encodeURIComponent(id)}`, undefined, signal).then(result => result.asset),
   create: (input: CreateJobInput, key: string = crypto.randomUUID()) => request<{ job: Job }>('/jobs', input, undefined, key),
   reference: (id: string, signal?: AbortSignal) => request<{ reference: ReferenceImage }>(`/references/${encodeURIComponent(id)}`, undefined, signal),
   uploadReference: (name: string, dataUrl: string, signal?: AbortSignal) => request<{ reference: ReferenceImage }>('/references', { name, dataUrl }, signal),

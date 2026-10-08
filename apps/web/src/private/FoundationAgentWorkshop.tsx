@@ -59,7 +59,7 @@ export function FoundationAgentWorkshop({ projectId, target, revision, language,
   const [history, setHistory] = useState<FoundationAgentHistory | null>(null)
   const [credits, setCredits] = useState<CreditSummary | null>(null)
   const [enabled, setEnabled] = useState(false)
-  const [selectedRunId, setSelectedRunId] = useState<string | null>(null)
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(() => new URLSearchParams(window.location.search).get('runId'))
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null)
   const [iterationIndex, setIterationIndex] = useState<number | null>(null)
   const [instructions, setInstructions] = useState('')
@@ -88,11 +88,7 @@ export function FoundationAgentWorkshop({ projectId, target, revision, language,
       if (signal.aborted || !mounted.current || observedGeneration !== generation.current) return
       const settled = data.runs.some(run => !active(run) && currentHistory.current?.runs.some(previous => previous.id === run.id && active(previous)))
       currentHistory.current = data; setHistory(data); setOffline(false); setError(previous => previous === c.loadFailed ? '' : previous)
-      if (settled) {
-        window.dispatchEvent(new Event('t3:credits-changed'))
-        const summary = await request<CreditSummary>('/api/credits', { signal })
-        if (!signal.aborted && mounted.current) setCredits(summary)
-      }
+      if (settled) window.dispatchEvent(new Event('t3:credits-changed'))
     } finally { if (loadPending.current === signal) loadPending.current = undefined }
   }, [projectId, c.loadFailed])
 
@@ -111,6 +107,20 @@ export function FoundationAgentWorkshop({ projectId, target, revision, language,
     void refreshWorkshop(abort.signal)
     return () => { mounted.current = false; abort.abort(); mutationAbort.current?.abort() }
   }, [refreshWorkshop])
+
+  useEffect(() => {
+    // A terminal history update stops polling; its cleanup must not abort the balance refresh.
+    const abort = new AbortController()
+    let latest = 0
+    const refresh = () => {
+      const sequence = ++latest
+      void request<CreditSummary>('/api/credits', { signal: abort.signal }).then(summary => {
+        if (!abort.signal.aborted && mounted.current && sequence === latest) setCredits(summary)
+      }).catch(() => { /* The completed action remains valid even when balance refresh fails. */ })
+    }
+    window.addEventListener('t3:credits-changed', refresh)
+    return () => { abort.abort(); window.removeEventListener('t3:credits-changed', refresh) }
+  }, [])
 
   const runs = (history?.runs ?? []).filter(run => run.target === target)
   const versions = (history?.versions ?? []).filter(version => version.target === target)

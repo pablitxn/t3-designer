@@ -2,6 +2,7 @@ import publicDemo from './public-assets.ts'
 
 export default {
   publicDemo,
+  selection: { jobLoading: 'Chargement du travail demandé…', assetLoading: 'Chargement de l’objet demandé…', jobMissing: 'Le travail demandé est introuvable ou vous n’y avez pas accès.', assetMissing: 'L’objet demandé est introuvable ou vous n’y avez pas accès.', unavailable: 'Impossible d’ouvrir l’élément demandé. Réessayez.', recent: 'Afficher les éléments les plus récents' },
   eyebrow: 'Votre atelier d’objets',
   title: 'Du produit à votre bibliothèque',
   description: 'Collez un lien, ajoutez les détails et créez un objet 3D à partir des dimensions et références disponibles pour votre projet.',

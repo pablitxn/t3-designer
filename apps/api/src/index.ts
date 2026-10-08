@@ -1,3 +1,4 @@
+import { UsageStore } from './usage.ts'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Health } from '@t3-designer/asset-schema'
@@ -30,10 +31,12 @@ async function main() {
   const releaseLock = acquireLibraryLock(directory)
   const store = new AssetStore(resolve(directory, 'library.sqlite'))
   store.recoverInterrupted()
+  const usage = new UsageStore(resolve(directory, 'usage.sqlite'))
+  usage.recoverInterrupted()
   const credits = accounts.credits
   await migrateBilling(database)
   const billing = new BillingService(database, credits, config.billing)
-  const metering = new GenerationCredits(credits, store)
+  const metering = new GenerationCredits(credits, store, usage)
   await metering.recover()
   const capacityReserve = 256 * 1024 * 1024
   const references = new ReferenceLibrary(directory, { beforeSave: bytes => ensureLibraryCapacity(directory, config.libraryMaxBytes, capacityReserve + bytes) })
@@ -73,17 +76,18 @@ async function main() {
       return result
     },
   })
-  const projectGenerations = new ProjectGenerations({ path: resolve(directory, 'project-generations.sqlite'), database, credits, store, projects, enabled: config.generation.enabled && inferenceProvider() === 'openai', limits: config.generation })
+  const projectGenerations = new ProjectGenerations({ usage, path: resolve(directory, 'project-generations.sqlite'), database, credits, store, projects, enabled: config.generation.enabled && inferenceProvider() === 'openai', limits: config.generation })
   await projectGenerations.recover()
-  const foundationAgent = new FoundationAgent({
+  const foundationAgent = new FoundationAgent({ usage,
     path: resolve(directory, 'foundation-agent.sqlite'), database, credits, store, projects,
+    timeoutMs: config.foundationTimeoutMs,
     // runtimeConfig restricts subscription sessions to a loopback development
     // host and web origin; production still requires the hosted API provider.
     enabled: config.generation.enabled, limits: config.generation,
     generate: createFoundationGenerator({ references }),
   })
   await foundationAgent.recover()
-  const worker = new AssetWorker({
+  const worker = new AssetWorker({ usage,
     store, directory, planner: planAsset, renderer: createRenderer(root), reviewer: reviewAsset, referenceLoader: references.prepare.bind(references),
     beforeRender: () => ensureLibraryCapacity(directory, config.libraryMaxBytes),
     beforePublish: bytes => ensureLibraryCapacity(directory, config.libraryMaxBytes, capacityReserve + bytes),
@@ -113,7 +117,7 @@ async function main() {
     })().finally(() => { healthPending = null })
     return healthPending
   }
-  const server = createApi({ store, worker, health, references, access: accounts, projects, publicOrigin: config.publicURL, production: config.production, generation: config.generation, credits, metering, projectGenerations, foundationAgent, billing, billingWebhookSecret: config.billing.webhookSecret })
+  const server = createApi({ usage: { report: (userId, query) => usage.report(database, userId, query) }, store, worker, health, references, access: accounts, projects, publicOrigin: config.publicURL, production: config.production, generation: config.generation, credits, metering, projectGenerations, foundationAgent, billing, billingWebhookSecret: config.billing.webhookSecret })
   const reconciliation = setInterval(() => {
     void metering.exclusive(async () => { await metering.recover(); await projectGenerations.reconcile(); await foundationAgent.reconcile() }).catch(() => console.error('Credit reconciliation temporarily unavailable'))
   }, 30000)
@@ -127,6 +131,7 @@ async function main() {
       new Promise<void>((done) => server.close(() => done())),
       worker.close(), projectGenerations.close(), foundationAgent.close(),
     ])
+    usage.close()
     store.close()
     await database.close()
     releaseLock()

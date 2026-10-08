@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process'
+import { beginUsageCall, invalidateUsageCall, type UsageStage } from './usage.ts'
 import { inferenceProvider, openaiVisualTurn } from './openai.ts'
 import { fileURLToPath } from 'node:url'
 import { isDeepStrictEqual, promisify } from 'node:util'
@@ -72,6 +73,8 @@ export async function getCodexHealth(): Promise<{ available: boolean; authentica
 }
 
 export type PlanOptions = {
+  usageStage?: UsageStage
+  usageIteration?: number
   signal: AbortSignal
   onInference?: () => void
   onProgress: (stage: string) => void
@@ -198,7 +201,7 @@ export class CodexPlanningError extends Error {
 }
 
 export function parsePlanResponse(response: string, input: CreateJobInput): AssetPlan {
-  if (response.length > 200_000) throw new CodexPlanningError('invalid_plan', 'Codex devolvió una propuesta demasiado grande. Intentalo de nuevo con una descripción más breve.')
+  if (response.length > 200_000) { invalidateUsageCall(); throw new CodexPlanningError('invalid_plan', 'Codex devolvió una propuesta demasiado grande. Intentalo de nuevo con una descripción más breve.') }
   try {
     const envelope = JSON.parse(response) as Record<string, unknown>
     const recipe = envelope.status === 'ready' && typeof envelope.recipeJson === 'string'
@@ -229,12 +232,13 @@ export function parsePlanResponse(response: string, input: CreateJobInput): Asse
     return plan
   } catch (error) {
     if (error instanceof CodexPlanningError) throw error
+    invalidateUsageCall()
     throw new CodexPlanningError('invalid_plan', 'Codex devolvió una propuesta que no cumple las reglas del modelo. Podés reintentar o aclarar las medidas y el producto.')
   }
 }
 
 export function parseReviewResponse(response: string, request: AssetRequest): VisualReview {
-  if (response.length > 200_000) throw new CodexPlanningError('invalid_review', 'La revisión visual devolvió una respuesta demasiado grande.')
+  if (response.length > 200_000) { invalidateUsageCall(); throw new CodexPlanningError('invalid_review', 'La revisión visual devolvió una respuesta demasiado grande.') }
   try {
     const envelope = JSON.parse(response) as Record<string, unknown>
     if (typeof envelope.recipeJson !== 'string' || (envelope.verdict !== 'revise' && envelope.recipeJson.trim())) {
@@ -267,6 +271,7 @@ export function parseReviewResponse(response: string, request: AssetRequest): Vi
     return review
   } catch (error) {
     if (error instanceof CodexPlanningError) throw error
+    invalidateUsageCall()
     throw new CodexPlanningError('invalid_review', 'La revisión visual no produjo una corrección válida. El modelo queda pendiente de revisión.')
   }
 }
@@ -305,10 +310,12 @@ export async function runVisualTurn(input: UserInput[], outputSchema: unknown, o
   const abort = () => controller.abort(options.signal.reason)
   options.signal.addEventListener('abort', abort, { once: true })
   let timedOut = false
-  const timer = setTimeout(() => { timedOut = true; controller.abort() }, timeoutMs)
+  const timer = setTimeout(() => { timedOut = true; controller.abort(new DOMException('Model call timed out', 'TimeoutError')) }, timeoutMs)
   timer.unref()
+  let usage: ReturnType<typeof beginUsageCall>
   try {
     if (provider === 'openai') return await openaiVisualTurn(input, outputSchema, { ...options, signal: controller.signal }, webSearch, fetcher)
+    usage = beginUsageCall('codex-local', options, process.env.T3_CODEX_MODEL || null)
     options.onInference?.()
     const codex = new Codex({ codexPathOverride: wrapper, env: codexEnvironment(), config: codexConfig })
     const thread = codex.startThread({
@@ -318,25 +325,32 @@ export async function runVisualTurn(input: UserInput[], outputSchema: unknown, o
       networkAccessEnabled: false, webSearchMode: webSearch ? 'live' : 'disabled', modelReasoningEffort: options.reasoningEffort ?? 'medium',
     })
     const { events } = await thread.runStreamed(input, { outputSchema, signal: controller.signal })
-    let finalResponse = ''
+    let finalResponse = '', oversized = false
     for await (const event of events) {
+      if (event.type === 'turn.completed') usage?.observe(event.usage)
       controller.signal.throwIfAborted()
       if (event.type === 'item.started' && event.item.type === 'web_search') options.onProgress('Revisando las referencias y medidas…')
       const activity = webActivity(event)
       if (activity) options.onEvent?.(activity)
       if (event.type === 'item.completed' && event.item.type === 'agent_message') {
-        if (event.item.text.length > 200_000) throw new Error('Codex returned an oversized result')
-        finalResponse = event.item.text
+        oversized = event.item.text.length > 200_000
+        finalResponse = oversized ? '' : event.item.text
       }
       if (event.type === 'turn.failed') throw new Error(event.error.message)
       if (event.type === 'error') throw new Error(event.message)
     }
     controller.signal.throwIfAborted()
-    if (!finalResponse.trim()) throw new Error('Codex returned an empty result')
+    if (oversized || !finalResponse.trim()) {
+      usage?.finish('invalid')
+      throw new Error('Codex returned an invalid result')
+    }
+    usage?.finish('succeeded')
     return finalResponse
   } catch (error) {
+    const timeout = timedOut || options.signal.reason?.name === 'TimeoutError'
+    usage?.finish(timeout ? 'interrupted' : options.signal.aborted ? 'cancelled' : 'failed')
+    if (timeout) throw new CodexPlanningError('timeout', 'El análisis visual tardó demasiado. Podés reintentar con referencias más claras y una descripción breve.')
     if (options.signal.aborted) throw new CodexPlanningError('cancelled', 'La generación se canceló.')
-    if (timedOut) throw new CodexPlanningError('timeout', 'El análisis visual tardó demasiado. Podés reintentar con referencias más claras y una descripción breve.')
     throw planningError(error)
   } finally {
     clearTimeout(timer)
@@ -357,7 +371,7 @@ export async function planAsset(input: CreateJobInput, options: PlanOptions): Pr
     }
   }
   options.onProgress('Comparando las fotos del producto y preparando su geometría…')
-  const response = await runVisualTurn(multimodalInput(productPrompt(input, options.previous), references, options.previous?.renderPaths), planOutputSchema, options, true)
+  const response = await runVisualTurn(multimodalInput(productPrompt(input, options.previous), references, options.previous?.renderPaths), planOutputSchema, { ...options, usageStage: options.previous ? 'correction' : 'analysis', usageIteration: 1 }, true)
   options.onProgress('Comprobando las medidas y la receta del modelo…')
   const plan = parsePlanResponse(response, options.previous && !input.dimensions
     ? { ...input, dimensions: options.previous.recipe.dimensions } : input)
@@ -384,6 +398,6 @@ export async function reviewAsset(request: AssetRequest, options: ReviewOptions)
     questions: ['Volvé a generar las tres vistas del modelo antes de repetir la revisión.'],
   }
   options.onProgress(`Comparando el modelo con las fotos: revisión ${options.iteration}…`)
-  const response = await runVisualTurn(multimodalInput(reviewPrompt(request, options.iteration), references, options.renderPaths), reviewOutputSchema, options, false)
+  const response = await runVisualTurn(multimodalInput(reviewPrompt(request, options.iteration), references, options.renderPaths), reviewOutputSchema, { ...options, usageStage: 'review', usageIteration: options.iteration }, false)
   return parseReviewResponse(response, request)
 }

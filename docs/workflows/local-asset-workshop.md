@@ -15,6 +15,12 @@ to activate the first administrator, assign an existing library and enable
 generation with credits and request limits. The same pipeline runs locally and
 in the single-worker production container.
 
+The private navigation also exposes [Consumo](../credits-billing.md#consumo-privado-de-generaciones)
+at `/app/usage`: application credits and provider-reported model usage, with one
+row per attempt and its individual calls. It only covers generations invoked by
+T3, not the total usage of the operator's Codex account. Keep `usage.sqlite` with
+the account/job databases and library files when backing up or restoring.
+
 ## Start
 
 Prerequisites: Node 24+, pnpm 12.7.0, Blender and an OpenAI API key configured
@@ -181,6 +187,11 @@ with the ChatGPT subscription and keep both the API host and browser origin on
 loopback. This adapter supports furniture and foundation workshops locally and
 is rejected in production. Hosted project generation still requires the API
 provider.
+For a subscription-only session, set the provider explicitly and launch the API
+without inherited `OPENAI_API_KEY` or `CODEX_API_KEY`. The package start/dev commands
+load the root `.env`; use a dedicated sanitized launcher or invoke
+`node apps/api/src/index.ts` without `--env-file` instead. Keep the backend out of
+watch mode during long generations. There is no fallback to a paid API request.
 Its runner inherits an allowlist of environment variables and the existing
 Codex auth location, but removes API-key credentials. The wrapper ignores user
 configuration, project rules, MCP servers and hooks for these jobs. Codex uses
@@ -213,7 +224,8 @@ Vite's `T3_API_PROXY_URL` override must be set in its launching shell. See
 | `CODEX_HOME` | existing CLI auth location if customized; never copy its credentials into this repo |
 
 Blender has a ten-minute timeout and renders 512 px previews at 24 samples.
-One job runs at a time. Shutdown aborts the worker and releases the library lock.
+One generation pipeline runs at a time across furniture, foundation and conceptual
+project workshops. Shutdown aborts active work and releases the library lock.
 The hosted adapter requires an API key; the application never creates keys.
 Asset drafts cost 20 credits and revisions 10 by default. Automatic visual
 corrections stay within the same attempt price. An analysis that asks for more

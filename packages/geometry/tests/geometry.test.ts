@@ -5,6 +5,7 @@ import {
   polygonArea,
   polygonBounds,
   polygonCentroid,
+  roofRidgeFrame,
   segmentWall,
   wallCenter,
   wallLength,
@@ -16,6 +17,20 @@ const close = (actual: number, expected: number) => assert.ok(Math.abs(actual - 
 const wall: Wall = { id: 'wall', from: [0, 0], to: [5, 0], height: 3, thickness: 0.12, kind: 'interior', estimated: true }
 const door: Door = { id: 'door', wallId: 'wall', offset: 0.5, width: 1, height: 2.1, hinge: 'start', opensToward: 1, locationConfidence: 'schematic', estimated: true }
 const window: Window = { id: 'window', wallId: 'wall', offset: 2.5, width: 1.5, height: 1.2, sillHeight: 0.9, estimated: true }
+
+test('explicit ridge frames use north clockwise independently of footprint winding and longest edges', () => {
+  const footprint: Point2D[] = [[0, 0], [11.0236, 0], [11.0236, 6.731], [0, 6.731]]
+  assert.deepEqual(roofRidgeFrame({ footprint }), { ridgeAxis: [1, 0], ridgeOffsetM: 3.3655, halfSpanM: 3.3655 })
+  for (const ring of [footprint, [...footprint].reverse()]) {
+    const north = roofRidgeFrame({ footprint: ring, roofRidgeAzimuthDeg: 0 })
+    assert.deepEqual(north.ridgeAxis, [0, -1]); close(north.ridgeOffsetM, 5.5118); close(north.halfSpanM, 5.5118)
+    const east = roofRidgeFrame({ footprint: ring, roofRidgeAzimuthDeg: 90 })
+    close(east.ridgeAxis[0], 1); close(east.ridgeAxis[1], 0); close(east.halfSpanM, 3.3655)
+    const diagonal = roofRidgeFrame({ footprint: ring, roofRidgeAzimuthDeg: 45 })
+    close(diagonal.ridgeAxis[0], Math.SQRT1_2); close(diagonal.ridgeAxis[1], -Math.SQRT1_2)
+  }
+  assert.throws(() => roofRidgeFrame({ footprint, roofRidgeAzimuthDeg: NaN }), RangeError)
+})
 
 test('diagonal wall transforms local X onto its plan direction', () => {
   const diagonal = { from: [-2, 1] as Point2D, to: [1, 5] as Point2D }

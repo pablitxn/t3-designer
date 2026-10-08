@@ -62,10 +62,106 @@ Una vez vencida la prueba, siguen disponibles los proyectos y las funciones
 manuales. Los créditos comprados o concedidos con otro vencimiento conservan sus
 propias condiciones.
 
-Los edificios generados contienen una envolvente aproximada y una sola planta
-interior. Las dimensiones, ubicación y zona horaria las indica la persona; las
+La ruta de proyectos conceptuales genera una envolvente aproximada y una sola
+planta interior. Los agentes de **Nuevo proyecto** tienen su propio flujo de bases
+y planos por planta. Las dimensiones, ubicación y zona horaria las indica la persona; las
 aberturas y distribuciones son estimaciones. No es un relevamiento ni un plano
 apto para construir.
+
+## Consumo privado de generaciones
+
+La navegación privada ofrece **Consumo**, en `/app/usage`. Muestra únicamente las
+operaciones de la cuenta autenticada: compartir un proyecto no comparte la
+facturación ni la actividad de otros usuarios. Su alcance son las llamadas al
+modelo invocadas por T3 para vivienda, edificio y muebles; no incluye los chats
+ni subagentes usados para desarrollar T3, ni representa el consumo total de una
+cuenta de Codex.
+
+`GET /api/usage` devuelve `totals`, `operations`, `projects` y `pagination`.
+Acepta `from`, `to`, `projectId`, `operationType`, `provider`, `status`, `limit`
+(1–100) y `offset`. El período selecciona operaciones por la fecha de creación
+de su reserva: `from` inclusivo y `to` exclusivo. Cada fila representa un intento
+y permite inspeccionar todas sus llamadas. Los totales se calculan sobre todas
+las operaciones filtradas antes de paginar, sin el límite de los últimos
+movimientos del historial de créditos. La duración suma el tiempo observado de
+las llamadas, no el tiempo de Blender ni la duración completa del trabajo.
+
+Los créditos siguen teniendo una única fuente de verdad: las reservas y el
+ledger existentes. Consumo lee ambos en una misma consulta para no duplicar una
+reserva que se confirma durante la lectura. **Consumidos** corresponde a reservas
+confirmadas; **Reservados**, al saldo todavía retenido; **Devueltos efectivamente**,
+al importe registrado por el reembolso. Una concesión vencida o revocada puede
+impedir devolver parte o todo el importe reservado. Un reembolso de créditos T3
+no elimina los tokens observados. Reutilizar un mueble en varios proyectos tampoco
+vuelve a contabilizar su generación.
+
+### Registro y procedencia
+
+`usage.sqlite`, dentro de la biblioteca configurada, contiene dos tablas:
+
+| Tabla | Contenido |
+| --- | --- |
+| `model_usage_operation` | Operación de créditos, usuario, proyecto cuando corresponde, trabajo/run, intento, versión padre, asset publicado y estado del intento |
+| `model_usage_call` | ID de llamada y operación, etapa, iteración, proveedor, modalidad de autenticación, modelos solicitado/efectivo, inicio/fin/duración, estado y métricas |
+
+Los trabajadores persisten el inicio de cada llamada antes de invocar al
+proveedor. Si esa escritura falla, no se inicia la inferencia. El SDK local
+registra `turn.completed.usage` con procedencia `codex.turn.completed`; Responses
+registra `usage` con procedencia `openai.responses`, también cuando la respuesta
+terminal es incompleta o fallida. La captura precede al parseo y a la validación
+de la propuesta: una respuesta inválida puede tener consumo medido. El estado
+del intento es independiente de cada llamada; una corrección posterior puede
+completar un intento que contiene una respuesta inválida. `needs_input` indica
+que el intento necesita una respuesta, aunque la llamada al proveedor haya
+terminado correctamente y corresponda confirmar sus créditos. La conciliación
+puede precisar una antigua etiqueta `succeeded` usando el estado persistido de
+ese mismo intento, sin cambiar sus llamadas ni sus créditos.
+
+| Métrica persistida | Codex `usage` | Responses `usage` |
+| --- | --- | --- |
+| `inputTokens` | `input_tokens` | `input_tokens` |
+| `outputTokens` | `output_tokens` | `output_tokens` |
+| `cachedInputTokens` | `cached_input_tokens` | `input_tokens_details.cached_tokens` |
+| `cacheWriteInputTokens` | `cache_write_input_tokens` | `input_tokens_details.cache_write_tokens`, si se informa |
+| `reasoningOutputTokens` | `reasoning_output_tokens` | `output_tokens_details.reasoning_tokens` |
+
+El SDK instalado contempla los cinco campos de Codex; esto no demuestra que el
+runtime entregue todos en una generación real. La verificación del subconjunto
+efectivamente observado pertenece a la evidencia de cada ejecución. El modelo
+efectivo permanece ausente cuando el proveedor no lo informa; no se copia el
+modelo solicitado para completar ese dato.
+
+Los valores ausentes son `null`, nunca cero estimado. Una llamada tiene medición
+**completa** cuando se conocen entrada y salida, **parcial** cuando solo hay alguna
+métrica, y **sin medición** cuando no se recibió ninguna. Los desgloses opcionales
+pueden faltar aun con entrada/salida completas. Caché y razonamiento no se suman
+de nuevo a entrada/salida. Un fallo, cancelación o timeout sin uso terminal no
+demuestra consumo cero; tras un reinicio tampoco se inventa la hora de fin.
+
+Un evento repetido completa únicamente campos ausentes, sin sumar otra vez los
+tokens. Cada reintento conserva una operación de créditos diferente y el vínculo
+histórico en `job_credit_history`; una revisión conserva su versión padre. Los
+datos históricos que nunca se registraron permanecen desconocidos. Resguardar
+`usage.sqlite` junto con las bases de cuentas, trabajos y versiones y los archivos
+de la biblioteca; restaurar solo una de estas partes puede perder sus relaciones.
+El registro de consumo no guarda prompts, imágenes, claves ni razonamiento.
+
+Para `codex-local` se muestra **Uso mediante suscripción de Codex**. No se calculan
+dólares con tarifas API, porcentajes de cuota restante ni facturas del proveedor.
+
+### Verificación de medición
+
+```sh
+node --test apps/api/test/usage.test.ts apps/api/test/generation-credits.test.ts
+```
+
+Estas pruebas usan SQLite real, un ejecutable Codex simulado y transportes
+Responses controlados. Verifican uso antes de validar, datos ausentes, eventos
+duplicados, interrupciones/reinicio, reintentos y versiones, devoluciones reales,
+aislamiento entre cuentas y totales con paginación. No realizan generaciones
+pagadas mediante API y no acreditan el recorrido E2E real de un proyecto. Las
+ejecuciones reales, sus campos observados y la reapertura del proyecto requieren
+evidencia de integración independiente.
 
 ## Qué se considera un pago
 

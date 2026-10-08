@@ -19,6 +19,8 @@ export interface BuildingFootprint {
   height: number;
   /** Range between IGN maximum and minimum roof elevation, not roof shape. */
   roofHeight: number;
+  /** Undirected ridge axis clockwise from north, [0, 180); absent means inferred. */
+  roofRidgeAzimuthDeg?: number;
   groundAltitude: number | null;
   groundOffset: number;
   floors: number | null;

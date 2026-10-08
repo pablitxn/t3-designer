@@ -1,4 +1,5 @@
 const en = {
+  staleRegistration: 'The home has changed. Correct its alignment in the building chat and apply the revised proposal. The previous scene is kept as a reference until both versions match again.',
   reviewTitle: 'Original plans and sources', reviewIntro: 'Review the information used to reconstruct your project. To correct a modeled base, include the new measurements or source links in the agent chat.',
   cadastralReference: 'Cadastral reference (optional)', cadastralReferenceHelp: 'For Argentina, copy the exact parcel reference returned by the official research. Save changes, then continue with the building agent to confirm that record. An approximate address alone does not select a parcel.',
   title: 'The foundations of your project', intro: 'First, document your home and the building around it. The 3D model, furniture and layout versions will grow from these two parts.',
@@ -12,6 +13,7 @@ const en = {
 } as const
 export type FoundationsCopy = { [K in keyof typeof en]: string }
 const es: FoundationsCopy = {
+  staleRegistration: 'La vivienda cambió. Corregí su alineación desde el chat del edificio y aplicá la propuesta revisada. Conservamos la escena anterior como referencia hasta que ambas versiones vuelvan a coincidir.',
   reviewTitle: 'Planos y fuentes originales', reviewIntro: 'Consultá la información que se usó para reconstruir tu proyecto. Para corregir una base modelada, incluí las nuevas medidas o enlaces de referencia en el chat del agente.',
   cadastralReference: 'Referencia catastral (opcional)', cadastralReferenceHelp: 'Para Argentina, copiá la referencia exacta de la parcela que devuelve la consulta oficial. Guardá los cambios y continuá con el agente del edificio para confirmar ese registro. Una dirección aproximada no selecciona una parcela.',
   title: 'Las bases de tu proyecto', intro: 'Primero, documentá tu casa y el edificio que la rodea. El modelo 3D, los muebles y las versiones de distribución van a partir de estas dos partes.',
@@ -24,6 +26,7 @@ const es: FoundationsCopy = {
   next: 'Cómo sigue', pendingTitle: 'Tu proyecto se está documentando', pending: 'Guardá tus planos y dirección; después iniciá cada agente abajo. Revisá sus propuestas y pedí correcciones por chat.', future: 'Cuando ambas partes estén modeladas y revisadas, vas a poder recorrer la casa, usar el taller de muebles y crear versiones de distribución a partir de esa base.', plansCount: '{count} de {total} plantas con planos', addressPresent: 'Dirección y país registrados', addressMissing: 'Falta completar dirección y país', modelPending: 'Modelado de vivienda y edificio pendiente', draft: 'Documentación', measurements: 'Medidas opcionales', levelDefault: 'Planta {number}',
 }
 const fr: FoundationsCopy = {
+  staleRegistration: 'Le logement a changé. Corrigez son alignement dans le chat du bâtiment et appliquez la proposition révisée. La scène précédente est conservée comme référence jusqu’à ce que les deux versions correspondent à nouveau.',
   reviewTitle: 'Plans et sources d’origine', reviewIntro: 'Consultez les informations utilisées pour reconstruire le projet. Pour corriger une base modélisée, indiquez les nouvelles mesures ou les liens de référence dans le chat de l’agent.',
   cadastralReference: 'Référence cadastrale (facultative)', cadastralReferenceHelp: 'Pour l’Argentine, copiez la référence exacte de la parcelle renvoyée par la recherche officielle. Enregistrez, puis poursuivez avec l’agent du bâtiment pour confirmer ce registre. Une adresse approximative ne sélectionne pas une parcelle.',
   title: 'Les bases de votre projet', intro: 'Documentez d’abord votre logement et son bâtiment. Le modèle 3D, les meubles et les variantes d’agencement partiront de ces deux éléments.',

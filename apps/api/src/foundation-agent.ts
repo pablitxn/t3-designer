@@ -1,3 +1,6 @@
+import { withUsage, type UsageStore } from './usage.ts'
+import { acquireGenerationSlot } from './generation-coordinator.ts'
+import { DEFAULT_FOUNDATION_TIMEOUT_MS, validateFoundationTimeoutMs } from './foundation-limits.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import {
@@ -32,6 +35,7 @@ const fingerprint = (value: unknown) => createHash('sha256').update(JSON.stringi
 /** One durable attempt per chat turn. Intermediate reviews survive a restart;
  * only a terminal version can be accepted into the project by the user. */
 export class FoundationAgent {
+  private readonly usage?: UsageStore
   private readonly db: DatabaseSync
   private readonly accounts: AppDatabase
   private readonly credits: CreditService
@@ -49,11 +53,10 @@ export class FoundationAgent {
   constructor(options: {
     path: string; database: AppDatabase; credits: CreditService; store: AssetStore; projects: Projects
     enabled: boolean; limits: { dailyLimit: number; globalDailyLimit: number; pendingLimit: number }; generate: FoundationGenerator
-    timeoutMs?: number
+    timeoutMs?: number; usage?: UsageStore
   }) {
-    const timeoutMs = options.timeoutMs ?? 30 * 60_000
-    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30 * 60_000) throw new Error('El tiempo máximo del agente debe estar entre 1 ms y 30 minutos.')
-    this.timeoutMs = timeoutMs
+    this.timeoutMs = validateFoundationTimeoutMs(options.timeoutMs ?? DEFAULT_FOUNDATION_TIMEOUT_MS)
+    this.usage = options.usage
     this.db = new DatabaseSync(options.path)
     this.accounts = options.database; this.credits = options.credits; this.store = options.store
     this.projects = options.projects; this.enabled = options.enabled; this.limits = options.limits; this.generate = options.generate
@@ -184,9 +187,10 @@ export class FoundationAgent {
           sourceRevision: project.revision, status: 'queued', createdAt: now, updatedAt: now, error: null,
           events: [], iterations: [], versionId: null,
         }
+        this.usage?.operation({ id: operationId(id), userId: user.id, kind: validated.target === 'dwelling' ? 'apartment' : 'building', projectId, projectLabel: project.name, jobId: null, runId: id, assetId: null, parentId: validated.parentVersionId ?? null, attempt: this.rows().filter(previous => previous.projectId === projectId && previous.target === validated.target && previous.userId === user.id).length + 1 })
         this.db.prepare('INSERT INTO foundation_agent_run(id,project_id,user_id,request_key,document) VALUES(?,?,?,?,?)').run(id, projectId, user.id, requestKey, JSON.stringify(row))
         return this.visible(row)
-      } catch (error) { await this.credits.refund(operationId(id)); throw error }
+      } catch (error) { this.usage?.settleOperation(operationId(id), 'failed'); await this.credits.refund(operationId(id)); throw error }
     })
     this.kick(); return job
   }
@@ -205,6 +209,7 @@ export class FoundationAgent {
     })
   }
   private async settle(row: Row): Promise<void> {
+    if (!active(row)) this.usage?.settleOperation(operationId(row.id), row.status === 'completed' ? 'succeeded' : row.status === 'needs_input' ? 'needs_input' : row.status === 'cancelled' ? 'cancelled' : 'failed')
     const reservation = await this.credits.reservation(operationId(row.id))
     if (reservation?.state !== 'reserved') return
     if (row.status === 'completed' || (row.status === 'needs_input' && row.inferenceStarted)) await this.credits.commit(reservation.id)
@@ -220,7 +225,9 @@ export class FoundationAgent {
       }
       // Covers a crash after reserving credits but before writing the queue row.
       for (const reservation of await this.credits.listReservations()) {
-        if (reservation.id.startsWith('foundation:') && !this.row(reservation.id.slice('foundation:'.length))) await this.credits.refund(reservation.id)
+        if (reservation.id.startsWith('foundation:') && !this.row(reservation.id.slice('foundation:'.length))) {
+          this.usage?.settleOperation(reservation.id, 'failed'); await this.credits.refund(reservation.id)
+        }
       }
     })
   }
@@ -254,9 +261,14 @@ export class FoundationAgent {
       const row = this.rows().filter(item => item.status === 'queued').sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0]
       if (!row) return
       const controller = new AbortController(); this.current = { id: row.id, controller }
-      const deadline = AbortSignal.timeout(this.timeoutMs)
-      const signal = AbortSignal.any([controller.signal, deadline])
+      let releaseSlot: (() => void) | undefined
+      let deadline: AbortSignal | undefined
+      let signal = controller.signal
       try {
+        releaseSlot = await acquireGenerationSlot(controller.signal)
+        controller.signal.throwIfAborted()
+        deadline = AbortSignal.timeout(this.timeoutMs)
+        signal = AbortSignal.any([controller.signal, deadline])
         this.write({ ...row, status: 'running', updatedAt: new Date().toISOString() })
         await this.authorizedUser(row.userId, row.projectId)
         signal.throwIfAborted()
@@ -264,7 +276,7 @@ export class FoundationAgent {
         if (reservation?.state !== 'reserved' || reservation.userId !== row.userId || reservation.kind !== (row.target === 'dwelling' ? 'apartment' : 'building')) throw new Error('La reserva de créditos ya no está disponible.')
         const parentVersion = row.parentVersionId ? this.version(row.parentVersionId) ?? undefined : undefined
         const baselineVersion = this.baseline(parentVersion, row.projectId, row.target, row.foundationsFingerprint)
-        const result = FoundationGenerationResultSchema.parse(await this.generate({ project: row.project, target: row.target, message: row.message, parentVersion, baselineVersion,
+        const result = FoundationGenerationResultSchema.parse(await withUsage(this.usage, operationId(row.id), () => this.generate({ project: row.project, target: row.target, message: row.message, parentVersion, baselineVersion,
           conversation: this.conversation(parentVersion, row.projectId, row.target) }, {
           signal,
           onInference: () => { signal.throwIfAborted(); const current = this.row(row.id)!; if (active(current)) this.write({ ...current, inferenceStarted: true }) },
@@ -285,7 +297,7 @@ export class FoundationAgent {
             if (validated.candidate && validated.candidate.target !== row.target) throw new Error('La iteración pertenece a otra parte del proyecto.')
             this.write({ ...current, updatedAt: new Date().toISOString(), iterations: [...current.iterations.filter(item => item.index !== validated.index), validated] })
           },
-        }))
+        })))
         signal.throwIfAborted()
         const acquiredResearch = result.officialResearch ?? this.row(row.id)?.officialResearch
         if (acquiredResearch) {
@@ -310,7 +322,11 @@ export class FoundationAgent {
           const finalIteration = version.iterations.at(-1)
           if (version.status === 'ready' && (!version.candidate || !finalIteration?.review.passed
             || fingerprint(finalIteration.candidate) !== fingerprint(version.candidate))) throw new Error('La versión no tiene una revisión aprobada para este modelo.')
-          this.event(row.id, { kind: version.status === 'ready' ? 'complete' : 'question', message: version.summary })
+          const terminalEvent = { kind: version.status === 'ready' ? 'complete' as const : 'question' as const, message: version.summary.slice(0, 500) }
+          const previousEvent = current.events.at(-1)
+          // Generators can already emit their terminal summary. Avoid repeating
+          // only that adjacent event; earlier/distinct questions stay untouched.
+          if (previousEvent?.kind !== terminalEvent.kind || previousEvent.message !== terminalEvent.message) this.event(row.id, terminalEvent)
           const terminal: Row = { ...this.row(row.id)!, status: version.status === 'ready' ? 'completed' : 'needs_input',
             updatedAt: version.createdAt, versionId: version.id, iterations: version.iterations, error: null,
             ...(version.officialResearch ? { officialResearch: version.officialResearch } : {}) }
@@ -333,7 +349,7 @@ export class FoundationAgent {
           let preserve = current.status !== 'cancelled' && (!!draft?.candidate || !!current.officialResearch)
           // Retaining a draft must not bypass the publication access check.
           if (preserve) { try { await this.authorizedUser(row.userId, row.projectId) } catch { preserve = false } }
-          const message = deadline.aborted ? 'El intento alcanzó el límite de tiempo.' : 'No se pudo completar el intento.'
+          const message = deadline?.aborted ? 'El intento alcanzó el límite de tiempo.' : 'No se pudo completar el intento.'
           const error = preserve
             ? `${message} Se conservó el borrador para continuar desde el chat. Se devolvieron los créditos; todavía no se puede aceptar esta versión.`
             : 'No se pudo completar el intento. Se devolvieron los créditos; las versiones anteriores siguen disponibles.'
@@ -356,7 +372,7 @@ export class FoundationAgent {
           } catch (error) { this.db.exec('ROLLBACK'); throw error }
           await this.settle(failed)
         })
-      } finally { this.current = null }
+      } finally { releaseSlot?.(); this.current = null }
     }
   }
   async close(): Promise<void> {

@@ -43,3 +43,25 @@ test('subscription inference is limited to local loopback while hosted generatio
     assert.equal(hosted.production, true); assert.equal(hosted.generation.enabled, true)
   } finally { process.env = original; await rm(directory, { recursive: true, force: true }) }
 })
+
+test('foundation workflow deadline is bounded, explicitly local and independent of the per-call deadline', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 't3-foundation-timeout-config-')), original = process.env
+  t.after(async () => { process.env = original; await rm(directory, { recursive: true, force: true }) })
+  const config = async (env: Record<string, string> = {}) => {
+    process.env = { NODE_ENV: 'development', T3_AUTH_SECRET: 'x'.repeat(48), ...env }
+    return runtimeConfig(directory)
+  }
+  assert.equal((await config()).foundationTimeoutMs, 30 * 60_000)
+  for (const value of [1, 60 * 60_000, 2 * 60 * 60_000]) {
+    assert.equal((await config({ T3_FOUNDATION_TIMEOUT_MS: String(value) })).foundationTimeoutMs, value)
+  }
+  for (const value of ['', '0', '-1', '0.5', 'NaN', 'Infinity', '7200001', '9007199254740992']) {
+    await assert.rejects(config({ T3_FOUNDATION_TIMEOUT_MS: value }), /T3_FOUNDATION_TIMEOUT_MS.*entero/)
+  }
+  await assert.rejects(config({ T3_FOUNDATION_TIMEOUT_MS: '3600000', T3_PUBLIC_URL: 'https://remote.example' }), /desarrollo local/)
+  const production = { NODE_ENV: 'production', T3_PUBLIC_URL: 'https://remote.example', T3_DATABASE_URL: 'postgresql://db/example' }
+  assert.equal((await config(production)).foundationTimeoutMs, 30 * 60_000)
+  await assert.rejects(config({ ...production, T3_FOUNDATION_TIMEOUT_MS: '3600000' }), /desarrollo local/)
+  // The existing Codex setting controls furniture calls, not this workflow.
+  assert.equal((await config({ T3_CODEX_TIMEOUT_MS: '600000' })).foundationTimeoutMs, 30 * 60_000)
+})

@@ -4,7 +4,7 @@ import { Canvas, useThree } from '@react-three/fiber'
 import { Html, OrbitControls, useGLTF } from '@react-three/drei'
 import { apartmentBounds, polygonCentroid } from '@t3-designer/geometry'
 import { getAssetMobility, isFixtureMovable, type Fixture, type FoundationModels, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
-import { Mesh, Path, PCFShadowMap, PerspectiveCamera, Shape } from 'three'
+import { Mesh, PCFShadowMap, PerspectiveCamera } from 'three'
 import { useTranslation } from 'react-i18next'
 import { Wall } from '../components/Wall'
 import { WebGLGuard } from '../components/WebGLGuard'
@@ -17,44 +17,40 @@ import { Staircase } from '../components/Staircase'
 import { DesignEnvelope, DesignLighting, LightEmitter } from '../components/DesignLighting'
 import { activeFixtureLightIds, fixtureLight } from '../lib/design-lighting'
 import { roomFinish } from '../materials/surfaces'
+import { projectContextShape } from './project-context-shape'
+import { contextBuildingVolumes, projectContextCutaways, type ContextCutaway } from './project-context-cutaway'
 
 type ProjectSceneProps = { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean; foundationModels?: FoundationModels | null }
 type SceneAsset = ProjectSnapshot['assets'][number]
 const button = 'tw:cursor-pointer tw:rounded-lg tw:border tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:px-3 tw:py-2 tw:text-sm tw:text-[var(--settings-text)] tw:transition-colors tw:hover:bg-[var(--settings-accent-soft)] tw:disabled:cursor-not-allowed tw:disabled:opacity-50'
 const input = 'tw:box-border tw:w-full tw:rounded-lg tw:border tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:px-3 tw:py-2 tw:text-sm tw:text-[var(--settings-text)] tw:disabled:opacity-60'
 
-function footprintShape(points: Point2D[], holes: Point2D[][] = []): Shape {
-  const shape = new Shape()
-  points.forEach(([x, z], index) => index ? shape.lineTo(x, -z) : shape.moveTo(x, -z))
-  shape.closePath()
-  shape.holes = holes.map(points => {
-    const hole = new Path()
-    points.forEach(([x, z], index) => index ? hole.lineTo(x, -z) : hole.moveTo(x, -z))
-    hole.closePath()
-    return hole
-  })
-  return shape
-}
-
 function Surface({ polygon, elevation, color }: { polygon: Point2D[]; elevation: number; color: string }) {
-  const shape = useMemo(() => footprintShape(polygon), [polygon])
+  const shape = useMemo(() => projectContextShape(polygon), [polygon])
+  if (!shape) return null
   return <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, elevation, 0]} receiveShadow>
     <shapeGeometry args={[shape]} /><meshStandardMaterial color={color} roughness={.92} />
   </mesh>
 }
 
 function Volume({ polygon, holes, base, height, color }: { polygon: Point2D[]; holes?: Point2D[][]; base: number; height: number; color: string }) {
-  const shape = useMemo(() => footprintShape(polygon, holes), [polygon, holes])
-  if (height <= 0 || polygon.length < 3) return null
+  const shape = useMemo(() => projectContextShape(polygon, holes), [polygon, holes])
+  if (height <= 0 || !shape) return null
   return <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, base, 0]} castShadow receiveShadow>
     <extrudeGeometry args={[shape, { depth: height, bevelEnabled: false }]} />
     <meshStandardMaterial color={color} roughness={.94} />
   </mesh>
 }
 
+function ContextBuilding({ building, cutaways }: { building: ProjectSnapshot['buildings'][number]; cutaways: ContextCutaway[] }) {
+  const volumes = useMemo(() => contextBuildingVolumes(building, cutaways), [building, cutaways])
+  return <>{volumes.map((volume, index) => <Volume key={index} {...volume} color="#bdc6bd" />)}</>
+}
+
 function ProjectContext({ snapshot }: { snapshot: ProjectSnapshot }) {
   const { placement, geometry, buildings } = snapshot
   const section = geometry.contextSections
+  const cutaways = useMemo(() => projectContextCutaways(snapshot), [snapshot])
   const hole = useMemo(() => snapshot.apartment.floorRegions?.length ? [snapshot.apartment.perimeter.map(([x, z]): Point2D => [placement.position[0] + Math.cos(placement.rotationY) * x + Math.sin(placement.rotationY) * z, placement.position[2] - Math.sin(placement.rotationY) * x + Math.cos(placement.rotationY) * z])] : undefined, [snapshot.apartment, placement])
   return <group rotation={[0, -placement.rotationY, 0]}>
     <group position={[-placement.position[0], -placement.position[1], -placement.position[2]]}>
@@ -62,7 +58,7 @@ function ProjectContext({ snapshot }: { snapshot: ProjectSnapshot }) {
       {buildings.map(building => building.isTarget ? <group key={building.id}>
         <Volume polygon={building.footprint} holes={building.holes} base={building.groundOffset} height={section.belowTop - building.groundOffset} color="#ddd7c5" />
         {[section.before, section.after].map((polygon, index) => <Volume key={index} polygon={polygon} base={section.belowTop} height={section.ceilingBase - section.belowTop} color="#ddd7c5" />)}
-      </group> : <Volume key={building.id} polygon={building.footprint} holes={building.holes} base={building.groundOffset} height={building.height} color="#bdc6bd" />)}
+      </group> : <ContextBuilding key={building.id} building={building} cutaways={cutaways} />)}
     </group>
   </group>
 }

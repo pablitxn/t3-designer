@@ -205,6 +205,7 @@ const workspace = {
     "dataConsulted": "Geometría adaptada de fuentes consultadas el {{date}}. {{attribution}}.",
     "canvasFallback": "La vista del edificio necesita WebGL. Activá la aceleración gráfica del navegador.",
     "canvasAria": "Modelo 3D de edificio de demostración y contexto local con sombras solares",
+    "projectRoofCanvasAria": "Modelo 3D de la cubierta del proyecto con paneles y sombras solares",
     "labelOverlayAria": "Rótulos del edificio, puntos cardinales y posición del sol",
     "apartmentLabel": "Nuestro T3",
     "sunLabel": "Sol · {{altitude}}°",

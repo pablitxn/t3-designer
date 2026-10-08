@@ -1,3 +1,5 @@
+import { withUsage, type UsageStore } from './usage.ts'
+import { acquireGenerationSlot } from './generation-coordinator.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises'
@@ -78,6 +80,7 @@ export class AssetWorker {
   private current: { id: string; controller: AbortController } | null = null
   private running: Promise<void> | null = null
   private stopped = false
+  private usage?: UsageStore
   private store: AssetStore
   private directory: string
   private planner: Planner
@@ -90,8 +93,9 @@ export class AssetWorker {
   private onSettled?: (jobId: string) => Promise<void>
   private canProcess?: (job: Job) => Promise<boolean>
 
-  constructor(options: { store: AssetStore; directory: string; planner: Planner; renderer: Renderer; reviewer?: Reviewer; referenceLoader?: ReferenceLoader; canProcess?: (job: Job) => Promise<boolean>; onInference?: (jobId: string) => void; onSettled?: (jobId: string) => Promise<void>; beforeRender?: () => Promise<void>; beforePublish?: (additionalBytes: number) => Promise<void> }) {
+  constructor(options: { usage?: UsageStore; store: AssetStore; directory: string; planner: Planner; renderer: Renderer; reviewer?: Reviewer; referenceLoader?: ReferenceLoader; canProcess?: (job: Job) => Promise<boolean>; onInference?: (jobId: string) => void; onSettled?: (jobId: string) => Promise<void>; beforeRender?: () => Promise<void>; beforePublish?: (additionalBytes: number) => Promise<void> }) {
     this.store = options.store
+    this.usage = options.usage
     this.directory = options.directory
     this.planner = options.planner
     this.renderer = options.renderer
@@ -130,10 +134,12 @@ export class AssetWorker {
       if (!job) return
       const controller = new AbortController()
       this.current = { id: job.id, controller }
+      let releaseSlot: (() => void) | undefined
       let outputDirectory: string | null = null
       let outputValidated = false
       let publishedDirectory: string | null = null
       try {
+        releaseSlot = await acquireGenerationSlot(controller.signal)
         // Persisted work may outlive its owner's account or generation grant.
         // Check immediately before any network/model/file-generation activity.
         if (this.canProcess) {
@@ -191,7 +197,8 @@ export class AssetWorker {
           feedback: [job.feedback, input.notes, previousReview?.summary, ...(previousReview?.issues ?? [])].filter(Boolean).join('\n\n'),
           renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(previousDirectory, file)).filter(existsSync),
         } : undefined
-        const plan = await this.planner(input, { ...callbacks, workingDirectory, referenceImages: references.images, previous })
+        const operationId = this.store.creditOperation(job.id)?.operationId ?? ''
+        const plan = await withUsage(this.usage, operationId, () => this.planner(input, { ...callbacks, workingDirectory, referenceImages: references.images, previous }))
         if (controller.signal.aborted) throw new Error('Operation cancelled')
         if (plan.status === 'needs_input') {
           this.store.updateJob(job.id, {
@@ -248,10 +255,10 @@ export class AssetWorker {
           if (!this.reviewer) break
           this.store.updateJob(job.id, { stage: `Comparando fotos y renders · versión ${iteration}` })
           this.store.appendEvent(job.id, { kind: 'review', message: `Revisión visual · versión ${iteration}`, detail: 'Comparando la vista general, frontal y lateral del modelo con las fotos del producto.' })
-          visualReview = VisualReviewSchema.parse(await this.reviewer(request, {
+          visualReview = VisualReviewSchema.parse(await withUsage(this.usage, operationId, () => this.reviewer!(request, {
             ...callbacks, workingDirectory: roundDirectory, referenceImages: references.images,
             renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(outputDirectory!, file)), iteration,
-          }))
+          })))
           controller.signal.throwIfAborted()
           await writeFile(join(outputDirectory, 'review.json'), JSON.stringify(visualReview, null, 2) + '\n')
           controller.signal.throwIfAborted()
@@ -325,6 +332,7 @@ export class AssetWorker {
         }
       } finally {
         try { await this.onSettled?.(job.id) } catch { console.error('Credit settlement deferred until recovery') }
+        releaseSlot?.()
         this.current = null
       }
     }

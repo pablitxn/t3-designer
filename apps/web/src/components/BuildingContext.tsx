@@ -4,6 +4,7 @@ import { BufferGeometry, DoubleSide, ExtrudeGeometry, Float32BufferAttribute, In
 import { SITE_BUILDINGS, SITE_PARCEL, SITE_ROADS, type BuildingFootprint, type SitePoint } from '../data/building-site'
 import { APARTMENT_PLACEMENT, siteToApartment, splitTargetBuildingFootprint } from '../data/apartment-placement'
 import { ShadowOnly } from './ShadowOnly'
+import { roofRidgeFrame } from '../../../../packages/geometry/src/index.ts'
 
 export type BuildingCutaway = 'none' | 'floor' | 'apartment'
 
@@ -27,13 +28,8 @@ function polygonShape(points: SitePoint[], holes: SitePoint[][] = []) {
  * before triangulation so the low-pitch target roof casts a coherent shadow. */
 function roofGeometry(building: BuildingFootprint, roofDatum = building) {
   const p = building.footprint
-  let axis: SitePoint = [1, 0], longest = 0
-  roofDatum.footprint.forEach((a, i) => {
-    const b = roofDatum.footprint[(i + 1) % roofDatum.footprint.length], length = Math.hypot(b[0] - a[0], b[1] - a[1])
-    if (length > longest) { longest = length; axis = [(b[0] - a[0]) / length, (b[1] - a[1]) / length] }
-  })
+  const { ridgeAxis: axis, ridgeOffsetM: middle, halfSpanM } = roofRidgeFrame(roofDatum)
   const across = ([x, z]: SitePoint) => -axis[1] * x + axis[0] * z
-  const offsets = roofDatum.footprint.map(across), min = Math.min(...offsets), max = Math.max(...offsets), middle = (min + max) / 2
   const split = (side: number) => {
     const result: SitePoint[] = []
     p.forEach((a, i) => {
@@ -49,7 +45,7 @@ function roofGeometry(building: BuildingFootprint, roofDatum = building) {
   const positions: number[] = []
   // Complex/courtyard buildings keep a flat inferred roof rather than bridge holes.
   const rise = building.holes?.length || p.length > 18 ? 0 : Math.min(5, building.roofHeight)
-  const heightAt = (point: SitePoint) => building.height + (rise > .4 ? rise * Math.max(0, 1 - Math.abs(across(point) - middle) / ((max - min) / 2)) : .08)
+  const heightAt = (point: SitePoint) => building.height + (rise > .4 ? rise * Math.max(0, 1 - Math.abs(across(point) - middle) / halfSpanM) : .08)
   for (const ring of rise > 0.4 ? [split(1), split(-1)] : [p]) {
     if (ring.length < 3) continue
     const shape = new ShapeGeometry(polygonShape(ring, rise > 0.4 ? [] : building.holes))

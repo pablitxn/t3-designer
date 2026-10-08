@@ -1,4 +1,5 @@
 import { SITE_BUILDINGS, type BuildingFootprint, type SitePoint } from '../data/building-site.ts'
+import { roofRidgeFrame } from '../../../../packages/geometry/src/index.ts'
 
 export type RoofPoint3 = [number, number, number]
 
@@ -57,23 +58,15 @@ const PANEL_THICKNESS = .04
 const ROOF_CLEARANCE = .15
 const dot = (a: SitePoint, b: SitePoint) => a[0] * b[0] + a[1] * b[1]
 
-/** Mirrors BuildingContext's inferred longest-edge ridge and flat-roof fallback.
- * The source provides neither surveyed roof faces nor structural permissions. */
-export function roofSurfaceFromBuilding(building: Pick<BuildingFootprint, 'footprint' | 'holes' | 'height' | 'roofHeight'>): RoofSurface {
-  let ridgeAxis: SitePoint = [1, 0], longest = 0
-  building.footprint.forEach((a, index) => {
-    const b = building.footprint[(index + 1) % building.footprint.length]
-    const length = Math.hypot(b[0] - a[0], b[1] - a[1])
-    if (length > longest) { longest = length; ridgeAxis = [(b[0] - a[0]) / length, (b[1] - a[1]) / length] }
-  })
-  const offsets = building.footprint.map(([x, z]) => -ridgeAxis[1] * x + ridgeAxis[0] * z)
-  const min = Math.min(...offsets), max = Math.max(...offsets)
+/** Shares the renderer's explicit ridge axis or legacy longest-edge fallback.
+ * A supported axis still describes a schematic roof, not structural permission. */
+export function roofSurfaceFromBuilding(building: Pick<BuildingFootprint, 'footprint' | 'holes' | 'height' | 'roofHeight' | 'roofRidgeAzimuthDeg'>): RoofSurface {
   const inferredRise = building.holes?.length || building.footprint.length > 18 ? 0 : Math.min(5, building.roofHeight)
   return {
     footprint: building.footprint, holes: building.holes,
     eaveHeightM: building.height + (inferredRise > .4 ? 0 : .08),
     riseM: inferredRise > .4 ? inferredRise : 0,
-    ridgeAxis, ridgeOffsetM: (min + max) / 2, halfSpanM: (max - min) / 2,
+    ...roofRidgeFrame(building),
   }
 }
 

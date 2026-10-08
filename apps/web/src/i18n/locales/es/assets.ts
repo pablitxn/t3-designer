@@ -2,6 +2,7 @@ import publicDemo from './public-assets.ts'
 
 export default {
   publicDemo,
+  selection: { jobLoading: 'Cargando el trabajo solicitado…', assetLoading: 'Cargando el objeto solicitado…', jobMissing: 'El trabajo solicitado no existe o no tenés acceso.', assetMissing: 'El objeto solicitado no existe o no tenés acceso.', unavailable: 'No pudimos abrir el elemento solicitado. Volvé a intentarlo.', recent: 'Mostrar los más recientes' },
   eyebrow: 'Tu taller de objetos',
   title: 'De un producto a tu biblioteca',
   description: 'Pegá un enlace, completá los detalles y creá un objeto 3D con las medidas y referencias disponibles para tu proyecto.',

@@ -205,6 +205,7 @@ const workspace = {
     "dataConsulted": "Géométrie adaptée de sources consultées le {{date}}. {{attribution}}.",
     "canvasFallback": "La vue de l’immeuble nécessite WebGL. Activez l’accélération graphique du navigateur.",
     "canvasAria": "Modèle 3D de bâtiment de démonstration et contexte local avec ombres solaires",
+    "projectRoofCanvasAria": "Modèle 3D de la toiture du projet avec panneaux et ombres solaires",
     "labelOverlayAria": "Étiquettes de l’immeuble, points cardinaux et position du soleil",
     "apartmentLabel": "Notre T3",
     "sunLabel": "Soleil · {{altitude}}°",

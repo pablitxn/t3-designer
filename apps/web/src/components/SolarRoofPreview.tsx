@@ -97,7 +97,7 @@ export function SolarRoofPreview({ roof, layout, sun, view = '3d' }: { roof: Roo
   const fallback = <div className="canvas-fallback">{t('building.canvasFallback')}</div>
   return <div className="building-scene-surface" style={{ width: '100%', height: '100%', position: 'relative' }}>
     <WebGLGuard fallback={fallback}>
-      <Canvas frameloop="demand" shadows="percentage" camera={{ fov: 42, near: .1, far: Math.max(1000, bounds.radius * 12) }} dpr={[1, 1.6]} aria-label={t('building.canvasAria')} fallback={fallback}>
+      <Canvas frameloop="demand" shadows="percentage" camera={{ fov: 42, near: .1, far: Math.max(1000, bounds.radius * 12) }} dpr={[1, 1.6]} aria-label={t('building.projectRoofCanvasAria')} fallback={fallback}>
         <color attach="background" args={['#e7eae2']} />
         <ambientLight intensity={.65} />
         <hemisphereLight args={['#edf3ff', '#b4b5a3', .8]} />

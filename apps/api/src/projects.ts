@@ -219,15 +219,25 @@ export async function createProjects(options: {
     if (project.revision !== revision) throw new AccountError(409, 'El proyecto cambió. Recargalo antes de usar esta versión.')
     if (version.projectId !== projectId || version.status !== 'ready' || !version.candidate || version.candidate.target !== version.target || !version.iterations.at(-1)?.review.passed) throw new AccountError(400, 'Esta versión todavía necesita correcciones.')
     if (!project.foundations || createHash('sha256').update(foundationInputFingerprintValue(project.foundations)).digest('hex') !== version.foundationsFingerprint) throw new AccountError(409, 'Los planos o fuentes cambiaron. Generá una versión con los datos actuales.')
+    if (version.candidate.target === 'building' && !version.candidate.dwellingRegistration && project.foundationModels?.building?.candidate.target === 'building' && project.foundationModels.building.candidate.dwellingRegistration) throw new AccountError(409, 'El edificio ya tiene un registro de vivienda. Corregilo explícitamente; no se puede omitir para volver al centrado estimado.')
+    if (version.candidate.target === 'building' && version.candidate.dwellingRegistration) {
+      const dwelling = project.foundationModels?.dwelling
+      if (project.foundations.dwelling.status !== 'ready' || dwelling?.candidate.target !== 'dwelling' || version.candidate.dwellingRegistration.dwellingVersionId !== dwelling.versionId) throw new AccountError(409, 'El registro del edificio corresponde a otra versión de vivienda. Corregilo desde el chat antes de aceptar.')
+    }
     const models: FoundationModels = structuredClone(project.foundationModels) ?? { dwelling: null, building: null, activeLevelId: null, levels: [] }
     if (models[version.target]?.versionId === version.id) return project
     models[version.target] = { versionId: version.id, candidate: version.candidate }
     const foundations = structuredClone(project.foundations)
     foundations[version.target].status = 'ready'
+    const staleRegistration = models.building?.candidate.target === 'building' && models.building.candidate.dwellingRegistration
+      && models.building.candidate.dwellingRegistration.dwellingVersionId !== models.dwelling?.versionId
+    // Preserve the earlier assembled scene as history/reference. A changed
+    // dwelling needs a reviewed building registration before assembling again.
+    if (staleRegistration) foundations.building.status = 'draft'
     let scene = project.scene
-    if (models.dwelling?.candidate.target === 'dwelling' && models.building?.candidate.target === 'building') {
+    if (foundations.building.status === 'ready' && models.dwelling?.candidate.target === 'dwelling' && models.building?.candidate.target === 'building') {
       models.levels = assembleFoundationScenes(projectId, project.name, models.dwelling.candidate, models.building.candidate)
-      if (version.target === 'building' && project.foundationModels?.levels.length) models.levels = rebaseBuildingFoundation(project.foundationModels, models.levels)
+      if (version.target === 'building' && project.foundations.building.status === 'ready' && project.foundationModels?.levels.length) models.levels = rebaseBuildingFoundation(project.foundationModels, models.levels, models.building.candidate.dwellingRegistration)
       models.activeLevelId = models.levels.some(level => level.id === models.activeLevelId) ? models.activeLevelId : models.levels[0].id
       scene = models.levels.find(level => level.id === models.activeLevelId)!.scene
     }

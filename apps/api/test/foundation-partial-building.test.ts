@@ -28,6 +28,13 @@ test('partial cadastre pins official parcel/origin/citations and keeps independe
   assert.deepEqual(candidate.officialResearch, evidence); assert.deepEqual(candidate.sources, evidence.sources)
   assert.deepEqual(candidate.roads, []); assert.match(candidate.unknowns.join(' '), /cota altimétrica/)
 })
+test('partial cadastre retains explicit dwelling registration without translating its official parcel', () => {
+  const evidence = research(), dwellingRegistration = { dwellingVersionId: '23fe1dc6-642e-4d99-9b6c-fd853a42a960', position: [0, -.127, 6.375], evidence: { confidence: 'user', note: 'User supplied the common origin relative to the parcel.' } }
+  const candidate = attachPartialBuilding({ ...proposal(), dwellingRegistration }, evidence, foundations)
+  assert.deepEqual(candidate.dwellingRegistration, dwellingRegistration)
+  assert.deepEqual(candidate.parcel.footprint, evidence.parcels[0].footprint)
+  assert.deepEqual(candidate.buildings, proposal().buildings)
+})
 test('unconfirmed parcels, holes, forged provenance and parcel-as-building proposals cannot become a 3D candidate', () => {
   const unselected = research(); unselected.selectedParcelId = null; unselected.selectionEvidence = null
   assert.throws(() => attachPartialBuilding(proposal(), unselected, foundations), /Confirmá/)

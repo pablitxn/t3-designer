@@ -27,6 +27,12 @@ export const FoundationMeasurementCorrectionSchema = z.object({
   value: z.number().finite().min(-1_000).max(10_000), quote: z.string().min(1).max(4_000),
 }).strict()
 export type FoundationMeasurementCorrection = z.infer<typeof FoundationMeasurementCorrectionSchema>
+export const FoundationDwellingRegistrationSchema = z.object({
+  dwellingVersionId: z.uuid(),
+  position: z.tuple([z.number().finite().min(-10_000).max(10_000), z.number().finite().min(-10_000).max(10_000), z.number().finite().min(-10_000).max(10_000)]),
+  evidence: z.object({ confidence: z.enum(['observed', 'inferred', 'user']), note: z.string().min(20).max(2_000) }).strict(),
+}).strict()
+export type FoundationDwellingRegistration = z.infer<typeof FoundationDwellingRegistrationSchema>
 export const FoundationCandidateSchema = z.discriminatedUnion('target', [
   z.object({ ...common, target: z.literal('dwelling'),
     measurementCorrections: z.array(FoundationMeasurementCorrectionSchema).max(120).optional(),
@@ -38,6 +44,7 @@ export const FoundationCandidateSchema = z.discriminatedUnion('target', [
     connections: z.array(FoundationConnectionSchema).max(60),
   }).strict(),
   z.object({ ...common, target: z.literal('building'), site: BuildingSiteSchema,
+    dwellingRegistration: FoundationDwellingRegistrationSchema.optional(),
     officialResearch: FoundationOfficialResearchSchema.optional(),
     buildingCorrections: FoundationBuildingCorrectionsSchema.optional(),
     buildings: z.array(SiteBuildingSchema).min(1).max(100),

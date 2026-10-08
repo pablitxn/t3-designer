@@ -15,6 +15,7 @@ export const energyIntegrationCopy = {
     localDate: 'Fecha del estudio energético', localTime: 'Hora local del estudio energético',
     dateError: 'Esa hora local no existe por el cambio de horario. Elegí otra hora.',
     repeatedTime: 'Esta hora ocurre dos veces por el cambio de horario; se usa la primera.',
+    repeatedTimeLater: 'Esta hora ocurre dos veces por el cambio de horario; se usa la segunda.',
   },
   en: {
     modeLabel: 'Building studies', light: 'Light and surroundings', energy: 'Solar energy',
@@ -32,6 +33,7 @@ export const energyIntegrationCopy = {
     localDate: 'Energy study date', localTime: 'Energy study local time',
     dateError: 'This local time does not exist because the clocks change. Choose another time.',
     repeatedTime: 'This time occurs twice because the clocks change; the first occurrence is used.',
+    repeatedTimeLater: 'This time occurs twice because the clocks change; the second occurrence is used.',
   },
   fr: {
     modeLabel: 'Études du bâtiment', light: 'Lumière et environnement', energy: 'Énergie solaire',
@@ -49,5 +51,6 @@ export const energyIntegrationCopy = {
     localDate: 'Date de l’étude énergétique', localTime: 'Heure locale de l’étude énergétique',
     dateError: 'Cette heure locale n’existe pas à cause du changement d’heure. Choisissez une autre heure.',
     repeatedTime: 'Cette heure existe deux fois à cause du changement d’heure ; la première occurrence est utilisée.',
+    repeatedTimeLater: 'Cette heure existe deux fois à cause du changement d’heure ; la seconde occurrence est utilisée.',
   },
 } as const

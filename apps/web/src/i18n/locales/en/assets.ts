@@ -2,6 +2,7 @@ import publicDemo from './public-assets.ts'
 
 export default {
   publicDemo,
+  selection: { jobLoading: 'Loading the requested job…', assetLoading: 'Loading the requested object…', jobMissing: 'The requested job does not exist or you do not have access.', assetMissing: 'The requested object does not exist or you do not have access.', unavailable: 'We could not open the requested item. Please try again.', recent: 'Show the most recent items' },
   eyebrow: 'Your object workshop',
   title: 'From a product to your library',
   description: 'Paste a link, add the details and create a 3D object using the available dimensions and references for your project.',

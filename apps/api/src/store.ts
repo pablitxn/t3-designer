@@ -51,6 +51,10 @@ export class AssetStore {
       CREATE TABLE IF NOT EXISTS job_credit_operation (
         job_id TEXT PRIMARY KEY, operation_id TEXT NOT NULL UNIQUE, inference_started INTEGER NOT NULL DEFAULT 0
       );
+      CREATE TABLE IF NOT EXISTS job_credit_history (
+        operation_id TEXT PRIMARY KEY, job_id TEXT NOT NULL, attempt INTEGER NOT NULL, inference_started INTEGER NOT NULL DEFAULT 0
+      );
+      CREATE INDEX IF NOT EXISTS job_credit_history_job ON job_credit_history(job_id,attempt);
       CREATE TABLE IF NOT EXISTS jobs (
         id TEXT PRIMARY KEY,
         status TEXT NOT NULL,
@@ -94,6 +98,9 @@ export class AssetStore {
         PRIMARY KEY(project_id, reference_id)
       );
     `)
+    // Recover only the pointer still present in legacy DBs; never invent older attempts.
+    this.db.exec(`INSERT OR IGNORE INTO job_credit_history(operation_id,job_id,attempt,inference_started)
+      SELECT c.operation_id,c.job_id,COALESCE((SELECT MAX(e.attempt) FROM job_events e WHERE e.job_id=c.job_id),1),c.inference_started FROM job_credit_operation c;`)
   }
 
   generationRequest(userId: string, key: string): { fingerprint: string; jobId: string } | null {
@@ -110,16 +117,32 @@ export class AssetStore {
     } catch (error) { this.db.exec('ROLLBACK'); throw error }
   }
   setCreditOperation(jobId: string, operationId: string): void {
-    this.db.prepare('INSERT INTO job_credit_operation (job_id,operation_id,inference_started) VALUES (?,?,0) ON CONFLICT(job_id) DO UPDATE SET operation_id=excluded.operation_id,inference_started=0').run(jobId, operationId)
+    this.db.exec('SAVEPOINT credit_attempt')
+    try {
+      const attempt = Number(this.db.prepare('SELECT COALESCE(MAX(attempt),0)+1 AS attempt FROM job_credit_history WHERE job_id=?').get(jobId)!.attempt)
+      this.db.prepare('INSERT INTO job_credit_history(operation_id,job_id,attempt,inference_started) VALUES(?,?,?,0)').run(operationId, jobId, attempt)
+      this.db.prepare('INSERT INTO job_credit_operation (job_id,operation_id,inference_started) VALUES (?,?,0) ON CONFLICT(job_id) DO UPDATE SET operation_id=excluded.operation_id,inference_started=0').run(jobId, operationId)
+      this.db.exec('RELEASE credit_attempt')
+    } catch (error) { this.db.exec('ROLLBACK TO credit_attempt; RELEASE credit_attempt'); throw error }
   }
-  markCreditInference(jobId: string): void { this.db.prepare('UPDATE job_credit_operation SET inference_started=1 WHERE job_id=?').run(jobId) }
+  markCreditInference(jobId: string): void {
+    this.db.prepare('UPDATE job_credit_operation SET inference_started=1 WHERE job_id=?').run(jobId)
+    this.db.prepare('UPDATE job_credit_history SET inference_started=1 WHERE operation_id=(SELECT operation_id FROM job_credit_operation WHERE job_id=?)').run(jobId)
+  }
+  creditAttempt(operationId: string): number | null {
+    const row = this.db.prepare('SELECT attempt FROM job_credit_history WHERE operation_id=?').get(operationId)
+    return row ? Number(row.attempt) : null
+  }
   creditOperation(jobId: string): { operationId: string; inferenceStarted: boolean } | null {
     const row = this.db.prepare('SELECT operation_id,inference_started FROM job_credit_operation WHERE job_id=?').get(jobId)
     return row ? { operationId: String(row.operation_id), inferenceStarted: Boolean(row.inference_started) } : null
   }
   creditJob(operationId: string): string | null {
-    const row = this.db.prepare('SELECT job_id FROM job_credit_operation WHERE operation_id=?').get(operationId)
+    const row = this.db.prepare('SELECT job_id FROM job_credit_history WHERE operation_id=?').get(operationId)
     return row ? String(row.job_id) : null
+  }
+  creditJobs(): { jobId: string; operationId: string }[] {
+    return this.db.prepare('SELECT job_id,operation_id FROM job_credit_operation').all().map(row => ({ jobId: String(row.job_id), operationId: String(row.operation_id) }))
   }
   createJob(input: CreateJobInput, options: { id?: string; parentAssetId?: string; feedback?: string; ownerUserId?: string } = {}): Job {
     const now = new Date().toISOString()
