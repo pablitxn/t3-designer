@@ -100,7 +100,7 @@ for (const mode of ['top', '3d'] as const) test(`public ${mode} WebGL drag saves
   }, selectedId)
   expect(transform.position).toEqual(selected!.position)
   expect(transform.rotation).toBe(selected!.rotation)
-  await expect(page.getByText('Esta instalación forma parte del departamento y conserva su posición.')).toBeVisible()
+  await expect(page.getByText('Podés quitar o incluir esta instalación. Su posición es fija.')).toBeVisible()
   expect(await page.evaluate(() => localStorage.getItem('t3-designer.demo-layout.v1'))).toBeNull()
   expect(errors).toEqual([])
 })
