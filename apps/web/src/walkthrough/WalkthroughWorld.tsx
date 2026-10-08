@@ -1,18 +1,19 @@
 import { Component, Suspense, memo, useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
-import { apartmentBounds } from '@t3-designer/geometry'
+import { apartmentBounds, polygonBounds } from '@t3-designer/geometry'
 import { defaultDesignCustomization, fixtureLightPosition, type DesignCustomization, type Fixture, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { Color, DirectionalLight, DoubleSide, Mesh, Object3D, Path, PMREMGenerator, Shape, Vector3 } from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { ArchitecturalDetails } from '../components/ArchitecturalDetails'
 import { Floor } from '../components/Floor'
+import { ApartmentSurfaces } from '../components/ApartmentSurfaces'
+import { Staircase } from '../components/Staircase'
 import { Wall } from '../components/Wall'
 import type { SolarPosition } from '../lib/solar'
 import { kelvinColor, lumensToCandela } from '../lib/design-lighting'
-import { roomFinish } from '../materials/surfaces'
 import { projectModelUrl, siteDirectionInProject } from '../private/project-scene'
-import { resolveWalkDoorOpenness } from './navigation'
+import { resolveWalkDoorOpenness, walkEntityId, walkLevelOffset, type WalkFoundationContext } from './navigation'
 
 type SceneAsset = ProjectSnapshot['assets'][number]
 
@@ -23,6 +24,7 @@ type WalkthroughWorldProps = {
   artificialLights: boolean
   /** Transient opening fractions, shared with the tour's collision world. */
   doorStates: Record<string, number>
+  context?: WalkFoundationContext
 }
 
 function footprintShape(points: Point2D[], holes: Point2D[][] = []): Shape {
@@ -51,15 +53,21 @@ function Volume({ polygon, holes, base, height, color }: {
 }
 
 /** Entire context remains in the persisted site frame, including its vertical datum. */
-function SiteContext({ snapshot }: { snapshot: ProjectSnapshot }) {
+function SiteContext({ snapshot, context }: { snapshot: ProjectSnapshot; context?: WalkFoundationContext }) {
   const { placement, geometry } = snapshot
   const sections = geometry.contextSections
+  const below = context ? Math.min(...context.levels.map(level => level.scene.placement.position[1] + level.scene.geometry.floor.elevation - level.scene.geometry.floor.thickness)) : sections.belowTop
+  const above = context ? Math.max(...context.levels.map(level => level.scene.placement.position[1] + level.scene.geometry.ceiling.elevation + level.scene.geometry.ceiling.thickness)) : sections.ceilingBase
+  const groundHoles = useMemo(() => context || snapshot.apartment.floorRegions?.length ? (context?.levels.map(level => level.scene) ?? [snapshot]).map(scene => {
+    const placement = scene.placement, cos = Math.cos(placement.rotationY), sin = Math.sin(placement.rotationY)
+    return scene.apartment.perimeter.map(([x, z]): Point2D => [placement.position[0] + cos * x + sin * z, placement.position[2] - sin * x + cos * z])
+  }) : undefined, [context, snapshot])
   return <group rotation={[0, -placement.rotationY, 0]}>
     <group position={[-placement.position[0], -placement.position[1], -placement.position[2]]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.1, 0]} receiveShadow>
+      {groundHoles ? <Floor polygon={[[-500, -500], [500, -500], [500, 500], [-500, 500]]} holes={groundHoles} elevation={-.1} color="#bcc7b3" /> : <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.1, 0]} receiveShadow>
         <planeGeometry args={[1000, 1000]} /><meshStandardMaterial color="#bcc7b3" roughness={1} />
-      </mesh>
-      <Floor polygon={snapshot.parcel.footprint} elevation={-.04} color="#ccd3b9" />
+      </mesh>}
+      <Floor polygon={snapshot.parcel.footprint} holes={groundHoles} elevation={-.04} color="#ccd3b9" />
       {snapshot.roads.flatMap(road => road.points.slice(1).map((end, index) => {
         const start = road.points[index]
         const length = Math.hypot(end[0] - start[0], end[1] - start[1])
@@ -70,11 +78,11 @@ function SiteContext({ snapshot }: { snapshot: ProjectSnapshot }) {
       }))}
       {snapshot.buildings.map(building => building.isTarget ? <group key={building.id}>
         <Volume polygon={building.footprint} holes={building.holes} base={building.groundOffset}
-          height={sections.belowTop - building.groundOffset} color="#d4ceb9" />
-        {[sections.before, sections.after].map((polygon, index) => <Volume key={index} polygon={polygon}
+          height={below - building.groundOffset} color="#d4ceb9" />
+        {!context && [sections.before, sections.after].map((polygon, index) => <Volume key={index} polygon={polygon}
           base={sections.belowTop} height={building.groundOffset + building.height - sections.belowTop} color="#d4ceb9" />)}
-        <Volume polygon={sections.apartmentBand} base={sections.ceilingBase}
-          height={building.groundOffset + building.height - sections.ceilingBase} color="#d4ceb9" />
+        <Volume polygon={context ? building.footprint : sections.apartmentBand} holes={context ? building.holes : undefined} base={above}
+          height={building.groundOffset + building.height - above} color="#d4ceb9" />
       </group> : <Volume key={building.id} polygon={building.footprint} holes={building.holes}
         base={building.groundOffset} height={building.height} color="#bac5bd" />)}
     </group>
@@ -126,7 +134,7 @@ function PlacedObject({ fixture, asset, projectId }: { fixture: Fixture; asset: 
   </group>
 }
 
-function ArtificialLighting({ snapshot, enabled }: { snapshot: ProjectSnapshot; enabled: boolean }) {
+function ArtificialLighting({ snapshot, enabled, limit = 8 }: { snapshot: ProjectSnapshot; enabled: boolean; limit?: number }) {
   const lighting = snapshot.customization?.lighting
   const lights = useMemo(() => [
     ...(lighting?.lights ?? []).filter(light => light.enabled && light.lumens > 0).map(light => ({ ...light, fixture: false })),
@@ -134,7 +142,7 @@ function ArtificialLighting({ snapshot, enabled }: { snapshot: ProjectSnapshot; 
       const position = fixtureLightPosition(fixture)
       return fixture.light?.enabled && fixture.light.lumens > 0 && position ? [{ ...fixture.light, id: fixture.id, position, fixture: true }] : []
     }),
-  ].slice(0, 8), [lighting, snapshot.fixtures])
+  ].slice(0, limit), [lighting, snapshot.fixtures, limit])
   if (!enabled) return null
   return <group name="saved-design-lights">
     {lights.map(light => <group key={`${light.fixture ? 'fixture' : 'fixed'}-${light.id}`} position={light.position}>
@@ -147,16 +155,18 @@ function ArtificialLighting({ snapshot, enabled }: { snapshot: ProjectSnapshot; 
   </group>
 }
 
-function NaturalLighting({ snapshot, sun }: Pick<WalkthroughWorldProps, 'snapshot' | 'sun'>) {
+function NaturalLighting({ snapshot, sun, context }: Pick<WalkthroughWorldProps, 'snapshot' | 'sun' | 'context'>) {
   const light = useRef<DirectionalLight>(null)
   const { gl, scene, invalidate } = useThree()
-  const bounds = useMemo(() => apartmentBounds(snapshot.apartment), [snapshot.apartment])
+  const bounds = useMemo(() => context ? polygonBounds(context.levels.flatMap(level => { const offset = walkLevelOffset(context, level.id); return level.scene.apartment.perimeter.map(([x, z]): Point2D => [x + offset[0], z + offset[2]]) })) : apartmentBounds(snapshot.apartment), [snapshot.apartment, context])
+  const minY = context ? Math.min(...context.levels.map(level => walkLevelOffset(context, level.id)[1] + level.scene.geometry.floor.elevation)) : snapshot.geometry.floor.elevation
+  const maxY = context ? Math.max(...context.levels.map(level => walkLevelOffset(context, level.id)[1] + level.scene.geometry.ceiling.elevation)) : snapshot.geometry.ceiling.elevation
   const daylight = sun.isDaylight && snapshot.customization?.lighting.naturalEnabled !== false
   const target = useMemo(() => {
     const object = new Object3D()
-    object.position.set(bounds.center[0], snapshot.geometry.floor.elevation + 1, bounds.center[1])
+    object.position.set(bounds.center[0], (minY + maxY) / 2, bounds.center[1])
     return object
-  }, [bounds, snapshot.geometry.floor.elevation])
+  }, [bounds, minY, maxY])
   const direction = siteDirectionInProject(snapshot, sun.direction)
 
   useEffect(() => {
@@ -187,7 +197,7 @@ function NaturalLighting({ snapshot, sun }: Pick<WalkthroughWorldProps, 'snapsho
     const camera = source.shadow.camera
     const corners: Vector3[] = []
     for (const x of [bounds.min[0], bounds.max[0]]) for (const z of [bounds.min[1], bounds.max[1]]) {
-      for (const y of [snapshot.geometry.floor.elevation, snapshot.geometry.ceiling.elevation + .3]) {
+      for (const y of [minY, maxY + .3]) {
         corners.push(new Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse))
       }
     }
@@ -200,7 +210,7 @@ function NaturalLighting({ snapshot, sun }: Pick<WalkthroughWorldProps, 'snapsho
     camera.updateProjectionMatrix()
     source.shadow.needsUpdate = true
     invalidate()
-  }, [bounds, snapshot, sun, target, invalidate])
+  }, [bounds, snapshot, sun, target, invalidate, minY, maxY])
 
   const color = new Color('#ffce8e').lerp(new Color('#fff7e5'), Math.min(1, Math.max(0, sun.altitude / 22)))
   return <>
@@ -215,7 +225,7 @@ function NaturalLighting({ snapshot, sun }: Pick<WalkthroughWorldProps, 'snapsho
 }
 
 /** Camera motion does not change this static world's shadow casters or lights. */
-function useStaticShadows({ snapshot, sun, artificialLights, doorStates }: WalkthroughWorldProps) {
+function useStaticShadows({ snapshot, sun, artificialLights, doorStates, context }: WalkthroughWorldProps) {
   const { gl, invalidate } = useThree()
   useLayoutEffect(() => {
     const previous = gl.shadowMap.autoUpdate
@@ -227,13 +237,12 @@ function useStaticShadows({ snapshot, sun, artificialLights, doorStates }: Walkt
   useLayoutEffect(() => {
     gl.shadowMap.needsUpdate = true
     invalidate()
-  }, [gl, invalidate, snapshot, sun, artificialLights, doorStates])
+  }, [gl, invalidate, snapshot, sun, artificialLights, doorStates, context])
 }
 
 // Pose/minimap updates occur ten times per second in the parent. Stable scene
 // inputs should not rebuild the entire apartment's React mesh tree each time.
-export const WalkthroughWorld = memo(function WalkthroughWorld({ snapshot, sun, artificialLights, doorStates }: WalkthroughWorldProps) {
-  useStaticShadows({ snapshot, sun, artificialLights, doorStates })
+function ApartmentInterior({ snapshot, doorStates, levelId }: Pick<WalkthroughWorldProps, 'snapshot' | 'doorStates'> & { levelId?: string }) {
   const { apartment, geometry, customization } = snapshot
   const assetMap = useMemo(() => new Map(snapshot.assets.map(asset => [asset.id, asset])), [snapshot.assets])
   const touringCustomization = useMemo<DesignCustomization>(() => ({
@@ -244,32 +253,35 @@ export const WalkthroughWorld = memo(function WalkthroughWorld({ snapshot, sun, 
       style: door.appearance ?? 'panel',
       color: door.finish === 'blue-gray' ? '#d0d5ca' : '#b7c0b6',
       ...customization?.doors[door.id],
-      openness: resolveWalkDoorOpenness(doorStates, door.id, customization?.doors[door.id]?.openness ?? 1),
+      openness: resolveWalkDoorOpenness(doorStates, levelId ? walkEntityId(levelId, door.id) : door.id, customization?.doors[door.id]?.openness ?? 1),
     }])),
-  }), [apartment.doors, customization, doorStates])
-  // Preserve finishes for previously saved copies of the original template.
-  const canonicalFinishes = apartment.id === 'demo-t3' || apartment.id === 'quimper-t3'
+  }), [apartment.doors, customization, doorStates, levelId])
   return <>
-    <color attach="background" args={[sun.isDaylight ? '#dbe7eb' : '#101a2b']} />
-    <fog attach="fog" args={[sun.isDaylight ? '#dbe7eb' : '#101a2b', 100, 400]} />
-    <NaturalLighting snapshot={snapshot} sun={sun} />
-    <ArtificialLighting snapshot={snapshot} enabled={artificialLights} />
-    <SiteContext snapshot={snapshot} />
-    <Floor polygon={geometry.floor.polygon} color="#c5c6b9" elevation={geometry.floor.elevation} thickness={geometry.floor.thickness} />
-    {apartment.rooms.map(room => {
-      const finish = customization?.floors[room.id]
-      return <Floor key={room.id} polygon={room.polygon} color={room.color} elevation={geometry.floor.elevation + .006}
-        finish={finish ? (finish.material === 'concrete' ? undefined : finish.material) : canonicalFinishes ? roomFinish(room.id) : undefined} tint={finish?.color} />
-    })}
+    <ApartmentSurfaces apartment={apartment} floor={geometry.floor} ceiling={geometry.ceiling} customization={customization} includeCeiling />
     {apartment.balcony && <Floor polygon={apartment.balcony.polygon} color="#c1c3b6" elevation={geometry.floor.elevation}
       thickness={geometry.floor.thickness} finish="balcony" />}
     {apartment.walls.map(wall => <Wall key={wall.id} wall={wall} doors={apartment.doors.filter(door => door.wallId === wall.id)}
       windows={apartment.windows.filter(window => window.wallId === wall.id)} cutaway={false} customization={touringCustomization} />)}
-    <Volume polygon={geometry.ceiling.polygon} base={geometry.ceiling.elevation} height={geometry.ceiling.thickness} color="#ecebe2" />
     <ArchitecturalDetails apartment={apartment} cutaway={false} />
     {snapshot.fixtures.map(fixture => {
       const asset = assetMap.get(fixture.assetId)
       return asset ? <PlacedObject key={fixture.id} fixture={fixture} asset={asset} projectId={snapshot.project.id} /> : null
     })}
+  </>
+}
+
+export const WalkthroughWorld = memo(function WalkthroughWorld({ snapshot, sun, artificialLights, doorStates, context }: WalkthroughWorldProps) {
+  useStaticShadows({ snapshot, sun, artificialLights, doorStates, context })
+  const active = context?.levels.find(level => level.id === context.activeLevelId)
+  return <>
+    <color attach="background" args={[sun.isDaylight ? '#dbe7eb' : '#101a2b']} />
+    <fog attach="fog" args={[sun.isDaylight ? '#dbe7eb' : '#101a2b', 100, 400]} />
+    <NaturalLighting snapshot={snapshot} sun={sun} context={context} />
+    <SiteContext snapshot={snapshot} context={context} />
+    {context ? context.levels.map((level, index) => <group key={level.id} name={`walk-level-${level.id}`} position={walkLevelOffset(context, level.id)}>
+      <ApartmentInterior snapshot={level.scene} doorStates={doorStates} levelId={level.id} />
+      <ArtificialLighting snapshot={level.scene} enabled={artificialLights} limit={Math.floor(8 / context.levels.length) + (index < 8 % context.levels.length ? 1 : 0)} />
+    </group>) : <><ApartmentInterior snapshot={snapshot} doorStates={doorStates} /><ArtificialLighting snapshot={snapshot} enabled={artificialLights} /></>}
+    {context?.connections.map((connection, index) => connection.geometry && <Staircase key={connection.id ?? index} geometry={connection.geometry} yOffset={-(active?.elevation ?? 0)} />)}
   </>
 })

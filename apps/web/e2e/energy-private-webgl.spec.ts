@@ -19,7 +19,7 @@ async function projectServer(page: Page, withoutContextFlanks = false) {
   scene.project = { id: projectId, name: 'Estudio solar privado' }
   // One existing fixture is sufficient to verify preservation through apartment edits.
   scene.fixtures = scene.fixtures.slice(0, 1)
-  let saved: Project = { id: projectId, name: scene.project.name, notes: '', ownerId: 'solar-owner', role: 'owner', revision: 1,
+  let saved: Project & { scene: NonNullable<Project['scene']> } = { id: projectId, name: scene.project.name, notes: '', ownerId: 'solar-owner', role: 'owner', revision: 1,
     createdAt: '2026-10-04T12:00:00Z', updatedAt: '2026-10-04T12:00:00Z', scene }
   let writes = 0
   await page.route('**/api/**', async route => {

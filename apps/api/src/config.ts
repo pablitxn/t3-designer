@@ -52,6 +52,10 @@ export async function runtimeConfig(root: string) {
     pendingLimit: limit('T3_GENERATION_PENDING_LIMIT', 2),
   }
   if (production && generation.enabled && (inferenceProvider() !== 'openai' || !process.env.OPENAI_API_KEY)) throw new Error('La generación remota requiere T3_INFERENCE_PROVIDER=openai y OPENAI_API_KEY del servidor.')
+  if (generation.enabled && inferenceProvider() === 'codex-local'
+    && (!['127.0.0.1', 'localhost', '::1'].includes(host) || !['127.0.0.1', 'localhost', '[::1]'].includes(origin.hostname))) {
+    throw new Error('La suscripción de Codex requiere servidor y origen web loopback; no se expone en instalaciones remotas.')
+  }
   const creditConfig = {
     trialDays: limit('T3_TRIAL_DAYS', 15), trialCredits: limit('T3_TRIAL_CREDITS', 100),
     premiumMonthlyCredits: limit('T3_PREMIUM_MONTHLY_CREDITS', 1000),

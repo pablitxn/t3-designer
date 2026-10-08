@@ -1,16 +1,17 @@
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
 import { createServer, type IncomingMessage } from 'node:http'
 import test from 'node:test'
 import pg from 'pg'
-import { defaultDesignCustomization } from '@t3-designer/scene-schema'
+import { defaultDesignCustomization, ProjectSnapshotSchema, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { createAccounts, normalizedIP, rateLimitClientIP } from '../src/accounts.ts'
 import { openAppDatabase } from '../src/app-database.ts'
 import { createProjects, type ProjectDocument, type ProjectAssetReference } from '../src/projects.ts'
 import type { User } from '../src/accounts.ts'
 import { createDefaultBuildingEnergy } from '../../web/src/energy/model.ts'
 
-interface TestResponse { user: User; token: string; project: ProjectDocument; projects: ProjectDocument[]; error?: string; ok?: boolean }
+interface TestResponse { user: User; token: string; project: ProjectDocument & { scene: ProjectSnapshot }; projects: ProjectDocument[]; error?: string; ok?: boolean }
 const proxyRequest = (remoteAddress: string, forwarded?: string): IncomingMessage => ({ socket: { remoteAddress }, headers: forwarded === undefined ? {} : { 'x-forwarded-for': forwarded } }) as IncomingMessage
 
 test('forwarded addresses require exact trusted hops and reject forged or malformed chains', () => {
@@ -67,6 +68,13 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
         return copied
       },
     })
+    async function existingProject(user: User, name: string) {
+      const scene = ProjectSnapshotSchema.parse(JSON.parse(await readFile(new URL('../../../assets/scenes/t3-project.json', import.meta.url), 'utf8')))
+      scene.project = { id: randomUUID(), name }
+      const project = await projects.createGenerated(user, scene)
+      assert.ok(project.scene)
+      return { ...project, scene: project.scene }
+    }
     const server = createServer((request, response) => {
       void (async () => {
         if (await accounts.handle(request, response) || await projects.handle(request, response)) return
@@ -147,7 +155,10 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
 
     const created = await request('/api/projects', { method: 'POST', cookie: alice.cookie, body: { name: 'Alice home', notes: 'Private notes' } })
     assert.equal(created.status, 201, JSON.stringify(created.body))
-    const project = created.body.project
+    assert.equal(created.body.project.scene, null)
+    assert.equal(created.body.project.stage, 'setup')
+    assert.equal(created.body.project.foundations?.dwelling.levels.length, 1)
+    const project = await existingProject(alice.user, 'Existing Alice home')
     assert.equal(project.scene.project.id, project.id)
     const resource = `/api/projects/${project.id}`
     await t.test('private project isolation includes admin, listing and cloning', async () => {
@@ -214,9 +225,8 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       assert.equal((await request(resource, { cookie: alice.cookie })).body.project.scene.assets.at(-1)!.id, asset.id)
     })
     await t.test('design alternatives and lamp emitters survive authenticated save, reload and clone while viewers cannot modify them', async () => {
-      const createdDesign = await request('/api/projects', { method: 'POST', cookie: alice.cookie, body: { name: 'Lighting study' } })
-      assert.equal(createdDesign.status, 201)
-      const design = createdDesign.body.project.scene, designResource = `/api/projects/${createdDesign.body.project.id}`
+      const createdDesign = await existingProject(alice.user, 'Lighting study')
+      const design = createdDesign.scene, designResource = `/api/projects/${createdDesign.id}`
       const fixture = design.fixtures[0]
       fixture.light = { enabled: true, kelvin: 2700, lumens: 700, offset: [0, .5, 0] }
       design.assets.find(asset => asset.id === fixture.assetId)!.light = structuredClone(fixture.light)
@@ -259,10 +269,9 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       assert.deepEqual((await request(designResource, { cookie: alice.cookie })).body.project.scene, design, 'clone and rejected mutations preserve the source')
     })
     await t.test('building energy survives save, reload and clone with revision and viewer protection', async () => {
-      const created = await request('/api/projects', { method: 'POST', cookie: alice.cookie, body: { name: 'Rooftop energy' } })
-      assert.equal(created.status, 201)
-      const scene = created.body.project.scene
-      const energyResource = `/api/projects/${created.body.project.id}`
+      const created = await existingProject(alice.user, 'Rooftop energy')
+      const scene = created.scene
+      const energyResource = `/api/projects/${created.id}`
       scene.buildingEnergy = createDefaultBuildingEnergy(scene.site.targetId)
       scene.buildingEnergy.installation.panelCount = 8
       const saved = await request(energyResource, { method: 'PUT', cookie: alice.cookie, body: { revision: 1, scene } })

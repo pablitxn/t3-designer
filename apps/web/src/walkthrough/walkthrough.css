@@ -1,5 +1,6 @@
 .walkthrough { --walk-ink: var(--settings-text, #283b30); color: var(--walk-ink); background: var(--settings-bg, #fafbf5); border: 1px solid var(--settings-border, #d7decd); border-radius: 18px; overflow: hidden; margin: 18px auto; width: calc(100% - 40px); max-width: 1600px; }
 .walkthrough *, .walkthrough *::before, .walkthrough *::after { box-sizing: border-box; }
+.walk-level-label { display:block; padding:5px 9px; font-size:11px; background:var(--settings-bg, #fafbf5); border-radius:8px 8px 0 0; }
 .walkthrough:fullscreen { width: 100%; max-width: none; margin: 0; border: 0; border-radius: 0; overflow: hidden; }
 .walk-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 20px; }
 .walk-header h2 { font-size: 17px; font-weight: 550; letter-spacing: -.025em; margin: 4px 0; }

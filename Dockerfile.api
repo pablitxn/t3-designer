@@ -61,6 +61,7 @@ COPY apps/api/package.json apps/api/package.json
 COPY apps/api/src/ apps/api/src/
 COPY apps/web/package.json apps/web/package.json
 COPY apps/web/src/lib/solar.ts apps/web/src/lib/solar-snapshot.ts apps/web/src/lib/
+COPY apps/web/src/private/foundation-scenes.ts apps/web/src/private/
 COPY packages/geometry/package.json packages/geometry/package.json
 COPY packages/geometry/src/ packages/geometry/src/
 COPY packages/asset-schema/package.json packages/asset-schema/package.json
@@ -71,7 +72,7 @@ COPY assets/scenes/t3-project.json assets/scenes/t3-project.json
 COPY scripts/ci/smoke-api-runtime.mjs scripts/ci/smoke-api-runtime.mjs
 COPY scripts/ci/smoke-blender-runtime.mjs scripts/ci/smoke-blender-runtime.mjs
 COPY scripts/blender/generate_asset.py scripts/blender/procedural_recipe.py scripts/blender/strandmon_recipe.py scripts/blender/upholstery.py scripts/blender/validate_assets.py scripts/blender/
-# The pure solar module is shared with the frontend and imports scene-schema.
+# Pure solar and foundation assembly modules are shared with the frontend.
 # Reuse the already installed workspace dependency without frontend packages.
 RUN mkdir -p /data/accounts /data/assets /app/apps/web/node_modules \
     && ln -s /app/apps/api/node_modules/@t3-designer /app/apps/web/node_modules/@t3-designer \

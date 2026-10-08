@@ -47,8 +47,26 @@ not certify clearances or detect every collision.
 
 ### Design a version of your own
 
-With the optional backend enabled, **My projects** gives you a private copy of the scene. Keep named apartment
-variants for different dividers, and separate furniture layouts for each one.
+With the optional backend enabled, **New project** starts with two foundations:
+your dwelling's plans (one set per floor) and its building, address and sources.
+Save and share this intake privately; no demo geometry is copied. Each foundation
+has an agent workshop: interpret the plans or research public property sources,
+inspect a 3D proposal and its review findings, then request corrections in chat.
+The agent can improve a proposal through up to three generation/review rounds.
+Missing scale or inaccessible evidence prompts a question instead of a ready model.
+Accept reviewed versions of both foundations to open the editor and walkthrough,
+with a separate editable scene for each floor, including basements. Source-based
+stair flights, landings and slab openings join those scenes in a continuous
+walkthrough; local floor regions preserve split levels and annex steps.
+
+Reviews compare structured geometry with the attached plans and cited sources;
+they do not certify a cadastral survey or claim a rendered-image audit. Building
+geometry and alignment stay estimated. A connection documented only in notes
+still needs supported geometry before it can be walked. Automatic furniture
+reconstruction is not part of this foundation workflow.
+
+For existing modeled projects, keep named apartment variants for different
+dividers, and separate furniture layouts for each one.
 Try wall colors, floor materials, door and window styles, curtains, blinds and
 shutters. Add room lights or an emitter to a lamp, then compare brightness and
 warm or cool light.
@@ -210,15 +228,24 @@ accounts start with **100 credits for 15 days**; gifted premium accounts receive
 free. The account screen shows the balance, reservations and transaction history.
 
 Generation uses a server-side OpenAI API key and reserves credits before work
-starts. Object drafts cost 20 credits and revisions 10. **Generate with AI** creates
-an editable conceptual project or apartment for 50 credits, or a building for 100.
+starts. Object drafts cost 20 credits and revisions 10. The separate conceptual
+generator at `/app/generate` creates an editable project or apartment for 50
+credits, or a building for 100. It is separate from the new-project intake.
 Enter the footprint, height and location: the result models one interior floor
 and an approximate building envelope. It is not a measured reconstruction.
 
-Install Blender, configure `OPENAI_API_KEY` privately and set
-`T3_GENERATION_ENABLED=true` to run generation locally. The
-[workshop guide](docs/workflows/local-asset-workshop.md) also documents the optional
-local Codex adapter. Public generation requires the hosted API adapter.
+The foundation workshops reserve 50 credits per dwelling attempt or 100 per
+building attempt, including chat corrections and up to three internal review
+rounds. A request for more evidence consumes credits only if inference started;
+failed or cancelled attempts return their reservation. The foundation workshops
+use the selected provider and validated scene data directly: the hosted API, or
+the signed-in Codex CLI with a ChatGPT subscription on a local loopback server.
+Architectural proposals do not require Blender.
+
+Set `T3_GENERATION_ENABLED=true` and configure the chosen provider privately to
+run generation locally. Furniture assets also require Blender. The
+[workshop guide](docs/workflows/local-asset-workshop.md) documents both adapters.
+Public generation requires the hosted API adapter.
 
 Subscriptions and top-ups have a configurable ARS catalog and a **development-only
 Mercado Pago integration**. Payments are disabled until test credentials are

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { getAssetMobility, isFixtureMovable, type Fixture, type ProjectSnapshot } from '@t3-designer/scene-schema'
+import { getAssetMobility, isFixtureMovable, type Fixture, type FoundationModels, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { polygonCentroid } from '@t3-designer/geometry'
 import { useLocale } from '../i18n/useLocale'
 import { useUnits } from '../lib/useUnits'
@@ -7,6 +7,7 @@ import { LengthInput } from '../components/LengthInput'
 import { EditorScene } from './EditorScene'
 import { editorCopy } from './copy'
 import { walkCopy } from '../walkthrough/copy'
+import type { WalkFoundationContext } from '../walkthrough/navigation'
 import { CustomizationPanel } from './CustomizationPanel'
 import { FullWallsControl, SolarDesignControls } from './SolarDesignControls'
 import { addFixture, addPartition, duplicateArchitecture, duplicateFixture, duplicateLayout, ensureEditor, getActiveArchitecture, getActiveLayout, removeFixture, removePartition, rotateFixture, selectArchitecture, selectLayout, updateFixture } from './model'
@@ -35,10 +36,11 @@ function NumberField({ name, value, disabled, onChange, minimum = -1000, maximum
 
 /** Controlled scene editor: the project owner supplies persistence and revision
  * checks. No private scene content is copied to localStorage or analytics. */
-export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean }) {
+export function ApartmentEditor({ snapshot, onChange, readOnly, foundationModels, onWalkingChange }: { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean; foundationModels?: FoundationModels | null; onWalkingChange?: (walking: boolean) => void }) {
   const { locale } = useLocale(), c = editorCopy[locale]
   const units = useUnits()
   const [walking, setWalking] = useState(() => window.location.hash === '#walkthrough')
+  useEffect(() => { onWalkingChange?.(walking); return () => onWalkingChange?.(false) }, [walking, onWalkingChange])
   useEffect(() => {
     const navigate = () => setWalking(window.location.hash === '#walkthrough')
     window.addEventListener('hashchange', navigate)
@@ -70,6 +72,15 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
     } catch { return current }
   }, [snapshot, readOnly, viewSelection])
   const architecture = getActiveArchitecture(scene), layout = getActiveLayout(scene)
+  const walkContext = useMemo<WalkFoundationContext | undefined>(() => {
+    const candidate = foundationModels?.dwelling?.candidate
+    if (!foundationModels?.activeLevelId || candidate?.target !== 'dwelling' || !foundationModels.levels.length) return undefined
+    return { activeLevelId: foundationModels.activeLevelId, connections: candidate.connections, levels: foundationModels.levels.map(level => ({ ...level,
+      elevation: candidate.levels.find(source => source.levelId === level.id)?.elevation ?? level.scene.placement.floorElevation,
+      scene: level.id === foundationModels.activeLevelId ? scene : level.scene,
+    })) }
+  }, [foundationModels, scene])
+  const stairs = useMemo(() => walkContext?.connections.filter(connection => connection.fromLevelId === walkContext.activeLevelId || connection.toLevelId === walkContext.activeLevelId).flatMap(connection => connection.geometry ? [{ geometry: connection.geometry, yOffset: -(walkContext.levels.find(level => level.id === walkContext.activeLevelId)?.elevation ?? 0) }] : []), [walkContext])
   const selected = scene.fixtures.find(fixture => fixture.id === selectedId)
   const selectedAsset = scene.assets.find(asset => asset.id === selected?.assetId)
   const selectedMovable = selected ? isFixtureMovable(selected, selectedAsset) : false
@@ -87,7 +98,10 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
       setHistory(previous => ({ past: [...previous.past.slice(-49), snapshot], future: [] }))
       setError(''); onChange(next)
       return true
-    } catch { setError(c.error); return false }
+    } catch (error) {
+      setError(error instanceof Error && /Partition crosses (different floor regions|a stair opening)/.test(error.message) ? c.partitionRegionError : c.error)
+      return false
+    }
   }
   function travel(direction: 'past' | 'future') {
     if (readOnly) return
@@ -142,7 +156,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
     const data = new FormData(event.currentTarget), number = (key: string) => units.toMeters(Number(data.get(key)))
     apply(current => addPartition(current, { id: `partition-${crypto.randomUUID()}`, from: [number('fromX'), number('fromZ')], to: [number('toX'), number('toZ')], height: number('height'), thickness: number('thickness') }))
   }
-  if (walking) return <Suspense fallback={<p role="status">{walkCopy[locale].loading}</p>}><Walkthrough snapshot={scene} onClose={() => { window.location.hash = 'editor'; setWalking(false) }} /></Suspense>
+  if (walking) return <Suspense fallback={<p role="status">{walkCopy[locale].loading}</p>}><Walkthrough snapshot={scene} context={walkContext} onClose={() => { window.location.hash = 'editor'; setWalking(false) }} /></Suspense>
   return <section className="tw:overflow-hidden tw:rounded-2xl tw:border tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:text-[color:var(--settings-text)]" aria-label={c.title} onKeyDown={keyDown}>
     <header className="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:border-0 tw:border-b tw:border-solid tw:border-[var(--settings-border)] tw:p-4">
       <div><h2 className="tw:m-0 tw:text-lg tw:font-medium">{c.title}</h2><p className={`${muted} tw:mb-0 tw:mt-1`}>{readOnly ? c.readonly : c.subtitle}</p></div>
@@ -159,7 +173,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
       <div className="tw:min-w-0">
         <div className="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-3 tw:p-3"><div className="tw:flex tw:gap-1" role="group" aria-label={c.top}><button className={`${button} ${mode === '3d' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>{c.three}</button><button className={`${button} ${mode === 'top' ? 'tw:bg-[var(--settings-accent-soft)]!' : ''}`} aria-pressed={mode === 'top'} onClick={() => setMode('top')}>{c.top}</button></div><FullWallsControl checked={fullWalls} onChange={setFullWalls} /><label className="tw:flex tw:items-center tw:gap-2 tw:text-xs">{c.snap}<select className={`${input} tw:w-24!`} value={snap} onChange={event => setSnap(Number(event.target.value))}><option value="0">{c.free}</option>{[.05, .1, .25].map(value => <option key={value} value={value}>{units.formatLength(value, 2)}</option>)}</select></label></div>
         <div className="tw:h-[520px] tw:min-w-0 tw:focus-visible:outline-2 tw:focus-visible:-outline-offset-2" tabIndex={0} aria-label={c.selected}>
-          <EditorScene scene={scene} selectedId={selected?.id ?? null} onSelect={setSelectedId} onMove={(id, next) => { apply(current => updateFixture(current, id, { position: next })) }} mode={mode} cutaway={!fullWalls} editable={!readOnly} snap={snap} projectId={snapshot.project.id} />
+          <EditorScene scene={scene} stairs={stairs} selectedId={selected?.id ?? null} onSelect={setSelectedId} onMove={(id, next) => { apply(current => updateFixture(current, id, { position: next })) }} mode={mode} cutaway={!fullWalls} editable={!readOnly} snap={snap} projectId={snapshot.project.id} />
         </div>
         <div className="tw:border-0 tw:border-t tw:border-solid tw:border-[var(--settings-border)] tw:px-4 tw:py-3"><p className={`${muted} tw:m-0`}>{c.camera}</p>{!readOnly && <p className={`${muted} tw:mb-0 tw:mt-1`}>{c.shortcuts}</p>}</div>
       </div>
@@ -168,7 +182,7 @@ export function ApartmentEditor({ snapshot, onChange, readOnly }: { snapshot: Pr
         {selected ? <div className="tw:grid tw:gap-3" aria-label={c.selected}>
           <div><h3 className="tw:m-0 tw:text-sm tw:font-semibold">{selected.label}</h3>{selectedAsset && <p className={`${muted} tw:mb-0 tw:mt-1`}>{units.formatDimensions(selectedAsset.dimensions)}</p>}</div>
           <p className={`${muted} tw:m-0`}>{selectedMovable ? c.movableHint : c.fixedHint}</p>
-          <div className="tw:grid tw:grid-cols-2 tw:gap-2">{[c.x, c.y, c.z].map((name, axis) => <NumberField key={`${selected.id}-${axis}`} name={name} length value={selected.position[axis]} disabled={readOnly || !selectedMovable} minimum={axis === 1 ? 0 : undefined} onChange={value => position(axis, value)} />)}<NumberField key={`${selected.id}-rotation`} name={c.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} minimum={-360} maximum={360} step={15} onChange={rotation => { apply(current => updateFixture(current, selected.id, { rotation: rotation * Math.PI / 180 })) }} /></div>
+          <div className="tw:grid tw:grid-cols-2 tw:gap-2">{[c.x, c.y, c.z].map((name, axis) => <NumberField key={`${selected.id}-${axis}`} name={name} length value={selected.position[axis]} disabled={readOnly || !selectedMovable} minimum={axis === 1 ? scene.geometry.floor.elevation : undefined} onChange={value => position(axis, value)} />)}<NumberField key={`${selected.id}-rotation`} name={c.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} minimum={-360} maximum={360} step={15} onChange={rotation => { apply(current => updateFixture(current, selected.id, { rotation: rotation * Math.PI / 180 })) }} /></div>
           <button className={button} disabled={readOnly || !selectedMovable} onClick={() => { apply(current => rotateFixture(current, selected.id, Math.PI / 2)) }}>{c.rotate}</button><button className={button} disabled={readOnly || !selectedMovable} onClick={duplicateObject}>{c.duplicate}</button><button className={`${button} tw:text-red-700!`} disabled={readOnly || !selectedMovable} onClick={removeObject}>{c.remove}</button>
         </div> : <p className={`${muted} tw:m-0`}>{c.empty}</p>}
         <div className="tw:grid tw:gap-3 tw:border-0 tw:border-t tw:border-solid tw:border-[var(--settings-border)] tw:pt-4"><h3 className={heading}>{c.catalog}</h3>{placementAsset ? <>

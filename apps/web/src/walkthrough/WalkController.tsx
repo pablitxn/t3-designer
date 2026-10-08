@@ -2,13 +2,15 @@ import { useEffect, useRef, type RefObject } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import {
   isWalkPositionFree,
-  moveWalkPosition,
+  moveWalkBody,
   roomAtPosition,
+  walkLevelAtPosition,
   WALK_CROUCH_HEIGHT,
   WALK_EYE_HEIGHT,
   stepWalkVertical,
   type WalkVerticalState,
   type WalkWorld,
+  type WalkSpawn,
 } from './navigation'
 
 export type WalkInput = {
@@ -26,7 +28,7 @@ export type WalkInput = {
   interact: boolean
 }
 
-export type WalkPose = { x: number; z: number; yaw: number; pitch: number; eyeHeight: number; feetOffset: number; grounded: boolean; roomId?: string }
+export type WalkPose = { x: number; z: number; yaw: number; pitch: number; eyeHeight: number; feetOffset: number; grounded: boolean; roomId?: string; levelId?: string }
 
 type WalkControllerProps = {
   world: WalkWorld
@@ -34,7 +36,7 @@ type WalkControllerProps = {
   collisionWorld: WalkWorld
   active: boolean
   input: RefObject<WalkInput>
-  spawn: { position: [number, number]; yaw: number } | null
+  spawn: WalkSpawn | null
   resetKey: number
   eyeHeight: number
   sensitivity: number
@@ -99,6 +101,7 @@ export function WalkController({ world, collisionWorld, active, input, spawn, re
   const spawnX = spawn?.position[0]
   const spawnZ = spawn?.position[1]
   const spawnYaw = spawn?.yaw
+  const spawnFeet = spawn?.feetOffset ?? 0
   const standingHeight = clamp(finite(eyeHeight, WALK_EYE_HEIGHT), WALK_CROUCH_HEIGHT, 2.1)
 
   useEffect(() => { callbacks.current = { onPose, onPause, onInteract } }, [onPose, onPause, onInteract])
@@ -112,16 +115,16 @@ export function WalkController({ world, collisionWorld, active, input, spawn, re
     // Navigation selected this point with the requested standing clearance.
     orientation.current = { yaw: spawnYaw, pitch: 0, height: Math.min(standingHeight, WALK_EYE_HEIGHT) }
     look.current = { x: 0, y: 0 }
-    vertical.current = { offset: 0, velocity: 0, grounded: true }
+    vertical.current = { offset: spawnFeet, velocity: 0, grounded: true }
     jumpQueued.current = false
     interactQueued.current = false
     poseElapsed.current = .1
     lastPose.current = null
-    camera.position.set(spawnX, world.floorElevation + orientation.current.height, spawnZ)
+    camera.position.set(spawnX, world.floorElevation + spawnFeet + orientation.current.height, spawnZ)
     camera.rotation.set(0, spawnYaw, 0, 'YXZ')
     invalidate()
     // Eye-height changes animate in place instead of resetting the walk.
-  }, [world, spawnX, spawnZ, spawnYaw, resetKey, camera, invalidate])
+  }, [world, spawnX, spawnZ, spawnYaw, spawnFeet, resetKey, camera, invalidate])
 
   useEffect(() => {
     const canvas = gl.domElement
@@ -309,10 +312,12 @@ export function WalkController({ world, collisionWorld, active, input, spawn, re
       const magnitude = Math.max(1, Math.hypot(forward, right))
       const distance = speed * delta / magnitude
       if (forward !== 0 || right !== 0) {
-        position.current = moveWalkPosition(collisionWorld, currentPosition, [
+        const movement = moveWalkBody(collisionWorld, currentPosition, [
           (-Math.sin(current.yaw) * forward + Math.cos(current.yaw) * right) * distance,
           (-Math.cos(current.yaw) * forward - Math.sin(current.yaw) * right) * distance,
-        ], current.height, vertical.current.offset)
+        ], current.height, vertical.current)
+        position.current = movement.position
+        vertical.current = movement.vertical
       }
       vertical.current = stepWalkVertical(collisionWorld, position.current ?? currentPosition, current.height, vertical.current, delta, jumpQueued.current || controls.jump)
       jumpQueued.current = false
@@ -320,7 +325,7 @@ export function WalkController({ world, collisionWorld, active, input, spawn, re
       if (interactQueued.current || controls.interact) {
         const [x, z] = position.current ?? currentPosition
         callbacks.current.onInteract({ x, z, yaw: current.yaw, pitch: current.pitch, eyeHeight: current.height,
-          feetOffset: vertical.current.offset, grounded: vertical.current.grounded, roomId: roomAtPosition(world, [x, z])?.id })
+          feetOffset: vertical.current.offset, grounded: vertical.current.grounded, roomId: roomAtPosition(world, [x, z], vertical.current.offset)?.id, levelId: walkLevelAtPosition(world, [x, z], vertical.current.offset) })
       }
       interactQueued.current = false
       controls.interact = false
@@ -335,9 +340,10 @@ export function WalkController({ world, collisionWorld, active, input, spawn, re
     if (poseElapsed.current < .1) return
     poseElapsed.current = 0
     const previous = lastPose.current
-    const roomId = roomAtPosition(world, [x, z])?.id
+    const roomId = roomAtPosition(world, [x, z], vertical.current.offset)?.id
+    const levelId = walkLevelAtPosition(world, [x, z], vertical.current.offset)
     if (previous && previous.x === x && previous.z === z && previous.yaw === current.yaw && previous.pitch === current.pitch && Math.abs(previous.eyeHeight - current.height) < .001 && Math.abs(previous.feetOffset - vertical.current.offset) < .001 && previous.grounded === vertical.current.grounded && previous.roomId === roomId) return
-    const pose: WalkPose = { x, z, yaw: current.yaw, pitch: current.pitch, eyeHeight: current.height, feetOffset: vertical.current.offset, grounded: vertical.current.grounded, roomId }
+    const pose: WalkPose = { x, z, yaw: current.yaw, pitch: current.pitch, eyeHeight: current.height, feetOffset: vertical.current.offset, grounded: vertical.current.grounded, roomId, levelId }
     lastPose.current = pose
     callbacks.current.onPose(pose)
   })

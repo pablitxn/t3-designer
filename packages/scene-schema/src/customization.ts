@@ -23,7 +23,7 @@ export const FixedLightSchema = z.object({
   id,
   name: z.string().trim().min(1).max(80),
   roomId: id,
-  position: z.tuple([number, number.nonnegative(), number]),
+  position: z.tuple([number, number.min(-1000).max(1000), number]),
   ...lightFields,
 })
 export type FixedLight = z.infer<typeof FixedLightSchema>

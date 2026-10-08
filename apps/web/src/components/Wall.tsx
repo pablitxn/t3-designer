@@ -16,7 +16,7 @@ export function Wall({ wall, doors, windows, cutaway, customization }: WallProps
   const segments = segmentWall(wall, [...doors, ...windows])
 
   return (
-    <group position={[wall.from[0], 0, wall.from[1]]} rotation={[0, wallRotation(wall), 0]}>
+    <group position={[wall.from[0], wall.baseElevation ?? 0, wall.from[1]]} rotation={[0, wallRotation(wall), 0]}>
       {segments.map((segment, index) => {
         const height = Math.min(segment.height, visibleHeight - segment.bottom)
         if (height <= 0) return null

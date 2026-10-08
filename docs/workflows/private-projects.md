@@ -2,9 +2,10 @@
 
 T3 has a public demo at `/` and an authenticated application at `/app`.
 The demo remains a published, bundled example. New accounts receive no private
-projects or library data automatically. Creating a manual project copies the
-published scene into a private, independently saved document. Generating with AI
-creates a new estimated scene from the person's dimensions and location.
+projects or library data automatically. Creating a project starts an empty private
+foundation document with two parts: the dwelling and its building/context. It
+does not read or copy the published demo. Existing scene projects remain usable;
+the separate conceptual AI generator still creates an estimated single-floor scene.
 
 Better Auth 1.7.7 is the MIT-licensed, self-hosted library. There is no paid auth
 service, Google integration or external identity account required.
@@ -103,10 +104,117 @@ are validated on the server, including model references. Project names and notes
 are stored privately and rendered as text. Personal documents, energy data and
 photo galleries are not automatically sent to a model or published in the demo.
 
-The initial project is a copy of the current T3. Its source measurements and
-geographical context remain estimates; renaming a copy does not reconstruct a
-different property. Importing a floorplan/address with an agent is not part of
-this release. Changes to the bundled demo do not update existing copies.
+New projects open in foundation setup. The dwelling has independent levels, each
+with a floor number, optional elevation and dimensions, notes and up to four
+PNG/JPEG/WebP plan images (5 MB each). Levels are simultaneous parts of a dwelling;
+architecture variants remain alternative designs of a reviewed base. Unknown
+measurements remain empty rather than inheriting values from the demo.
+
+The building has a country, region, address, notes and individually attributed
+source links. Official portal suggestions depend on the selected country. These
+are navigation aids until a generation attempt explicitly researches the address.
+Users can record sources for any country; jurisdiction and public availability
+vary. See [property sources](../architecture/property-sources.md).
+
+Setup, renaming, notes and sources use the existing explicit revision save.
+A draft has no scene. The viewer, variants, furniture placement and energy tools
+stay closed until reviewed dwelling and building models exist. Attaching plans
+or adding an address does not mark either model complete. Each foundation now has
+its own agent workshop with persisted conversation, activity, iterations, review
+findings and immutable candidate versions. Starting a reconstruction sends its
+saved input and correction message to the selected model provider. Dwelling attempts attach
+the selected plan images. Metropolitan France building attempts first acquire
+numbered addresses, building footprints/heights, roads and the address parcel
+from IGN; other jurisdictions use public web search. Acquired coordinates and
+source citations remain server-owned while the model explains and reviews them.
+The model returns bounded scene data, never executable code.
+
+Each attempt runs at most three generation/validation/review rounds. Deterministic
+checks validate polygon shape, room overlap, openings, floor coverage and supplied
+dimensions. A model then compares the structured candidate against source plans
+or cited public records. This is a source/geometry review, not an automated audit
+of rendered 3D images. The preview displays the resulting geometry for the user.
+Missing metric scale, unreadable plans or inaccessible required property evidence
+produce questions and keep the version unready. Unsupported details stay in the
+assumptions and unknowns, and reconstructed geometry stays estimated.
+
+The user can request another version in chat and explicitly accept a reviewed
+candidate. Both accepted foundations are required to materialize the project's
+floor scenes. During setup, changing plans or building inputs invalidates only
+that foundation and preserves the other accepted model. Floor selection preserves
+each floor's furniture and design variants, including negative floor numbers for
+basements. The geographic position
+is initially centered in the building and its orientation is estimated. Physical
+stair connections contain source-attributed flights, intermediate landings and
+floor/ceiling openings in the shared dwelling frame. The walkthrough renders all
+accepted floors together and supports continuous ascent and descent, with wall,
+door, furniture, headroom and guard collisions. Local floor regions represent
+annex steps or split levels without turning them into separate storeys. Their
+elevations and wall bases remain local to the owning floor. A building rebase
+moves the assembly without changing those interior dimensions or variants.
+Legacy connections containing notes alone remain descriptive; the agent needs
+supported geometry before they become traversable. Inferred widths, steps and
+landings remain estimates, not regulatory or structural approval.
+Copied projects retain their accepted bases; a correction can use those bases
+without access to the original project's generation history.
+Chat can correct known measurements: the backend checks a literal user quote and
+its numeric value, preserves that evidence, and uses accepted corrections as the
+baseline for later versions while still rejecting unexplained dimension changes.
+
+Building chat supports changes to the body/eaves height without the roof, the
+roof's own height, or the total height including the roof. A total-height change
+sets the body height to the requested total minus the current roof height; an
+ambiguous request for “height” asks which measurement is intended. The same
+bounded operations support translation in explicit cardinal directions and
+resizing the footprint's east–west width or north–south depth around its current
+bounding-box center. Courtyard holes follow that transformation. Measurements
+must be stated in meters in a literal, affirmative quote from the current user
+message; explicit metric conversions from other units are accepted. Editing a
+neighbor requires its exact building identifier in that quote.
+
+Only the specified buildings change. Their geometry becomes `estimated`, while
+the original building records and the complete validated operation history stay
+in the version's provenance. Unrelated buildings, roads, parcel, source citations
+and source dates retain the reviewed snapshot; a correction does not silently
+refresh geographic datasets. The full correction history remains visible in
+the assumptions even when new model prose omits an earlier change. Building
+changes do not automatically resize interior rooms or apartment variants.
+Rotation/north, individual footprint vertices, roads, parcel and address changes
+still require clarification or a new supported source workflow.
+
+A failed or unready correction can continue from the most recent reviewed
+ancestor with matching project inputs, even if that ancestor was not accepted
+yet. The worker searches at most 12 ancestors and rejects cycles, foreign project
+records and stale input fingerprints. The direct parent remains available for
+its outstanding questions, but its unapproved geometry does not replace the
+reviewed baseline. Attempts allow up to 30 minutes for their three review rounds.
+On failure or timeout, an already persisted candidate is retained as an unready
+chat version and the failed attempt is refunded; it cannot be accepted without
+a new successful review. Account access is checked again before retaining it.
+
+Replacing an accepted base creates a restorable project checkpoint. A building
+correction preserves the edited interiors and building-energy assumptions while
+updating context. Replacing the dwelling rebuilds its interior base, so the UI
+asks the user to confirm resetting furniture and variants. Checkpoints preserve
+the previous project state for recovery. The foundation document cannot be turned
+into a ready scene through generic PUT.
+Legacy scene projects and the independent conceptual generator retain their
+existing editor behavior.
+
+Plan uploads reuse the furniture workshop's validated image storage, capacity
+checks and upload quotas. Project members read plans through project-scoped
+URLs; only owners/editors upload. The project keeps access if the uploader is
+removed, and revoked members lose project access. Uploading stores the image;
+Save records its assignment to a floor. Removing an assignment does not delete
+its stored image. Clones get independent foundation fields and authorized links
+to the same immutable images. There is no automatic deletion of original plans.
+
+Furniture generation remains in the existing asset workshop. Foundation
+reconstruction currently creates rooms, walls and openings; built-in cabinetry,
+appliances and other furnishings are not generated automatically. Their missing
+detail can be recorded in the proposal's unknowns. Furniture layouts and movable
+furnishings extend the accepted floor base, with existing immutable asset
+revisions. No furniture is silently generated during intake.
 
 Generated models belong to their creator. Adding one to a project grants that
 project access to the immutable GLB revision, not the creator's prompts,
@@ -148,6 +256,20 @@ See [credits and billing](../credits-billing.md) for reservation, return and
 expiration rules. Failed or cancelled generation returns its reservation; a
 completed analysis requesting further information consumes its attempt.
 
+Foundation reconstruction uses the selected inference provider. Local operator
+testing can use `T3_INFERENCE_PROVIDER=codex-local` with an existing ChatGPT CLI
+login and a loopback-bound backend; production rejects this adapter. The same
+bounded candidate/validation/review loop runs with either provider, without an
+automatic fallback to a different billing method. Each dwelling
+attempt costs 50 credits and each building attempt 100, including chat
+corrections; the price covers up to three internal improvement rounds. A missing
+plan detected before inference returns the reservation. Durable runs and versions
+survive normal navigation; a server restart marks interrupted work failed and
+returns its reservation rather than silently replaying paid inference. Plan
+read access, version read access, acceptance and cancellation remain scoped to
+project membership. A stale project revision or changed saved inputs require a
+refresh/new generation before acceptance.
+
 `/app/generate` creates conceptual projects, apartments and building envelopes.
 The user supplies dimensions, coordinates and an IANA time zone. Only one ground
 floor has an interior; upper floors are an approximate exterior envelope.
@@ -155,8 +277,11 @@ Generated scenes contain no copied cadastral evidence or public-demo furnishings
 All geometry and openings are marked estimated. These drafts need human review.
 
 Self-hosted does not mean all generation data stays on the server: the existing
-asset workflow sends selected product references and renders to OpenAI. Private
-project notes and other project documents are not included in that workflow.
+asset workflow sends selected product references and renders to OpenAI. The
+foundation workflow sends the saved dwelling/building preparation, selected plan
+images, correction message and previous candidate when applicable; building
+research can include the submitted address in public search queries. Unrelated
+project documents and the separate project-notes field are not included.
 Public-page analytics is consent-controlled; private routes never send Umami
 events, even when public analytics consent was previously granted.
 

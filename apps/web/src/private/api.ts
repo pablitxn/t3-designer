@@ -1,8 +1,8 @@
-import type { ProjectSnapshot } from '@t3-designer/scene-schema'
+import type { FoundationModels, ProjectFoundations, ProjectSnapshot } from '@t3-designer/scene-schema'
 
 export type AccountUser = { id: string; name: string; email: string; role: 'user' | 'admin'; tier?: 'standard' | 'premium'; canInvite?: boolean; suspended?: boolean }
-export type ProjectSummary = { id: string; name: string; notes: string; ownerId: string; role: 'owner' | 'editor' | 'viewer'; revision: number; createdAt: string; updatedAt: string }
-export type Project = ProjectSummary & { scene: ProjectSnapshot }
+export type ProjectSummary = { id: string; name: string; notes: string; ownerId: string; role: 'owner' | 'editor' | 'viewer'; revision: number; createdAt: string; updatedAt: string; stage?: 'setup' | 'ready' }
+export type Project = ProjectSummary & { scene: ProjectSnapshot | null; foundations?: ProjectFoundations | null; foundationModels?: FoundationModels | null }
 export type ProjectMember = { userId: string; name: string; email: string; role: 'viewer' | 'editor' }
 export class PrivateApiError extends Error {
   constructor(readonly status: number) { super(`Request failed (${status})`); this.name = 'PrivateApiError' }

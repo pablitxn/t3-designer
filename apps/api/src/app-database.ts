@@ -25,7 +25,8 @@ export interface AppTables {
   t3_bootstrap: { id: string; invitationId: string }
   t3_recovery: { id: string; tokenHash: string; userId: string; expiresAt: string; usedAt: string | null }
   t3_rate_limit: { key: string; count: number; expiresAt: string }
-  t3_project: { id: string; ownerId: string; name: string; notes: string; scene: string; revision: number; createdAt: string; updatedAt: string }
+  t3_project: { id: string; ownerId: string; name: string; notes: string; scene: string; foundations: import('kysely').Generated<string | null>; foundationModels: import('kysely').Generated<string | null>; revision: number; createdAt: string; updatedAt: string }
+  t3_project_checkpoint: { id: string; projectId: string; revision: number; reason: string; document: string; createdAt: string }
   t3_project_member: { projectId: string; userId: string; role: string; createdAt: string }
 }
 
@@ -109,6 +110,23 @@ export class AppDatabase {
       .addColumn('name', 'text', c => c.notNull()).addColumn('notes', 'text', c => c.notNull())
       .addColumn('scene', 'text', c => c.notNull()).addColumn('revision', 'integer', c => c.notNull())
       .addColumn('createdAt', 'text', c => c.notNull()).addColumn('updatedAt', 'text', c => c.notNull()).execute()
+    if (this.dialect === 'postgres') {
+      await sql`ALTER TABLE t3_project ADD COLUMN IF NOT EXISTS "foundations" text`.execute(this.db)
+      await sql`ALTER TABLE t3_project ADD COLUMN IF NOT EXISTS "foundationModels" text`.execute(this.db)
+    } else {
+      const projectColumns = (await this.db.introspection.getTables()).find(table => table.name === 't3_project')?.columns ?? []
+      if (!projectColumns.some(column => column.name === 'foundations')) {
+        await this.db.schema.alterTable('t3_project').addColumn('foundations', 'text').execute()
+      }
+      if (!projectColumns.some(column => column.name === 'foundationModels')) {
+        await this.db.schema.alterTable('t3_project').addColumn('foundationModels', 'text').execute()
+      }
+    }
+    await this.db.schema.createTable('t3_project_checkpoint').ifNotExists()
+      .addColumn('id', 'text', c => c.primaryKey()).addColumn('projectId', 'text', c => c.notNull().references('t3_project.id').onDelete('cascade'))
+      .addColumn('revision', 'integer', c => c.notNull()).addColumn('reason', 'text', c => c.notNull())
+      .addColumn('document', 'text', c => c.notNull()).addColumn('createdAt', 'text', c => c.notNull()).execute()
+    await this.db.schema.createIndex('t3_project_checkpoint_history').ifNotExists().on('t3_project_checkpoint').columns(['projectId', 'revision']).unique().execute()
     await this.db.schema.createTable('t3_project_member').ifNotExists()
       .addColumn('projectId', 'text', c => c.notNull().references('t3_project.id').onDelete('cascade'))
       .addColumn('userId', 'text', c => c.notNull().references('user.id').onDelete('cascade'))

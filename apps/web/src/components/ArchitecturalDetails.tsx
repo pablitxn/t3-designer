@@ -41,7 +41,7 @@ export function ArchitecturalDetails({ apartment, cutaway }: { apartment: Apartm
         const wall = apartment.walls.find((candidate) => candidate.id === opening.wallId)!
         const height = Math.max(0.05, (cutaway ? 1 : 1.2) - opening.sillHeight + 0.03)
         return (
-          <group key={opening.id} position={[wall.from[0], 0, wall.from[1]]} rotation={[0, wallRotation(wall), 0]}>
+          <group key={opening.id} position={[wall.from[0], wall.baseElevation ?? 0, wall.from[1]]} rotation={[0, wallRotation(wall), 0]}>
             <group position={[opening.offset + 0.025, opening.sillHeight - 0.03, -wall.thickness / 2 - 0.085]}>
               <Guard length={opening.width - 0.05} height={height} simple />
             </group>

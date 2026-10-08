@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { apartmentBounds } from '@t3-designer/geometry'
 import { defaultDesignCustomization, MAX_DESIGN_LIGHTS, type DesignCustomization, type LightSource, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { DoubleSide, Object3D, Path, Shape } from 'three'
@@ -6,6 +6,7 @@ import { siteDirectionInProject } from '../private/project-scene'
 import { kelvinColor, lumensToCandela } from '../lib/design-lighting'
 import { ShadowOnly } from './ShadowOnly'
 import { Wall } from './Wall'
+import { surfaceGeometry } from './surface-geometry'
 
 export function LightEmitter({ source, position }: { source: Pick<LightSource, 'kelvin' | 'lumens' | 'enabled'>; position: [number, number, number] }) {
   const active = source.enabled && source.lumens > 0
@@ -65,9 +66,11 @@ function polygonShape(points: Point2D[], holes: Point2D[][] = []) {
 
 function OccludingVolume({ polygon, holes, elevation, thickness }: { polygon: Point2D[]; holes?: Point2D[][]; elevation: number; thickness: number }) {
   const shape = useMemo(() => thickness > 0 && polygon.length >= 3 ? polygonShape(polygon, holes) : null, [polygon, holes, thickness])
+  const clipped = useMemo(() => holes?.length && thickness > 0 ? surfaceGeometry(polygon, holes, undefined, thickness) : null, [polygon, holes, thickness])
+  useEffect(() => () => clipped?.dispose(), [clipped])
   if (!shape) return null
-  return <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, elevation, 0]} castShadow raycast={() => {}}>
-    <extrudeGeometry args={[shape, { depth: thickness, bevelEnabled: false }]} /><meshBasicMaterial side={DoubleSide} />
+  return <mesh rotation={[clipped ? 0 : -Math.PI / 2, 0, 0]} position={[0, clipped ? elevation + thickness : elevation, 0]} castShadow raycast={() => {}}>
+    {clipped ? <primitive attach="geometry" object={clipped} /> : <extrudeGeometry args={[shape, { depth: thickness, bevelEnabled: false }]} />}<meshBasicMaterial side={DoubleSide} />
   </mesh>
 }
 
@@ -87,7 +90,7 @@ export function DesignEnvelope({ scene, cutaway }: { scene: ProjectSnapshot; cut
     {cutaway && apartment.walls.map(wall => <Wall key={wall.id} wall={wall}
       doors={apartment.doors.filter(door => door.wallId === wall.id)}
       windows={apartment.windows.filter(window => window.wallId === wall.id)} cutaway={false} customization={shadowDesign} />)}
-    <OccludingVolume polygon={geometry.ceiling.polygon} elevation={geometry.ceiling.elevation} thickness={geometry.ceiling.thickness} />
+    {(apartment.floorRegions?.length ? apartment.floorRegions.map(region => ({ polygon: region.polygon, elevation: region.ceilingElevation })) : [geometry.ceiling]).map((region, index) => <OccludingVolume key={`ceiling-${index}`} polygon={region.polygon} holes={apartment.ceilingOpenings?.map(opening => opening.polygon)} elevation={region.elevation} thickness={geometry.ceiling.thickness} />)}
     <group rotation={[0, -placement.rotationY, 0]}>
       <group position={[-placement.position[0], -placement.position[1], -placement.position[2]]}>
         {buildings.filter(building => !building.isTarget).map(building => <OccludingVolume key={building.id} polygon={building.footprint} holes={building.holes} elevation={building.groundOffset} thickness={building.height} />)}

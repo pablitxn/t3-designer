@@ -15,6 +15,8 @@ import { createProjects } from './projects.ts'
 import { BillingService, migrateBilling } from './billing.ts'
 import { GenerationCredits } from './generation-credits.ts'
 import { ProjectGenerations } from './project-generations.ts'
+import { FoundationAgent } from './foundation-agent.ts'
+import { createFoundationGenerator } from './foundation-agent-model.ts'
 import { inferenceProvider } from './openai.ts'
 import { ensureLibraryCapacity } from './storage-capacity.ts'
 
@@ -37,6 +39,14 @@ async function main() {
   const references = new ReferenceLibrary(directory, { beforeSave: bytes => ensureLibraryCapacity(directory, config.libraryMaxBytes, capacityReserve + bytes) })
   const projects = await createProjects({
     database, accounts, bundledScenePath: resolve(root, 'assets/scenes/t3-project.json'),
+    validatePlanReference: async (_user, projectId, referenceId) => store.hasProjectReference(projectId, referenceId)
+      && !!await references.get(referenceId) && !!await references.file(referenceId),
+    clonePlanReferences: async (sourceId, targetId, _user, foundations) => {
+      for (const level of foundations.dwelling.levels) for (const reference of level.planReferences) {
+        if (!store.hasProjectReference(sourceId, reference.id) || !await references.file(reference.id)) throw new Error('El plano original ya no está disponible.')
+        store.attachProjectReference(targetId, reference.id)
+      }
+    },
     validateAssetReference: async (_user, projectId, asset) => {
       const attachment = store.projectAssets(projectId).find(item => item.id === asset.id)
       return !!attachment && asset.url === attachment.url && asset.repoPath === `private/${attachment.id}/model.glb`
@@ -65,6 +75,14 @@ async function main() {
   })
   const projectGenerations = new ProjectGenerations({ path: resolve(directory, 'project-generations.sqlite'), database, credits, store, projects, enabled: config.generation.enabled && inferenceProvider() === 'openai', limits: config.generation })
   await projectGenerations.recover()
+  const foundationAgent = new FoundationAgent({
+    path: resolve(directory, 'foundation-agent.sqlite'), database, credits, store, projects,
+    // runtimeConfig restricts subscription sessions to a loopback development
+    // host and web origin; production still requires the hosted API provider.
+    enabled: config.generation.enabled, limits: config.generation,
+    generate: createFoundationGenerator({ references }),
+  })
+  await foundationAgent.recover()
   const worker = new AssetWorker({
     store, directory, planner: planAsset, renderer: createRenderer(root), reviewer: reviewAsset, referenceLoader: references.prepare.bind(references),
     beforeRender: () => ensureLibraryCapacity(directory, config.libraryMaxBytes),
@@ -95,9 +113,9 @@ async function main() {
     })().finally(() => { healthPending = null })
     return healthPending
   }
-  const server = createApi({ store, worker, health, references, access: accounts, projects, publicOrigin: config.publicURL, production: config.production, generation: config.generation, credits, metering, projectGenerations, billing, billingWebhookSecret: config.billing.webhookSecret })
+  const server = createApi({ store, worker, health, references, access: accounts, projects, publicOrigin: config.publicURL, production: config.production, generation: config.generation, credits, metering, projectGenerations, foundationAgent, billing, billingWebhookSecret: config.billing.webhookSecret })
   const reconciliation = setInterval(() => {
-    void metering.exclusive(async () => { await metering.recover(); await projectGenerations.reconcile() }).catch(() => console.error('Credit reconciliation temporarily unavailable'))
+    void metering.exclusive(async () => { await metering.recover(); await projectGenerations.reconcile(); await foundationAgent.reconcile() }).catch(() => console.error('Credit reconciliation temporarily unavailable'))
   }, 30000)
   reconciliation.unref()
   let closing = false
@@ -107,7 +125,7 @@ async function main() {
     clearInterval(reconciliation)
     await Promise.all([
       new Promise<void>((done) => server.close(() => done())),
-      worker.close(), projectGenerations.close(),
+      worker.close(), projectGenerations.close(), foundationAgent.close(),
     ])
     store.close()
     await database.close()

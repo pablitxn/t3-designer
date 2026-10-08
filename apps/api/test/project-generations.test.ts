@@ -72,7 +72,7 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       blocked.release()
       await until(async () => (await f.credits.reservation(`architecture:${jobs[0].id}`))?.state === 'committed')
       assert.equal(f.generations.get(f.alice.id, jobs[0].id).projectId, jobs[0].id)
-      assert.equal((await f.projects.get(f.alice, jobs[0].id)).scene.project.id, jobs[0].id)
+      assert.equal((await f.projects.get(f.alice, jobs[0].id)).scene?.project.id, jobs[0].id)
       await assert.rejects(f.projects.get(f.bob, jobs[0].id), error => error instanceof AccountError && error.status === 404)
       assert.equal((await f.generations.create(f.alice, input, key)).id, jobs[0].id)
       assert.equal((await f.credits.summary(f.alice.id)).balance, 50)

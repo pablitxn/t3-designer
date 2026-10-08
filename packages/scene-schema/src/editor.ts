@@ -67,9 +67,18 @@ export function pointInEditorPolygon([x, z]: Point2D, polygon: readonly Point2D[
   return inside
 }
 
-function validateCustomizationScene(apartment: Apartment, fixtures: Fixture[], customization: DesignCustomization | undefined, ceiling: number, context: z.RefinementCtx, path: (string | number)[]) {
+/** Shared edges use the tighter clearance of both adjacent regions. */
+function verticalBounds(apartment: Apartment, point: Point2D, floor: number, ceiling: number) {
+  const regions = apartment.floorRegions?.filter(region => pointInEditorPolygon(point, region.polygon))
+  return regions?.length ? { floor: Math.max(...regions.map(region => region.floorElevation)), ceiling: Math.min(...regions.map(region => region.ceilingElevation)) } : { floor, ceiling }
+}
+
+function validateCustomizationScene(apartment: Apartment, fixtures: Fixture[], customization: DesignCustomization | undefined, floor: number, ceiling: number, context: z.RefinementCtx, path: (string | number)[]) {
   const issue = (message: string, suffix: (string | number)[]) => context.addIssue({ code: 'custom', message, path: [...path, ...suffix] })
-  const inside = ([x, y, z]: [number, number, number]) => y >= 0 && y <= ceiling + 1e-8 && pointInEditorPolygon([x, z], apartment.perimeter)
+  const inside = ([x, y, z]: [number, number, number]) => {
+    const bounds = verticalBounds(apartment, [x, z], floor, ceiling)
+    return y >= bounds.floor - 1e-8 && y <= bounds.ceiling + 1e-8 && pointInEditorPolygon([x, z], apartment.perimeter)
+  }
   const lights = customization?.lighting.lights ?? []
   if (lights.length + fixtures.filter(fixture => fixture.light).length > MAX_DESIGN_LIGHTS) issue(`A layout supports at most ${MAX_DESIGN_LIGHTS} light sources`, ['customization', 'lighting', 'lights'])
   fixtures.forEach((fixture, index) => {
@@ -94,20 +103,33 @@ function validateCustomizationScene(apartment: Apartment, fixtures: Fixture[], c
   })
 }
 
-export function validateEditorScene(snapshot: { apartment: Apartment; fixtures: Fixture[]; customization?: DesignCustomization; assets: { id: string; dimensions: [number, number, number] }[]; geometry: { ceiling: { elevation: number } }; editor?: ProjectEditor }, context: z.RefinementCtx) {
-  validateCustomizationScene(snapshot.apartment, snapshot.fixtures, snapshot.customization, snapshot.geometry.ceiling.elevation, context, [])
+export function validateEditorScene(snapshot: { apartment: Apartment; fixtures: Fixture[]; customization?: DesignCustomization; assets: { id: string; dimensions: [number, number, number] }[]; geometry: { floor?: { elevation: number }; ceiling: { elevation: number } }; editor?: ProjectEditor }, context: z.RefinementCtx) {
+  const floor = snapshot.geometry.floor?.elevation ?? 0, ceiling = snapshot.geometry.ceiling.elevation
+  validateCustomizationScene(snapshot.apartment, snapshot.fixtures, snapshot.customization, floor, ceiling, context, [])
+  const assets = new Map(snapshot.assets.map(asset => [asset.id, asset]))
+  const validateFixture = (fixture: Fixture, apartment: Apartment, path: (string | number)[]) => {
+    const asset = assets.get(fixture.assetId), point: Point2D = [fixture.position[0], fixture.position[2]]
+    const bounds = verticalBounds(apartment, point, floor, ceiling)
+    if (!asset) context.addIssue({ code: 'custom', message: 'Fixture must reference a project asset, including inactive layouts', path: [...path, 'assetId'] })
+    if (!pointInEditorPolygon(point, apartment.perimeter)) context.addIssue({ code: 'custom', message: 'Object origin must stay inside its apartment', path: [...path, 'position'] })
+    if (apartment.floorOpenings?.some(opening => pointInEditorPolygon(point, opening.polygon))) context.addIssue({ code: 'custom', message: 'Object origin must stay outside floor openings', path: [...path, 'position'] })
+    if (fixture.position[1] < bounds.floor - 1e-8) context.addIssue({ code: 'custom', message: 'Object extends below the local floor', path: [...path, 'position'] })
+    if (asset && fixture.position[1] + asset.dimensions[1] > bounds.ceiling + 1e-8) context.addIssue({ code: 'custom', message: 'Object extends above the ceiling', path: [...path, 'position'] })
+  }
+  snapshot.fixtures.forEach((fixture, index) => {
+    // Stored v1 scenes without an editor predate spatial fixture validation.
+    // Preserve their positive placements; new regional scenes and negative Y
+    // must still prove a valid local supporting floor.
+    if (snapshot.editor || snapshot.apartment.floorRegions || snapshot.apartment.floorOpenings?.length || fixture.position[1] < floor) validateFixture(fixture, snapshot.apartment, ['fixtures', index])
+  })
   const editor = snapshot.editor
   if (!editor) return
-  const assets = new Map(snapshot.assets.map(asset => [asset.id, asset]))
   editor.architectures.forEach((architecture, architectureIndex) => {
     architecture.layouts.forEach((layout, layoutIndex) => {
-      validateCustomizationScene(architecture.apartment, layout.fixtures, layout.customization, snapshot.geometry.ceiling.elevation, context, ['editor', 'architectures', architectureIndex, 'layouts', layoutIndex])
+      validateCustomizationScene(architecture.apartment, layout.fixtures, layout.customization, floor, ceiling, context, ['editor', 'architectures', architectureIndex, 'layouts', layoutIndex])
       layout.fixtures.forEach((fixture, fixtureIndex) => {
         const path = ['editor', 'architectures', architectureIndex, 'layouts', layoutIndex, 'fixtures', fixtureIndex]
-        const asset = assets.get(fixture.assetId)
-        if (!asset) context.addIssue({ code: 'custom', message: 'Fixture must reference a project asset, including inactive layouts', path: [...path, 'assetId'] })
-        if (!pointInEditorPolygon([fixture.position[0], fixture.position[2]], architecture.apartment.perimeter)) context.addIssue({ code: 'custom', message: 'Object origin must stay inside its apartment', path: [...path, 'position'] })
-        if (asset && fixture.position[1] + asset.dimensions[1] > snapshot.geometry.ceiling.elevation + 1e-8) context.addIssue({ code: 'custom', message: 'Object extends above the ceiling', path: [...path, 'position'] })
+        validateFixture(fixture, architecture.apartment, path)
       })
     })
   })

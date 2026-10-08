@@ -6,7 +6,7 @@ export type FixtureEdit = Pick<Fixture, 'position' | 'rotation' | 'roomId'>
 
 /** A scene edit changes instances, never a shared model or the source template. */
 export function updateProjectFixture(snapshot: ProjectSnapshot, fixtureId: string, patch: Partial<FixtureEdit>): ProjectSnapshot {
-  if (snapshot.editor) return updateFixture(snapshot, fixtureId, patch)
+  if (snapshot.editor || snapshot.apartment.floorRegions?.length) return updateFixture(snapshot, fixtureId, patch)
   const original = snapshot.fixtures.find(fixture => fixture.id === fixtureId)
   if (!original) throw new Error('Unknown object')
   if (!isFixtureMovable(original, snapshot.assets.find(asset => asset.id === original.assetId))) throw new Error('Fixed objects cannot be rearranged')
@@ -27,7 +27,7 @@ export function removeProjectFixture(snapshot: ProjectSnapshot, fixtureId: strin
 }
 
 export function addProjectFixture(snapshot: ProjectSnapshot, assetId: string, fixtureId: string, roomId = snapshot.apartment.rooms[0].id): ProjectSnapshot {
-  if (snapshot.editor) return addFixture(snapshot, assetId, fixtureId, roomId)
+  if (snapshot.editor || snapshot.apartment.floorRegions?.length) return addFixture(snapshot, assetId, fixtureId, roomId)
   const asset = snapshot.assets.find(item => item.id === assetId)
   const room = snapshot.apartment.rooms.find(item => item.id === roomId)
   if (!asset || !room || !fixtureId || snapshot.fixtures.some(item => item.id === fixtureId)) throw new Error('Invalid object instance')

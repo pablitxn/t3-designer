@@ -27,7 +27,7 @@ test('standard account sees allowance expiry and credit history with disabled de
   await expect(page.getByRole('link', { name: 'Invitaciones', exact: true })).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'Movimientos de créditos' })).toBeVisible()
   await expect(page.getByRole('cell', { name: '+100', exact: true })).toBeVisible()
-  await expect(page.getByText(/Crear proyectos desde la demo, editarlos y compartirlos es gratis/)).toBeVisible()
+  await expect(page.getByText(/Crear proyectos privados, documentar tu casa y compartirlos es gratis/)).toBeVisible()
   await page.screenshot({ path: '/tmp/t3-credit-wallet-desktop.png', fullPage: true })
   await page.setViewportSize({ width: 390, height: 844 })
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)

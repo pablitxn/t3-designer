@@ -229,6 +229,49 @@ test('project viewers receive an attached model without the source library, phot
   assert.equal(f.store.projectAssets(f.projectId).length, 1)
 })
 
+test('project plans reuse image storage with project access, editor uploads and revocation', async t => {
+  const f = await fixture(t)
+  const endpoint = `/api/projects/${f.projectId}/references`
+  const body = { name: 'Ground floor.png', dataUrl: imageData }
+  await status(await f.post(endpoint, null, body), 401)
+  await status(await f.post(endpoint, 'outsider', body), 404)
+  await status(await f.post(endpoint, 'bob', body), 403)
+  const { reference } = JSON.parse(await status(await f.post(endpoint, 'alice', body), 201)) as { reference: ReferenceImage }
+  assert.equal(reference.url, `${endpoint}/${reference.id}/image`)
+  assert.equal(f.store.owner('reference', reference.id), 'alice')
+  assert.ok(f.store.hasProjectReference(f.projectId, reference.id))
+  await status(await f.send(reference.url, null), 401)
+  await status(await f.send(reference.url, 'bob'), 200)
+  await status(await f.send(reference.url, 'bob', { method: 'HEAD' }), 200)
+  await status(await f.send(`/api/references/${reference.id}/image`, 'bob'), 404)
+  await status(await f.send(reference.url, 'outsider'), 404)
+  const otherProject = randomUUID()
+  f.roles.set(`${otherProject}:bob`, 'owner')
+  await status(await f.send(reference.url.replace(f.projectId, otherProject), 'bob'), 404)
+  const privatePhoto = await f.seed('alice')
+  await status(await f.send(`${endpoint}/${privatePhoto.reference.id}/image`, 'bob'), 404)
+  f.roles.set(`${f.projectId}:bob`, 'editor')
+  const uploaded = JSON.parse(await status(await f.post(endpoint, 'bob', body), 201)) as { reference: ReferenceImage }
+  await status(await f.send(uploaded.reference.url, 'alice'), 200)
+  f.roles.delete(`${f.projectId}:bob`)
+  await status(await f.send(reference.url, 'bob'), 404)
+  await status(await f.send(uploaded.reference.url, 'bob'), 404)
+  // The project keeps its source even when its uploader is removed.
+  await status(await f.send(uploaded.reference.url, 'alice'), 200)
+  assert.equal(f.workerState.kicks, 0)
+})
+
+test('plan and furniture uploads share quotas and never attach a failed upload', async t => {
+  const f = await fixture(t)
+  const endpoint = `/api/projects/${f.projectId}/references`
+  const invalid = { name: 'plan.svg', dataUrl: 'data:image/svg+xml;base64,PHN2Zy8+' }
+  await status(await f.post(endpoint, 'alice', invalid), 400)
+  assert.equal(f.store.referenceCount('alice'), 0)
+  for (let index = 0; index < 100; index++) f.store.assignOwner('reference', randomUUID(), 'alice')
+  await status(await f.post(endpoint, 'alice', { name: 'plan.png', dataUrl: imageData }), 429)
+  assert.equal(f.store.referenceCount('alice'), 100)
+})
+
 test('generation is disabled by default for creation, retry, answers and asset revisions, including admins', async t => {
   const f = await fixture(t)
   const a = await f.seed('alice')

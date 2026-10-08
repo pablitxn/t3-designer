@@ -5,6 +5,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { AnswersInputSchema, CreateJobInputSchema, RevisionInputSchema, type Health, type JobEvent } from '@t3-designer/asset-schema'
+import { FoundationAgentInputSchema } from '@t3-designer/scene-schema'
+import { z } from 'zod'
 import type { ReferenceLibrary } from './references.ts'
 import { AssetStore } from './store.ts'
 import { artifactFiles, AssetWorker } from './worker.ts'
@@ -13,6 +15,8 @@ import { CreditError, type CreditService, type CreditKind } from './credits.ts'
 import { BillingError, CheckoutInputSchema, validWebhookSignature, type BillingService } from './billing.ts'
 import type { GenerationCredits } from './generation-credits.ts'
 import type { ProjectGenerations } from './project-generations.ts'
+import type { FoundationAgent } from './foundation-agent.ts'
+import type { Projects } from './projects.ts'
 import { ProjectGenerationInputSchema } from './project-generation-model.ts'
 import { StorageCapacityError } from './storage-capacity.ts'
 
@@ -87,14 +91,17 @@ export function createApi(options: {
   access?: {
     authorize: (request: IncomingMessage) => Promise<User | null>
     handle?: (request: IncomingMessage, response: ServerResponse) => Promise<boolean>
+    rateLimit?: (request: IncomingMessage, scope: string, max?: number, discriminator?: string) => Promise<void>
   }
   projects?: {
     handle: (request: IncomingMessage, response: ServerResponse) => Promise<boolean>
     access: (user: User, projectId: string) => Promise<string | null>
+    applyFoundationVersion?: Projects['applyFoundationVersion']
   }
   publicOrigin?: string
   production?: boolean
   projectGenerations?: ProjectGenerations
+  foundationAgent?: FoundationAgent
   credits?: CreditService
   metering?: GenerationCredits
   billing?: BillingService
@@ -146,6 +153,41 @@ export function createApi(options: {
     for (const id of ids ?? []) {
       if (store.owner('reference', id) !== userId || !options.references || !await options.references.get(id) || !await options.references.file(id)) throw new HttpError(400, 'Una imagen de referencia ya no está disponible. Volvé a adjuntarla.')
     }
+  }
+
+  async function uploadReference(request: IncomingMessage, user: User) {
+    if (!options.references) throw new HttpError(503, 'El almacenamiento de referencias no está disponible.')
+    const inFlight = referenceUploads.get(user.id) ?? 0
+    const allInFlight = [...referenceUploads.values()].reduce((sum, count) => sum + count, 0)
+    if (inFlight >= 2 || allInFlight >= 4 || store.referenceCount(user.id) + inFlight >= 100 || store.referenceCount() + allInFlight >= 1000) throw new HttpError(429, 'Se alcanzó el límite de referencias almacenadas o cargas simultáneas.')
+    referenceUploads.set(user.id, inFlight + 1)
+    try {
+      const body = await readJson(request, 7 * 1024 * 1024)
+      if (!body || typeof body !== 'object' || !('name' in body) || !('dataUrl' in body)
+          || typeof body.name !== 'string' || typeof body.dataUrl !== 'string') throw new HttpError(400, 'Adjuntá una imagen con nombre y contenido.')
+      const reference = await options.references.upload({ name: body.name, dataUrl: body.dataUrl }).catch((error: unknown) => {
+        if (error instanceof StorageCapacityError) throw error
+        throw new HttpError(400, 'La imagen no es válida. Usá PNG, JPEG o WebP de hasta 5 MB.')
+      })
+      store.assignOwner('reference', reference.id, user.id)
+      return reference
+    } finally {
+      const remaining = (referenceUploads.get(user.id) ?? 1) - 1
+      if (remaining) referenceUploads.set(user.id, remaining)
+      else referenceUploads.delete(user.id)
+    }
+  }
+
+  async function serveReferenceImage(id: string, request: IncomingMessage, response: ServerResponse) {
+    const file = await options.references?.file(id)
+    if (!file) throw new HttpError(404, 'Imagen no encontrada.')
+    const info = await stat(file.path)
+    response.writeHead(200, {
+      'Content-Type': file.mime, 'Content-Length': info.size, 'Cache-Control': 'private, no-store',
+      'X-Content-Type-Options': 'nosniff', 'Cross-Origin-Resource-Policy': 'same-origin',
+    })
+    if (request.method === 'HEAD') response.end()
+    else await pipeline(createReadStream(file.path), response)
   }
 
   async function enqueue<T>(request: IncomingMessage, payload: unknown, user: User, jobId: string, kind: CreditKind, action: () => T, validate = () => {}): Promise<T> {
@@ -218,6 +260,54 @@ export function createApi(options: {
       }
       throw new HttpError(404, 'Ruta no encontrada.')
     }
+    const foundationAgentMatch = /^\/api\/projects\/([a-f0-9-]{36})\/foundation-agent(?:\/(runs|versions)\/([a-f0-9-]{36})\/(cancel|accept))?$/.exec(url.pathname)
+    if (foundationAgentMatch) {
+      if (!options.foundationAgent) throw new HttpError(503, 'El agente de proyectos no está disponible.')
+      const [, projectId, resource, resourceId, action] = foundationAgentMatch
+      if (method !== 'GET') await options.access?.rateLimit?.(request, 'foundation-agent-mutation', 60, user.id)
+      if (!resource && method === 'GET') { sendJson(response, 200, await options.foundationAgent.list(user, projectId)); return }
+      if (!resource && method === 'POST') {
+        const input = FoundationAgentInputSchema.safeParse(await readJson(request))
+        if (!input.success) throw new HttpError(400, 'Revisá el mensaje, la parte del proyecto y la revisión actual.')
+        const key = request.headers['idempotency-key']
+        if (typeof key !== 'string') throw new HttpError(400, 'Se requiere una clave de reintento.')
+        sendJson(response, 202, { run: await options.foundationAgent.create(user, projectId, input.data, key) }); return
+      }
+      if (resource === 'runs' && action === 'cancel' && method === 'POST') {
+        if (!z.object({}).strict().safeParse(await readJson(request)).success) throw new HttpError(400, 'Solicitud de cancelación inválida.')
+        sendJson(response, 200, { run: await options.foundationAgent.cancel(user, projectId, resourceId) }); return
+      }
+      if (resource === 'versions' && action === 'accept' && method === 'POST') {
+        if (!options.projects?.applyFoundationVersion) throw new HttpError(503, 'La aplicación de versiones no está disponible.')
+        const input = z.object({ revision: z.number().int().positive() }).strict().safeParse(await readJson(request))
+        if (!input.success) throw new HttpError(400, 'Indicá la revisión actual del proyecto.')
+        const version = await options.foundationAgent.getVersion(user, projectId, resourceId)
+        sendJson(response, 200, { project: await options.projects.applyFoundationVersion(user, projectId, version, input.data.revision) }); return
+      }
+      throw new HttpError(404, 'Ruta del agente no encontrada.')
+    }
+    const projectReferencesMatch = /^\/api\/projects\/([a-f0-9-]{36})\/references(?:\/([a-f0-9-]{36})\/image)?$/.exec(url.pathname)
+    if (projectReferencesMatch && options.projects) {
+      const [, projectId, referenceId] = projectReferencesMatch
+      const role = await options.projects.access(user, projectId)
+      if (!role) throw new HttpError(404, 'Proyecto no encontrado.')
+      if (!referenceId && method === 'POST') {
+        if (!['owner', 'editor'].includes(role)) throw new HttpError(403, 'Solo los editores pueden agregar planos.')
+        const reference = await uploadReference(request, user)
+        // Uploading bytes can take time; do not grant access after revocation.
+        const currentRole = await options.projects.access(user, projectId)
+        if (!currentRole || !['owner', 'editor'].includes(currentRole)) throw new HttpError(403, 'Ya no tenés permiso para agregar planos.')
+        store.attachProjectReference(projectId, reference.id)
+        sendJson(response, 201, { reference: { ...reference, url: `/api/projects/${projectId}/references/${reference.id}/image` } })
+        return
+      }
+      if (referenceId && ['GET', 'HEAD'].includes(method)) {
+        if (!store.hasProjectReference(projectId, referenceId)) throw new HttpError(404, 'Plano no encontrado.')
+        await serveReferenceImage(referenceId, request, response)
+        return
+      }
+      throw new HttpError(404, 'Ruta de planos no encontrada.')
+    }
     const projectAssetsMatch = /^\/api\/projects\/([a-f0-9-]{36})\/assets(?:\/([a-f0-9-]{36})\/files\/(model\.glb))?$/.exec(url.pathname)
     if (projectAssetsMatch && options.projects) {
       const projectId = projectAssetsMatch[1]
@@ -247,31 +337,11 @@ export function createApi(options: {
     }
     if (await options.projects?.handle(request, response)) return
     if (url.pathname === '/api/health' && method === 'GET') {
-      sendJson(response, 200, { ...await options.health(), generationEnabled: generationAllowed(user), projectGenerationEnabled: options.projectGenerations?.isEnabled ?? false, activeJobId: worker.activeJobId && store.owner('job', worker.activeJobId) === user.id ? worker.activeJobId : null })
+      sendJson(response, 200, { ...await options.health(), generationEnabled: generationAllowed(user), projectGenerationEnabled: options.projectGenerations?.isEnabled ?? false, foundationAgentEnabled: options.foundationAgent?.isEnabled ?? false, activeJobId: worker.activeJobId && store.owner('job', worker.activeJobId) === user.id ? worker.activeJobId : null })
       return
     }
     if (url.pathname === '/api/references' && method === 'POST') {
-      if (!options.references) throw new HttpError(503, 'El almacenamiento de referencias no está disponible.')
-      const inFlight = referenceUploads.get(user.id) ?? 0
-      const allInFlight = [...referenceUploads.values()].reduce((sum, count) => sum + count, 0)
-      if (inFlight >= 2 || allInFlight >= 4 || store.referenceCount(user.id) + inFlight >= 100 || store.referenceCount() + allInFlight >= 1000) throw new HttpError(429, 'Se alcanzó el límite de referencias almacenadas o cargas simultáneas.')
-      referenceUploads.set(user.id, inFlight + 1)
-      try {
-        const body = await readJson(request, 7 * 1024 * 1024)
-        if (!body || typeof body !== 'object' || !('name' in body) || !('dataUrl' in body)
-            || typeof body.name !== 'string' || typeof body.dataUrl !== 'string') throw new HttpError(400, 'Adjuntá una imagen con nombre y contenido.')
-        const reference = await options.references.upload({ name: body.name, dataUrl: body.dataUrl }).catch((error: unknown) => {
-          if (error instanceof StorageCapacityError) throw error
-          throw new HttpError(400, 'La imagen no es válida. Usá PNG, JPEG o WebP de hasta 5 MB.')
-        })
-        store.assignOwner('reference', reference.id, user.id)
-        sendJson(response, 201, { reference })
-      }
-      finally {
-        const remaining = (referenceUploads.get(user.id) ?? 1) - 1
-        if (remaining) referenceUploads.set(user.id, remaining)
-        else referenceUploads.delete(user.id)
-      }
+      sendJson(response, 201, { reference: await uploadReference(request, user) })
       return
     }
     const referenceMatch = /^\/api\/references\/([^/]+)(\/image)?$/.exec(url.pathname)
@@ -280,15 +350,7 @@ export function createApi(options: {
       const reference = await options.references?.get(referenceMatch[1])
       if (!reference) throw new HttpError(404, 'Referencia no encontrada.')
       if (!referenceMatch[2]) { sendJson(response, 200, { reference }); return }
-      const file = await options.references?.file(reference.id)
-      if (!file) throw new HttpError(404, 'Imagen no encontrada.')
-      const info = await stat(file.path)
-      response.writeHead(200, {
-        'Content-Type': file.mime, 'Content-Length': info.size, 'Cache-Control': 'private, no-store',
-        'X-Content-Type-Options': 'nosniff', 'Cross-Origin-Resource-Policy': 'same-origin',
-      })
-      if (method === 'HEAD') response.end()
-      else await pipeline(createReadStream(file.path), response)
+      await serveReferenceImage(reference.id, request, response)
       return
     }
     if (url.pathname === '/api/jobs' && method === 'GET') {

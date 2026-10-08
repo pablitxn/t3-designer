@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { LightSourceSchema } from './customization.ts'
+import { FloorRegionSchema, SurfaceOpeningSchema, apartmentCirculationIssues } from './circulation.ts'
 
 export const SCENE_SCHEMA_VERSION = 1
 
@@ -35,6 +36,8 @@ export const WallSchema = z.object({
   from: Point2DSchema,
   to: Point2DSchema,
   height: positive,
+  /** Floor-local elevation of the bottom edge; absent means zero. */
+  baseElevation: z.number().finite().min(-1_000).max(1_000).optional(),
   thickness: positive,
   kind: z.enum(['exterior', 'interior']),
   estimated: z.boolean(),
@@ -56,6 +59,8 @@ const openingFields = {
 
 export const DoorSchema = z.object({
   ...openingFields,
+  /** Threshold above this wall's bottom edge; absent means zero. */
+  thresholdHeight: nonnegative.max(1_000).optional(),
   hinge: z.enum(['start', 'end']),
   // Wall-local +X follows from → to; +Z points (-dz, dx) in the plan.
   opensToward: z.union([z.literal(1), z.literal(-1)]),
@@ -87,6 +92,9 @@ export const ApartmentSchema = z.object({
     z: z.literal('south'),
   }),
   perimeter: polygon,
+  floorRegions: z.array(FloorRegionSchema).min(1).max(100).optional(),
+  floorOpenings: z.array(SurfaceOpeningSchema).max(60).optional(),
+  ceilingOpenings: z.array(SurfaceOpeningSchema).max(60).optional(),
   rooms: z.array(RoomSchema).min(1),
   walls: z.array(WallSchema).min(1),
   doors: z.array(DoorSchema),
@@ -101,6 +109,7 @@ export const ApartmentSchema = z.object({
     unresolved: z.array(z.string()),
   }),
 }).superRefine((apartment, context) => {
+  for (const issue of apartmentCirculationIssues(apartment)) context.addIssue({ code: 'custom', ...issue })
   const ids = new Set<string>()
   for (const collection of ['rooms', 'walls', 'doors', 'windows'] as const) {
     apartment[collection].forEach((entity, index) => {
@@ -116,7 +125,7 @@ export const ApartmentSchema = z.object({
 
   const walls = new Map(apartment.walls.map((wall) => [wall.id, wall]))
   const openings = [
-    ...apartment.doors.map((door, index) => ({ ...door, bottom: 0, path: ['doors', index] })),
+    ...apartment.doors.map((door, index) => ({ ...door, bottom: door.thresholdHeight ?? 0, path: ['doors', index] })),
     ...apartment.windows.map((window, index) => ({ ...window, bottom: window.sillHeight, path: ['windows', index] })),
   ]
   openings.forEach((opening, index) => {
@@ -164,7 +173,7 @@ export const AssetSchema = z.object({
 export type Asset = z.infer<typeof AssetSchema>
 export const FixtureSchema = z.object({
   id, assetId: id, roomId: id, label: z.string().min(1),
-  position: z.tuple([z.number().finite(), nonnegative, z.number().finite()]),
+  position: z.tuple([z.number().finite(), z.number().finite().min(-1000).max(1000), z.number().finite()]),
   rotation: z.number().finite(),
   evidence: z.string().min(1),
   placementStatus: z.literal('estimated'),

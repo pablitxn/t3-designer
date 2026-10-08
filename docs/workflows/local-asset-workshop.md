@@ -177,13 +177,17 @@ answering a question or retrying after review reuses the most recent valid
 candidate and observed differences rather than starting without context.
 
 For `T3_INFERENCE_PROVIDER=codex-local`, install the Codex CLI, run `codex login`
-and keep the API bound to loopback. This adapter is rejected in production.
+with the ChatGPT subscription and keep both the API host and browser origin on
+loopback. This adapter supports furniture and foundation workshops locally and
+is rejected in production. Hosted project generation still requires the API
+provider.
 Its runner inherits an allowlist of environment variables and the existing
 Codex auth location, but removes API-key credentials. The wrapper ignores user
 configuration, project rules, MCP servers and hooks for these jobs. Codex uses
 a read-only sandbox, no approvals, no shell tools, and hosted web research.
-Only explicitly selected product photos and generated renders are attached to
-the hosted Codex service for comparison. No credentials are copied into the
+Only explicitly selected product photos, foundation plans and generated renders
+are attached to the hosted Codex service for comparison. Foundation attempts use
+a bounded thirty-minute timeout; asset calls retain the timeout below. No credentials are copied into the
 library or sent to the browser. A failed
 generation exposes a bounded, readable error instead of a raw Codex transcript.
 
@@ -195,9 +199,9 @@ Vite's `T3_API_PROXY_URL` override must be set in its launching shell. See
 
 | Variable | Default / purpose |
 | --- | --- |
-| `T3_INFERENCE_PROVIDER` | `openai` with an API key; `codex-local` for the optional local CLI |
+| `T3_INFERENCE_PROVIDER` | `openai` with an API key; `codex-local` for the local CLI signed in with ChatGPT |
 | `OPENAI_API_KEY` | Server-only API credential; never included in model inputs or Blender environment |
-| `T3_OPENAI_MODEL` | `gpt-5.4` for hosted structured generation and review |
+| `T3_OPENAI_MODEL` | `gpt-6.1-sol` for hosted structured generation and review |
 | `T3_LIBRARY_MAX_MIB` | `1536`; combined artifact budget with 256 MiB reserved before rendering |
 | `T3_API_PORT` | `8787` |
 | `T3_API_PROXY_URL` | `http://127.0.0.1:8787`; set for the Vite process if using another local API port |

@@ -19,7 +19,7 @@ async function mockProject(page: Page, role: Project['role'] = 'owner', withPriv
     scene.assets.push({ ...scene.assets[0], id: generatedAssetId, label: 'Mueble generado', url: generatedModelUrl, repoPath: `private/${generatedAssetId}/model.glb` })
     scene.fixtures[0] = { ...scene.fixtures[0], assetId: generatedAssetId, label: 'Mueble generado' }
   }
-  let saved: Project = {
+  let saved: Project & { scene: NonNullable<Project['scene']> } = {
     id: projectId, name: scene.project.name, notes: '', ownerId: 'test-owner', role,
     revision: 1, createdAt: '2026-10-04T10:00:00Z', updatedAt: '2026-10-04T10:00:00Z', scene,
   }

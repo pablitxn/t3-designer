@@ -74,8 +74,8 @@ export function segmentWall(wall: Wall, openings: readonly (Door | Window)[]): W
   const apertures = openings.filter((opening) => opening.wallId === wall.id).map((opening) => ({
     from: opening.offset,
     to: opening.offset + opening.width,
-    bottom: 'sillHeight' in opening ? opening.sillHeight : 0,
-    top: ('sillHeight' in opening ? opening.sillHeight : 0) + opening.height,
+    bottom: 'sillHeight' in opening ? opening.sillHeight : opening.thresholdHeight ?? 0,
+    top: ('sillHeight' in opening ? opening.sillHeight : opening.thresholdHeight ?? 0) + opening.height,
   }))
   const cuts = [...new Set([0, length, ...apertures.flatMap((opening) => [opening.from, opening.to])])].sort((a, b) => a - b)
   const segments: WallSegment[] = []

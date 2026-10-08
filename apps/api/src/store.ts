@@ -89,6 +89,10 @@ export class AssetStore {
         label TEXT NOT NULL, dimensions TEXT NOT NULL, created_at TEXT NOT NULL,
         UNIQUE(project_id, asset_id)
       );
+      CREATE TABLE IF NOT EXISTS project_references (
+        project_id TEXT NOT NULL, reference_id TEXT NOT NULL,
+        PRIMARY KEY(project_id, reference_id)
+      );
     `)
   }
 
@@ -278,6 +282,15 @@ export class AssetStore {
     return Number(userId
       ? this.db.prepare("SELECT COUNT(*) AS count FROM resource_owners WHERE kind='reference' AND user_id=?").get(userId)!.count
       : this.db.prepare("SELECT COUNT(*) AS count FROM resource_owners WHERE kind='reference'").get()!.count)
+  }
+
+  /** A plan is shared with project members independently of its uploader. */
+  attachProjectReference(projectId: string, referenceId: string): void {
+    this.db.prepare('INSERT INTO project_references(project_id,reference_id) VALUES(?,?) ON CONFLICT DO NOTHING').run(projectId, referenceId)
+  }
+
+  hasProjectReference(projectId: string, referenceId: string): boolean {
+    return !!this.db.prepare('SELECT 1 FROM project_references WHERE project_id=? AND reference_id=?').get(projectId, referenceId)
   }
 
   userJobs(userId: string): Job[] {

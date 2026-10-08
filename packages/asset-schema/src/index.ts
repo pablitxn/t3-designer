@@ -159,6 +159,7 @@ export interface Asset {
 }
 export interface Health {
   status: 'ok'
+  foundationAgentEnabled?: boolean
   projectGenerationEnabled?: boolean
   generationEnabled?: boolean
   codex: { available: boolean; authenticated: boolean; authMode: 'chatgpt' | 'api-key' | 'unavailable' }

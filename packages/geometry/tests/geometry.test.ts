@@ -75,3 +75,13 @@ test('vertically separated openings share a horizontal span safely', () => {
   close(segments.reduce((area, segment) => area + segment.length * segment.height, 0), 15 - 2.1 - 0.5)
   assert.ok(segments.some((segment) => segment.offset === 0.5 && Math.abs(segment.bottom - 2.1) < 1e-9 && Math.abs(segment.height - 0.2) < 1e-9))
 })
+
+test('a raised door retains its threshold wall independently of the wall base elevation', () => {
+  const raisedDoor = { ...door, thresholdHeight: .45 }
+  const segments = segmentWall({ ...wall, baseElevation: -.3 }, [raisedDoor])
+  const threshold = segments.find(segment => segment.offset === door.offset && segment.bottom === 0)
+  assert.equal(threshold?.height, .45)
+  close(segments.reduce((sum, segment) => sum + segment.length * segment.height, 0), 15 - door.width * door.height)
+  assert.ok(segments.some(segment => segment.offset === door.offset && Math.abs(segment.bottom - 2.55) < 1e-9))
+  assert.deepEqual(segmentWall(wall, [{ ...door, thresholdHeight: 0 }]), segmentWall(wall, [door]), 'legacy openings keep their original segmentation')
+})

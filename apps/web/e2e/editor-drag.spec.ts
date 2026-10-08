@@ -23,7 +23,7 @@ async function projectServer(page: Page, fullScene = false) {
   const scene = structuredClone(source)
   scene.project = { id: projectId, name: 'Prueba de arrastre' }
   if (!fullScene) scene.fixtures = [{ ...scene.fixtures[0], position: initial, rotation: 0 }]
-  let saved: Project = { id: projectId, name: scene.project.name, notes: '', ownerId: 'drag-owner', role: 'owner', revision: 1,
+  let saved: Project & { scene: NonNullable<Project['scene']> } = { id: projectId, name: scene.project.name, notes: '', ownerId: 'drag-owner', role: 'owner', revision: 1,
     createdAt: '2026-10-04T12:00:00Z', updatedAt: '2026-10-04T12:00:00Z', scene }
   let writes = 0
   await page.route('**/api/**', async route => {

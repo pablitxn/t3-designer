@@ -111,7 +111,8 @@ function PaneledLeaf({ width, fullHeight, visibleHeight, color, damaged, glazed 
 
 // All positions are in the wall's local frame: X follows wall.from → wall.to.
 export function Door({ door, wall, visibleWallHeight, customization }: DoorProps) {
-  const height = Math.min(door.height, visibleWallHeight)
+  visibleWallHeight -= door.thresholdHeight ?? 0
+  const height = Math.max(0, Math.min(door.height, visibleWallHeight))
   const hingeAtStart = door.hinge === 'start'
   const leafDirection = hingeAtStart ? 1 : -1
   const leafWidth = door.width - 0.045
@@ -120,9 +121,10 @@ export function Door({ door, wall, visibleWallHeight, customization }: DoorProps
   const frameColor = customization?.color ?? (door.finish === 'blue-gray' ? '#526f80' : door.finish === 'white' ? '#e3e6dc' : '#a2afa9')
   const leafColor = customization?.color ?? (door.finish === 'blue-gray' ? '#d0d5ca' : '#b7c0b6')
   const passage = customization ? customization.style === 'passage' : door.appearance === 'passage'
+  if (height === 0) return null
 
   return (
-    <group>
+    <group position={[0, door.thresholdHeight ?? 0, 0]}>
       {[door.offset + 0.014, door.offset + door.width - 0.014].map((x) => (
         <mesh key={x} position={[x, height / 2, 0]} castShadow receiveShadow>
           <boxGeometry args={[0.028, height, wall.thickness + 0.008]} />

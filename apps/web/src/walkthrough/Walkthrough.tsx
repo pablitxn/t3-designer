@@ -11,7 +11,7 @@ import { WebGLGuard } from '../components/WebGLGuard'
 import { ViewerIcon, ViewerPanel } from '../components/ViewerPanel'
 import { getSolarPosition, resolveLocalDateTime } from '../lib/solar'
 import { walkCopy } from './copy'
-import { buildWalkWorld, canSetWalkDoorOpenness, findWalkDoorTarget, findWalkSpawn, initialWalkDoorStates, withWalkDoorStates, type WalkDoorStates, type WalkWorld } from './navigation'
+import { buildWalkWorld, canSetWalkDoorOpenness, findWalkDoorTarget, findWalkSpawn, initialWalkDoorStates, walkEntityId, walkLevelOffset, withWalkDoorStates, type WalkDoorStates, type WalkWorld, type WalkFoundationContext } from './navigation'
 import { WalkController, type WalkInput, type WalkPose } from './WalkController'
 import { WalkthroughWorld } from './WalkthroughWorld'
 import './walkthrough.css'
@@ -28,10 +28,11 @@ function CameraSettings({ fov, torch }: { fov: number; torch: boolean }) {
   return <pointLight ref={light} visible={torch} intensity={7} distance={8} decay={2} color="#fff3df" />
 }
 
-function Minimap({ snapshot, world, doorStates, pose, label }: { snapshot: ProjectSnapshot; world: WalkWorld; doorStates: WalkDoorStates; pose: WalkPose | null; label: string }) {
+function Minimap({ snapshot, world, doorStates, pose, label, levelId, offset = [0, 0, 0] }: { snapshot: ProjectSnapshot; world: WalkWorld; doorStates: WalkDoorStates; pose: WalkPose | null; label: string; levelId?: string; offset?: [number, number, number] }) {
   const bounds = useMemo(() => apartmentBounds(snapshot.apartment), [snapshot.apartment])
-  return <svg className="walk-map" data-pitch={pose?.pitch ?? 0} data-feet-offset={pose?.feetOffset ?? 0} data-grounded={pose?.grounded ?? true} viewBox={`${bounds.min[0] - .4} ${bounds.min[1] - .4} ${bounds.width + .8} ${bounds.depth + .8}`} role="img" aria-label={label}>
+  return <svg className="walk-map" data-level-id={levelId} data-pitch={pose?.pitch ?? 0} data-feet-offset={pose?.feetOffset ?? 0} data-eye-height={pose?.eyeHeight ?? 1.65} data-grounded={pose?.grounded ?? true} viewBox={`${bounds.min[0] - .4} ${bounds.min[1] - .4} ${bounds.width + .8} ${bounds.depth + .8}`} role="img" aria-label={label}>
     {snapshot.apartment.rooms.map(room => <polygon key={room.id} points={room.polygon.map(p => p.join(',')).join(' ')} fill={room.color} fillOpacity={.6} stroke="#b0b6a8" strokeWidth={.025} />)}
+    {snapshot.apartment.floorOpenings?.map(opening => <polygon key={`opening-${opening.id}`} points={opening.polygon.map(point => point.join(',')).join(' ')} fill="#f3f5ed" stroke="#86927b" strokeWidth={.035} strokeDasharray=".1 .1" />)}
     {snapshot.apartment.walls.flatMap(wall => {
       const length = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1])
       const ux = (wall.to[0] - wall.from[0]) / length, uz = (wall.to[1] - wall.from[1]) / length
@@ -39,11 +40,11 @@ function Minimap({ snapshot, world, doorStates, pose, label }: { snapshot: Proje
         x1={wall.from[0] + ux * segment.offset} y1={wall.from[1] + uz * segment.offset}
         x2={wall.from[0] + ux * (segment.offset + segment.length)} y2={wall.from[1] + uz * (segment.offset + segment.length)} stroke="#4b584d" strokeWidth={wall.thickness} />)
     })}
-    {world.blockers.flatMap(leaf => leaf.doorId ? [<line key={`door-${leaf.doorId}`} data-door-id={leaf.doorId} data-openness={doorStates[leaf.doorId]}
-      x1={leaf.center[0] - leaf.cos * leaf.halfWidth} y1={leaf.center[1] + leaf.sin * leaf.halfWidth}
-      x2={leaf.center[0] + leaf.cos * leaf.halfWidth} y2={leaf.center[1] - leaf.sin * leaf.halfWidth}
+    {world.blockers.flatMap(leaf => leaf.doorId && (!levelId || world.doors.some(door => door.id === leaf.doorId && door.levelId === levelId)) ? [<line key={`door-${leaf.doorId}`} data-door-id={leaf.doorId} data-openness={doorStates[leaf.doorId]}
+      x1={leaf.center[0] - leaf.cos * leaf.halfWidth - offset[0]} y1={leaf.center[1] + leaf.sin * leaf.halfWidth - offset[2]}
+      x2={leaf.center[0] + leaf.cos * leaf.halfWidth - offset[0]} y2={leaf.center[1] - leaf.sin * leaf.halfWidth - offset[2]}
       stroke="#956a3c" strokeWidth={.065} strokeLinecap="round" />] : [])}
-    {pose && <g transform={`translate(${pose.x} ${pose.z}) rotate(${-pose.yaw * 180 / Math.PI})`}>
+    {pose && <g transform={`translate(${pose.x - offset[0]} ${pose.z - offset[2]}) rotate(${-pose.yaw * 180 / Math.PI})`}>
       <path d="M 0,-.8 L -.38,-.1 L .38,-.1 Z" fill="#436d50" fillOpacity={.3} />
       <circle r=".16" fill="#285c41" stroke="white" strokeWidth=".055" />
       <path d="M 0,-.36 L -.12,-.14 L .12,-.14 Z" fill="white" />
@@ -60,8 +61,8 @@ function HoldButton({ label, children, field, value, input }: { label: string; c
 }
 
 /** A disposable visit of the supplied active version; never calls project persistence. */
-export function Walkthrough({ snapshot, onClose, initialMoment, reference = false }: {
-  snapshot: ProjectSnapshot; onClose: () => void; initialMoment?: { date: string; minutes: number }; reference?: boolean
+export function Walkthrough({ snapshot, onClose, initialMoment, reference = false, context }: {
+  snapshot: ProjectSnapshot; onClose: () => void; initialMoment?: { date: string; minutes: number }; reference?: boolean; context?: WalkFoundationContext
 }) {
   const { locale } = useLocale()
   const { formatLength } = useUnits(), c = walkCopy[locale]
@@ -69,10 +70,10 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
   const roomName = (room: ProjectSnapshot['apartment']['rooms'][number]) => reference ? roomLabel(t, room.id) : room.name
   const root = useRef<HTMLElement>(null), canvas = useRef<HTMLCanvasElement | null>(null)
   const input = useRef<WalkInput>(emptyInput())
-  const initialDoors = useMemo(() => initialWalkDoorStates(snapshot), [snapshot])
-  const [visitDoors, setVisitDoors] = useState(() => ({ snapshot, values: initialDoors }))
-  const doorStates = visitDoors.snapshot === snapshot ? visitDoors.values : initialDoors
-  const initialWorld = useMemo(() => buildWalkWorld(snapshot, initialDoors), [snapshot, initialDoors])
+  const initialDoors = useMemo(() => initialWalkDoorStates(snapshot, context), [snapshot, context])
+  const [visitDoors, setVisitDoors] = useState(() => ({ snapshot, context, values: initialDoors }))
+  const doorStates = visitDoors.snapshot === snapshot && visitDoors.context === context ? visitDoors.values : initialDoors
+  const initialWorld = useMemo(() => buildWalkWorld(snapshot, initialDoors, context), [snapshot, initialDoors, context])
   const world = useMemo(() => withWalkDoorStates(initialWorld, doorStates), [initialWorld, doorStates])
   const [roomId, setRoomId] = useState('')
   const [eyeHeight, setEyeHeight] = useState(1.65), [sensitivity, setSensitivity] = useState(1), [fov, setFov] = useState(70)
@@ -97,7 +98,10 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
   const validMoment = !!solar.resolution?.instants.length
   const architecture = snapshot.editor?.architectures.find(item => item.id === snapshot.editor?.activeArchitectureId)
   const layout = architecture?.layouts.find(item => item.id === architecture.activeLayoutId)
-  const currentRoom = snapshot.apartment.rooms.find(room => room.id === pose?.roomId)
+  const currentRoom = world.rooms.find(room => room.id === pose?.roomId)
+  const currentLevel = context?.levels.find(level => level.id === (pose?.levelId ?? context.activeLevelId))
+  const mapSnapshot = currentLevel?.scene ?? snapshot
+  const mapOffset = currentLevel && context ? walkLevelOffset(context, currentLevel.id) : undefined
   const interaction = active && pose ? findWalkDoorTarget(world, doorStates, pose) : null
   const doorBlocked = interaction && pose && !canSetWalkDoorOpenness(world, doorStates, interaction.id, interaction.open ? 0 : 1, pose)
   const interact = useCallback((currentPose: WalkPose) => {
@@ -105,9 +109,9 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
     if (!target) return
     const openness = target.open ? 0 : 1
     if (!canSetWalkDoorOpenness(world, doorStates, target.id, openness, currentPose)) return
-    setVisitDoors({ snapshot, values: { ...doorStates, [target.id]: openness } })
+    setVisitDoors({ snapshot, context, values: { ...doorStates, [target.id]: openness } })
     setPose(currentPose)
-  }, [world, doorStates, snapshot])
+  }, [world, doorStates, snapshot, context])
   const pause = useCallback(() => {
     setActive(false); input.current = emptyInput()
     if (document.pointerLockElement === canvas.current && document.pointerLockElement) document.exitPointerLock()
@@ -116,8 +120,8 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
     // A server save/reload can replace the scene while this view stays mounted.
     // Stop before adopting its new collision world, and discard stale location UI.
     pause(); setPose(null)
-    setRoomId(previous => snapshot.apartment.rooms.some(room => room.id === previous) ? previous : '')
-  }, [snapshot, pause])
+    setRoomId(previous => initialWorld.rooms.some(room => room.id === previous) ? previous : '')
+  }, [snapshot, context, initialWorld, pause])
   useEffect(() => {
     function changed() { setFullscreen(document.fullscreenElement === root.current) }
     document.addEventListener('fullscreenchange', changed)
@@ -144,7 +148,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
       try { const request = canvas.current?.requestPointerLock?.(); if (request) void request.catch(() => undefined) } catch { /* browser denied capture */ }
     }
   }
-  function restart() { pause(); setPose(null); setEntered(false); setSpawnHeight(eyeHeight); setVisitDoors({ snapshot, values: initialDoors }); setReset(value => value + 1) }
+  function restart() { pause(); setPose(null); setEntered(false); setSpawnHeight(eyeHeight); setVisitDoors({ snapshot, context, values: initialDoors }); setReset(value => value + 1) }
   function toggleSettings() { pause(); setSettingsOpen(previous => !previous) }
   async function toggleFullscreen() {
     pause(); setMessage('')
@@ -165,7 +169,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
         <WebGLGuard fallback={fallback}>
           <Canvas shadows={{ type: PCFShadowMap }} dpr={[1, 1.5]} camera={{ fov, near: .04, far: 600 }} fallback={fallback} tabIndex={0} aria-label={c.title}
             onCreated={({ gl }) => { canvas.current = gl.domElement; gl.domElement.tabIndex = 0; setReady(true) }}>
-            <WalkthroughWorld snapshot={snapshot} sun={solar.sun} artificialLights={artificialLights} doorStates={doorStates} />
+            <WalkthroughWorld snapshot={snapshot} sun={solar.sun} artificialLights={artificialLights} doorStates={doorStates} context={context} />
             <WalkController world={initialWorld} collisionWorld={world} spawn={spawn} resetKey={reset} active={active} input={input} eyeHeight={eyeHeight} sensitivity={sensitivity} onPose={setPose} onPause={pause} onInteract={interact} />
             <CameraSettings fov={fov} torch={torch} />
           </Canvas>
@@ -195,14 +199,14 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
           <HoldButton label={c.left} field="right" value={-1} input={input}>←</HoldButton><HoldButton label={c.backward} field="forward" value={-1} input={input}>↓</HoldButton><HoldButton label={c.right} field="right" value={1} input={input}>→</HoldButton>
           <button type="button" className="walk-jump" aria-label={c.jump} onClick={() => { input.current.jump = true }}>{c.jump} ↑</button></div>
         </div>}
-        {ready && <div className="walk-map-wrap"><Minimap snapshot={snapshot} world={world} doorStates={doorStates} pose={pose} label={c.map} /></div>}
+        {ready && <div className="walk-map-wrap">{currentLevel && <span className="walk-level-label" data-testid="walk-current-level">{currentLevel.name}</span>}<Minimap snapshot={mapSnapshot} world={world} doorStates={doorStates} pose={pose} label={c.map} levelId={currentLevel?.id} offset={mapOffset} /></div>}
         {active && <span className="walk-bottom-hint">{c.keyboard} · {window.matchMedia('(pointer: coarse)').matches ? c.mouseTouch : mouseCaptured ? c.mouse : c.mouseFree} · {c.space}: {c.jump} · E: {c.interact}</span>}
         {settingsOpen && <ViewerPanel id="walk-settings" title={c.settings} onClose={() => setSettingsOpen(false)} className="walk-settings-panel">
         <div className="walk-settings">
         <div className="walk-version"><span className="walk-eyebrow">{c.version}</span><strong>{reference ? c.reference : snapshot.project.name}</strong>{architecture && <span>{architecture.name} / {layout?.name}</span>}<p>{c.draft}</p></div>
         <fieldset disabled={active}>
           <legend>{c.settings}</legend>
-          <label>{c.room}<select value={roomId} onChange={event => { setRoomId(event.target.value); restart() }}><option value="">{c.entrance}</option>{snapshot.apartment.rooms.map(room => <option key={room.id} value={room.id}>{roomName(room)}</option>)}</select></label>
+          <label>{c.room}<select value={roomId} onChange={event => { setRoomId(event.target.value); restart() }}><option value="">{c.entrance}</option>{snapshot.apartment.rooms.map(room => <option key={room.id} value={context ? walkEntityId(context.activeLevelId, room.id) : room.id}>{roomName(room)}</option>)}</select></label>
           <button className="walk-button" onClick={restart}>{c.reset} ↺</button>
           <div className="walk-form-row"><label>{c.date}<input type="date" min="1900-01-01" max="2100-12-31" value={moment.date} onChange={event => setMoment(previous => ({ ...previous, date: event.target.value }))} /></label><label>{c.time}<input type="time" value={clockValue(moment.minutes)} onChange={event => { const [hours, minutes] = event.target.value.split(':').map(Number); if (Number.isFinite(hours + minutes)) setMoment(previous => ({ ...previous, minutes: hours * 60 + minutes })) }} /></label></div>
           <small>{snapshot.site.timeZone}</small>
@@ -219,6 +223,6 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
         </ViewerPanel>}
       </div>
     </div>
-    <footer className="walk-footer">{c.notice}</footer>
+    <footer className="walk-footer">{c.notice}{context && ` ${locale === 'es' ? 'Las escaleras modeladas conectan las plantas durante el recorrido. La geometría y las barandas son aproximadas.' : locale === 'fr' ? 'Les escaliers modélisés relient les niveaux pendant la visite. Géométrie et garde-corps approximatifs.' : 'Modeled stairs connect floors during the visit. Geometry and guards are approximate.'}`}</footer>
   </section>
 }

@@ -53,7 +53,7 @@ export function rebuildApartmentGeometry(snapshot: ProjectSnapshot): ProjectSnap
       const length = wallLength(wall)
       const ux = (wall.to[0] - wall.from[0]) / length, uz = (wall.to[1] - wall.from[1]) / length
       return { wallId: wall.id, solids: segmentWall(wall, [...apartment.doors, ...apartment.windows]).map(segment => ({
-        position: [wall.from[0] + ux * (segment.offset + segment.length / 2), segment.bottom + segment.height / 2, wall.from[1] + uz * (segment.offset + segment.length / 2)] as [number, number, number],
+        position: [wall.from[0] + ux * (segment.offset + segment.length / 2), (wall.baseElevation ?? 0) + segment.bottom + segment.height / 2, wall.from[1] + uz * (segment.offset + segment.length / 2)] as [number, number, number],
         scale: [segment.length, segment.height, wall.thickness] as [number, number, number],
         rotationY: wallRotation(wall) || 0,
       })) }
@@ -125,7 +125,8 @@ export function addFixedLight(snapshot: ProjectSnapshot, roomId: string, id: str
   const customization = next.customization ?? defaultDesignCustomization()
   if (customization.lighting.lights.some(light => light.id === id)) throw new Error('Light ID already exists')
   const [x, z] = polygonCentroid(room.polygon)
-  const light: FixedLight = { id, roomId, name: room.name, position: [x, Math.max(0, next.geometry.ceiling.elevation - .15), z], enabled: true, kelvin: 2700, lumens: 800 }
+  const surface = fixtureSurfaceAt(next, [x, z])
+  const light: FixedLight = { id, roomId, name: room.name, position: [x, Math.max(surface.floor, surface.ceiling - .15), z], enabled: true, kelvin: 2700, lumens: 800 }
   return updateCustomization(next, { ...customization, lighting: { ...customization.lighting, lights: [...customization.lighting.lights, light] } })
 }
 
@@ -181,12 +182,20 @@ export function renameLayout(snapshot: ProjectSnapshot, id: string, name: string
 /** Inclusive polygon containment for concave rooms and the stepped perimeter. */
 export const pointInPolygon = pointInEditorPolygon
 
+export function fixtureSurfaceAt(snapshot: ProjectSnapshot, point: Point2D) {
+  const region = snapshot.apartment.floorRegions?.find(region => pointInPolygon(point, region.polygon))
+  return { floor: region?.floorElevation ?? snapshot.geometry.floor.elevation, ceiling: region?.ceilingElevation ?? snapshot.geometry.ceiling.elevation }
+}
+
 function validatePosition(snapshot: ProjectSnapshot, position: Fixture['position'], assetId: string) {
-  if (position.length !== 3 || !position.every(Number.isFinite) || position[1] < 0) throw new Error('Invalid position')
+  if (position.length !== 3 || !position.every(Number.isFinite)) throw new Error('Invalid position')
+  const surface = fixtureSurfaceAt(snapshot, [position[0], position[2]])
+  if (position[1] < surface.floor - epsilon) throw new Error('Object extends below the floor')
   if (!pointInPolygon([position[0], position[2]], snapshot.apartment.perimeter)) throw new Error('Object must stay inside the apartment')
+  if (snapshot.apartment.floorOpenings?.some(opening => pointInPolygon([position[0], position[2]], opening.polygon))) throw new Error('Object must stay outside the stair opening')
   const asset = snapshot.assets.find(item => item.id === assetId)
   if (!asset) throw new Error('Unknown asset')
-  if (position[1] + asset.dimensions[1] > snapshot.geometry.ceiling.elevation + epsilon) throw new Error('Object extends above the ceiling')
+  if (position[1] + asset.dimensions[1] > surface.ceiling + epsilon) throw new Error('Object extends above the ceiling')
 }
 
 function requireMovable(snapshot: ProjectSnapshot, fixture: Fixture) {
@@ -200,7 +209,14 @@ export function updateFixture(snapshot: ProjectSnapshot, id: string, patch: Fixt
   if (patch.rotation !== undefined && !Number.isFinite(patch.rotation)) throw new Error('Invalid rotation')
   let roomId = patch.roomId ?? original.roomId
   if (patch.position) {
-    validatePosition(next, patch.position, original.assetId)
+    // Only an explicit horizontal move of a floor-standing object follows a
+    // regional change. Loading variants and intentionally raised objects do not.
+    if (next.apartment.floorRegions?.length && patch.position[1] === original.position[1]
+      && (patch.position[0] !== original.position[0] || patch.position[2] !== original.position[2])
+      && Math.abs(original.position[1] - fixtureSurfaceAt(next, [original.position[0], original.position[2]]).floor) < .01) {
+      patch = { ...patch, position: [patch.position[0], fixtureSurfaceAt(next, [patch.position[0], patch.position[2]]).floor, patch.position[2]] }
+    }
+    validatePosition(next, patch.position!, original.assetId)
     if (patch.roomId === undefined) roomId = next.apartment.rooms.find(room => pointInPolygon([patch.position![0], patch.position![2]], room.polygon))?.id ?? roomId
   }
   if (!next.apartment.rooms.some(room => room.id === roomId)) throw new Error('Unknown room')
@@ -217,7 +233,7 @@ export function addFixture(snapshot: ProjectSnapshot, assetId: string, id: strin
   if (!asset || !room || next.fixtures.some(item => item.id === id)) throw new Error('Invalid object instance')
   if (getAssetMobility(asset) !== 'movable') throw new Error('Fixed objects cannot be added as furniture')
   const [x, z] = polygonCentroid(room.polygon)
-  const placement: Fixture['position'] = position ? [...position] : [x, 0, z]
+  const placement: Fixture['position'] = position ? [...position] : [x, fixtureSurfaceAt(next, [x, z]).floor, z]
   validatePosition(next, placement, assetId)
   const fixture: Fixture = { id, assetId, roomId, label: asset.label, position: placement, rotation: 0, evidence: asset.evidence, placementStatus: 'estimated', mobility: getAssetMobility(asset), ...(asset.light ? { light: structuredClone(asset.light) } : {}) }
   return replaceFixtures(next, [...next.fixtures, fixture])
@@ -243,8 +259,8 @@ export function rotateFixture(snapshot: ProjectSnapshot, id: string, radians: nu
   return updateFixture(snapshot, id, { rotation: fixture.rotation + radians })
 }
 
-function segmentInsidePolygon(from: Point2D, to: Point2D, polygon: Point2D[]) {
-  if (!pointInPolygon(from, polygon) || !pointInPolygon(to, polygon)) return false
+function segmentInsidePolygon(from: Point2D, to: Point2D, polygon: Point2D[], inside = true) {
+  if (pointInPolygon(from, polygon) !== inside || pointInPolygon(to, polygon) !== inside) return false
   const dx = to[0] - from[0], dz = to[1] - from[1]
   const cuts = [0, 1]
   polygon.forEach((a, index) => {
@@ -258,15 +274,22 @@ function segmentInsidePolygon(from: Point2D, to: Point2D, polygon: Point2D[]) {
   cuts.sort((a, b) => a - b)
   return cuts.slice(1).every((cut, index) => {
     const midpoint = (cuts[index] + cut) / 2
-    return pointInPolygon([from[0] + midpoint * dx, from[1] + midpoint * dz], polygon)
+    return pointInPolygon([from[0] + midpoint * dx, from[1] + midpoint * dz], polygon) === inside
   })
 }
 export function addPartition(snapshot: ProjectSnapshot, input: PartitionInput): EditorSnapshot {
   const next = ensureEditor(snapshot), architecture = getActiveArchitecture(next)
   requireId(input.id)
   const wall = WallSchema.parse({ ...input, kind: 'interior', estimated: true })
-  if (wallLength(wall) < .2 || wall.thickness < .05 || wall.thickness > .5 || wall.height > next.geometry.ceiling.elevation) throw new Error('Invalid partition dimensions')
   if (!segmentInsidePolygon(wall.from, wall.to, next.apartment.perimeter)) throw new Error('Partition must stay inside the apartment')
+  const regions = next.apartment.floorRegions
+  const region = regions?.find(region => segmentInsidePolygon(wall.from, wall.to, region.polygon))
+  if (regions?.length && !region) throw new Error('Partition crosses different floor regions')
+  const base = region?.floorElevation ?? 0
+  const ceiling = region?.ceilingElevation ?? next.geometry.ceiling.elevation
+  if (region) wall.baseElevation = base
+  if (wallLength(wall) < .2 || wall.thickness < .05 || wall.thickness > .5 || wall.height + base > ceiling) throw new Error('Invalid partition dimensions')
+  if (next.apartment.floorOpenings?.some(opening => !segmentInsidePolygon(wall.from, wall.to, opening.polygon, false))) throw new Error('Partition crosses a stair opening')
   return replaceArchitecture(next, { ...architecture, partitionWallIds: [...architecture.partitionWallIds, wall.id], apartment: { ...architecture.apartment, walls: [...architecture.apartment.walls, wall] } })
 }
 export function removePartition(snapshot: ProjectSnapshot, id: string): EditorSnapshot {

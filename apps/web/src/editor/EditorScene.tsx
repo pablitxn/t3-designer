@@ -2,10 +2,12 @@ import { Component, Suspense, useEffect, useMemo, useRef, type ComponentRef, typ
 import { Canvas, useThree } from '@react-three/fiber'
 import { Html, OrbitControls, useGLTF } from '@react-three/drei'
 import { apartmentBounds } from '@t3-designer/geometry'
-import { type Fixture, type ProjectSnapshot } from '@t3-designer/scene-schema'
+import { type Fixture, type ProjectSnapshot, type StairGeometry } from '@t3-designer/scene-schema'
 import { Group, Mesh, PCFShadowMap, PerspectiveCamera } from 'three'
 import { useTranslation } from 'react-i18next'
 import { Floor } from '../components/Floor'
+import { ApartmentSurfaces } from '../components/ApartmentSurfaces'
+import { Staircase } from '../components/Staircase'
 import { Wall } from '../components/Wall'
 import { WebGLGuard } from '../components/WebGLGuard'
 import { projectModelUrl } from '../private/project-scene'
@@ -28,6 +30,7 @@ export type EditorSceneProps = {
   cutaway?: boolean
   /** Neutral object-editing light for the public layout; private projects retain their solar study. */
   lighting?: 'scene' | 'studio'
+  stairs?: { geometry: StairGeometry; yOffset: number }[]
 }
 
 type SceneAsset = ProjectSnapshot['assets'][number]
@@ -132,6 +135,7 @@ function EditorWorld(props: EditorSceneProps) {
   const activeLights = useMemo(() => activeFixtureLightIds(scene), [scene])
   const cutaway = props.cutaway ?? true
   const floor = scene.geometry.floor
+  const regional = !!(scene.apartment.floorRegions?.length || scene.apartment.floorOpenings?.length)
   const gridSize = Math.max(20, Math.ceil(Math.max(bounds.width, bounds.depth) * 2))
   return <>
     <color attach="background" args={['#e8ecdf']} />
@@ -142,11 +146,12 @@ function EditorWorld(props: EditorSceneProps) {
     </> : <><DesignLighting scene={scene} /><DesignEnvelope scene={scene} cutaway={cutaway} /></>}
     <SceneCamera scene={scene} mode={props.mode} controls={controls} cutaway={cutaway} />
     <gridHelper position={[bounds.center[0], floor.elevation - floor.thickness - .01, bounds.center[1]]} args={[gridSize, gridSize, '#bac8b4', '#d3dccb']} />
-    <Floor polygon={floor.polygon} color="#c5c8b9" thickness={floor.thickness} elevation={floor.elevation} />
+    {regional ? <ApartmentSurfaces apartment={scene.apartment} floor={floor} ceiling={scene.geometry.ceiling} customization={scene.customization} /> : <><Floor polygon={floor.polygon} color="#c5c8b9" thickness={floor.thickness} elevation={floor.elevation} />
     {scene.apartment.rooms.map(room => {
       const finish = scene.customization?.floors[room.id]
       return <Floor key={room.id} polygon={room.polygon} elevation={floor.elevation + .005} color={room.color} tint={finish?.color ?? '#ffffff'} finish={finish?.material === 'concrete' ? undefined : finish?.material ?? roomFinish(room.id)} />
-    })}
+    })}</>}
+    {props.stairs?.map((stair, index) => <Staircase key={index} {...stair} />)}
     {scene.apartment.balcony && <Floor polygon={scene.apartment.balcony.polygon} color="#c9c7ae" elevation={floor.elevation} thickness={floor.thickness} />}
     {scene.apartment.walls.map(wall => <Wall key={wall.id} wall={wall} doors={scene.apartment.doors.filter(door => door.wallId === wall.id)} windows={scene.apartment.windows.filter(window => window.wallId === wall.id)} cutaway={cutaway} customization={scene.customization} />)}
     {scene.fixtures.map(fixture => {

@@ -85,7 +85,7 @@ export const SolarSnapshotSchema = z.object({
 
 const placement = z.object({
   buildingId: id, confidence: z.literal('estimated'), position: vector, rotationY: number,
-  floorIndex: nonnegative.int(), storeyHeight: positive, floorElevation: number,
+  floorIndex: number.int().min(-20).max(200), storeyHeight: positive, floorElevation: number,
   facadeOffset: nonnegative, exteriorInset: nonnegative, wallHeight: positive,
   bounds: z.object({ minX: number, maxX: number, minZ: number, maxZ: number, width: positive, depth: positive }),
   livingFacadeAzimuth: nonnegative.max(360), bedroomFacadeAzimuth: nonnegative.max(360),

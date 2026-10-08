@@ -63,7 +63,7 @@ async function mockProject(page: Page, role: Project['role'] = 'owner', empty = 
       ],
     }],
   }
-  const saved: Project = { id: projectId, name: scene.project.name, notes: '', ownerId: 'walk-owner', role,
+  const saved: Project & { scene: NonNullable<Project['scene']> } = { id: projectId, name: scene.project.name, notes: '', ownerId: 'walk-owner', role,
     revision: 1, createdAt: '2026-10-04T12:00:00Z', updatedAt: '2026-10-04T12:00:00Z', scene }
   const mutations: string[] = []
   await page.route('**/api/**', async route => {

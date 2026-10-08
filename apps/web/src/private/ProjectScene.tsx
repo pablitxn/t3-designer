@@ -3,7 +3,7 @@ import { Component, Suspense, useEffect, useMemo, useRef, useState, type Compone
 import { Canvas, useThree } from '@react-three/fiber'
 import { Html, OrbitControls, useGLTF } from '@react-three/drei'
 import { apartmentBounds, polygonCentroid } from '@t3-designer/geometry'
-import { getAssetMobility, isFixtureMovable, type Fixture, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
+import { getAssetMobility, isFixtureMovable, type Fixture, type FoundationModels, type Point2D, type ProjectSnapshot } from '@t3-designer/scene-schema'
 import { Mesh, Path, PCFShadowMap, PerspectiveCamera, Shape } from 'three'
 import { useTranslation } from 'react-i18next'
 import { Wall } from '../components/Wall'
@@ -12,11 +12,13 @@ import { addProjectFixture, projectModelUrl, removeProjectFixture, updateProject
 import { sceneCopy } from './scene-copy'
 import { editorCopy } from '../editor/copy'
 import { Floor } from '../components/Floor'
+import { ApartmentSurfaces } from '../components/ApartmentSurfaces'
+import { Staircase } from '../components/Staircase'
 import { DesignEnvelope, DesignLighting, LightEmitter } from '../components/DesignLighting'
 import { activeFixtureLightIds, fixtureLight } from '../lib/design-lighting'
 import { roomFinish } from '../materials/surfaces'
 
-type ProjectSceneProps = { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean }
+type ProjectSceneProps = { snapshot: ProjectSnapshot; onChange: (snapshot: ProjectSnapshot) => void; readOnly: boolean; foundationModels?: FoundationModels | null }
 type SceneAsset = ProjectSnapshot['assets'][number]
 const button = 'tw:cursor-pointer tw:rounded-lg tw:border tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:px-3 tw:py-2 tw:text-sm tw:text-[var(--settings-text)] tw:transition-colors tw:hover:bg-[var(--settings-accent-soft)] tw:disabled:cursor-not-allowed tw:disabled:opacity-50'
 const input = 'tw:box-border tw:w-full tw:rounded-lg tw:border tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:px-3 tw:py-2 tw:text-sm tw:text-[var(--settings-text)] tw:disabled:opacity-60'
@@ -53,9 +55,10 @@ function Volume({ polygon, holes, base, height, color }: { polygon: Point2D[]; h
 function ProjectContext({ snapshot }: { snapshot: ProjectSnapshot }) {
   const { placement, geometry, buildings } = snapshot
   const section = geometry.contextSections
+  const hole = useMemo(() => snapshot.apartment.floorRegions?.length ? [snapshot.apartment.perimeter.map(([x, z]): Point2D => [placement.position[0] + Math.cos(placement.rotationY) * x + Math.sin(placement.rotationY) * z, placement.position[2] - Math.sin(placement.rotationY) * x + Math.cos(placement.rotationY) * z])] : undefined, [snapshot.apartment, placement])
   return <group rotation={[0, -placement.rotationY, 0]}>
     <group position={[-placement.position[0], -placement.position[1], -placement.position[2]]}>
-      <Surface polygon={snapshot.parcel.footprint} elevation={-.04} color="#dce1cf" />
+      <Floor polygon={snapshot.parcel.footprint} holes={hole} elevation={-.04} color="#dce1cf" />
       {buildings.map(building => building.isTarget ? <group key={building.id}>
         <Volume polygon={building.footprint} holes={building.holes} base={building.groundOffset} height={section.belowTop - building.groundOffset} color="#ddd7c5" />
         {[section.before, section.after].map((polygon, index) => <Volume key={index} polygon={polygon} base={section.belowTop} height={section.ceilingBase - section.belowTop} color="#ddd7c5" />)}
@@ -141,7 +144,10 @@ function NumberField({ label, value, minimum, onCommit, disabled, length = false
   </label>
 }
 
-export function ProjectScene({ snapshot, onChange, readOnly }: ProjectSceneProps) {
+export function ProjectScene({ snapshot, onChange, readOnly, foundationModels }: ProjectSceneProps) {
+  const regional = !!(snapshot.apartment.floorRegions?.length || snapshot.apartment.floorOpenings?.length)
+  const dwelling = foundationModels?.dwelling?.candidate
+  const elevation = dwelling?.target === 'dwelling' ? dwelling.levels.find(level => level.levelId === foundationModels?.activeLevelId)?.elevation ?? 0 : 0
   const units = useUnits()
   const { i18n } = useTranslation('common')
   const locale = i18n.resolvedLanguage === 'es' || i18n.resolvedLanguage === 'fr' ? i18n.resolvedLanguage : 'en'
@@ -190,13 +196,14 @@ export function ProjectScene({ snapshot, onChange, readOnly }: ProjectSceneProps
               <DesignEnvelope scene={snapshot} cutaway={lowWalls} />
               {!context && <gridHelper args={[Math.max(bounds.width, bounds.depth) * 3, 30, '#c1cbb6', '#d5dccb']} position={[bounds.center[0], -.15, bounds.center[1]]} />}
               {context && <ProjectContext snapshot={snapshot} />}
-              <Volume polygon={snapshot.geometry.floor.polygon} base={snapshot.geometry.floor.elevation - snapshot.geometry.floor.thickness} height={snapshot.geometry.floor.thickness} color="#c5c8b9" />
+              {regional ? <ApartmentSurfaces apartment={snapshot.apartment} floor={snapshot.geometry.floor} ceiling={snapshot.geometry.ceiling} customization={snapshot.customization} /> : <Volume polygon={snapshot.geometry.floor.polygon} base={snapshot.geometry.floor.elevation - snapshot.geometry.floor.thickness} height={snapshot.geometry.floor.thickness} color="#c5c8b9" />}
+              {dwelling?.target === 'dwelling' && dwelling.connections.filter(connection => connection.fromLevelId === foundationModels?.activeLevelId || connection.toLevelId === foundationModels?.activeLevelId).map((connection, index) => connection.geometry && <Staircase key={connection.id ?? index} geometry={connection.geometry} yOffset={-elevation} />)}
               {snapshot.apartment.rooms.map(room => {
                 const finish = snapshot.customization?.floors[room.id]
                 return <group key={room.id}>
-                <Floor polygon={room.polygon} elevation={snapshot.geometry.floor.elevation + .002} color={room.color}
+                {!regional && <Floor polygon={room.polygon} elevation={snapshot.geometry.floor.elevation + .002} color={room.color}
                   tint={finish?.color ?? '#ffffff'}
-                  finish={finish?.material === 'concrete' ? undefined : finish?.material ?? roomFinish(room.id)} />
+                  finish={finish?.material === 'concrete' ? undefined : finish?.material ?? roomFinish(room.id)} />}
                 {labels && <Html position={[polygonCentroid(room.polygon)[0], .05, polygonCentroid(room.polygon)[1]]} center style={{ pointerEvents: 'none' }}><span className="tw:block tw:whitespace-nowrap tw:rounded-md tw:bg-[#fffffae8] tw:px-2 tw:py-1 tw:text-xs tw:text-[#354139]">{room.name}</span></Html>}
                 </group>
               })}
@@ -224,7 +231,7 @@ export function ProjectScene({ snapshot, onChange, readOnly }: ProjectSceneProps
           <p className="tw:m-0 tw:text-xs tw:text-[var(--settings-muted)]">{selectedMovable ? mobilityCopy.movableHint : mobilityCopy.fixedHint}</p>
           <label className="tw:grid tw:gap-1 tw:text-xs tw:text-[var(--settings-muted)]">{copy.room}<select className={input} value={selected.roomId} disabled={readOnly || !selectedMovable} onChange={event => { if (!readOnly && selectedMovable) onChange(updateProjectFixture(snapshot, selected.id, { roomId: event.target.value })) }}>{snapshot.apartment.rooms.map(room => <option key={room.id} value={room.id}>{room.name}</option>)}</select></label>
           <div className="tw:grid tw:grid-cols-2 tw:gap-3">
-            {([copy.x, copy.y, copy.z]).map((label, axis) => <NumberField key={`${selected.id}-${axis}`} label={label} length value={selected.position[axis]} minimum={axis === 1 ? 0 : undefined} disabled={readOnly || !selectedMovable} onCommit={value => changePosition(axis, value)} />)}
+            {([copy.x, copy.y, copy.z]).map((label, axis) => <NumberField key={`${selected.id}-${axis}`} label={label} length value={selected.position[axis]} minimum={axis === 1 ? snapshot.geometry.floor.elevation : undefined} disabled={readOnly || !selectedMovable} onCommit={value => changePosition(axis, value)} />)}
             <NumberField key={`${selected.id}-rotation`} label={copy.rotation} value={selected.rotation * 180 / Math.PI} disabled={readOnly || !selectedMovable} onCommit={value => { if (!readOnly && selectedMovable) onChange(updateProjectFixture(snapshot, selected.id, { rotation: value * Math.PI / 180 })) }} />
           </div>
           {!readOnly && <button className={button} type="button" disabled={!selectedMovable} onClick={() => { if (!selectedMovable) return; onChange(removeProjectFixture(snapshot, selected.id)); setSelectedId(null) }}>{copy.remove}</button>}
