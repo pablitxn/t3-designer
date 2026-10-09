@@ -1,5 +1,8 @@
 import { withUsage, type UsageStore } from './usage.ts'
+import { traceEvent, traceStep } from './telemetry.ts'
 import { acquireGenerationSlot } from './generation-coordinator.ts'
+import { OpenAIProviderError, OPENAI_TIMEOUT_MS } from './openai.ts'
+import { planningError } from './codex.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import type { ProjectSnapshot } from '@t3-designer/scene-schema'
@@ -150,19 +153,22 @@ export class ProjectGenerations {
         const reservation = await this.credits.reservation(`architecture:${row.id}`)
         if (reservation?.state !== 'reserved' || reservation.userId !== row.userId || reservation.kind !== row.input.kind) throw new Error('La reserva de créditos ya no está disponible.')
         controller.signal.throwIfAborted()
-        const scene = await withUsage(this.usage, `architecture:${row.id}`, () => this.generate(row.id, row.input, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(180000)]), onInference() {} }))
-        controller.signal.throwIfAborted()
-        if (scene.project.id !== row.id) throw new Error('La identidad de la propuesta no coincide con el trabajo.')
-        // Publication and cancellation serialize; completed projects survive a crash
-        // between PostgreSQL publication and credit capture via their stable id.
-        await this.exclusive(async () => {
+        await withUsage(this.usage, `architecture:${row.id}`, async () => {
+          const scene = await this.generate(row.id, row.input, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(OPENAI_TIMEOUT_MS)]), onInference() {} })
           controller.signal.throwIfAborted()
-          if (this.row(row.id)?.status === 'cancelled') throw new Error('cancelled')
-          await this.projects.createGenerated({ id: owner.id, name: owner.name, email: owner.email, role: owner.role === 'admin' ? 'admin' : 'user' }, scene)
-          this.write({ ...row, status: 'completed', projectId: row.id, updatedAt: new Date().toISOString() })
-          await this.credits.commit(`architecture:${row.id}`)
+          if (scene.project.id !== row.id) throw new Error('La identidad de la propuesta no coincide con el trabajo.')
+          // Publication and cancellation serialize; completed projects survive a crash
+          // between PostgreSQL publication and credit capture via their stable id.
+          await traceStep('project.publish', async () => this.exclusive(async () => {
+            controller.signal.throwIfAborted()
+            if (this.row(row.id)?.status === 'cancelled') throw new Error('cancelled')
+            await this.projects.createGenerated({ id: owner.id, name: owner.name, email: owner.email, role: owner.role === 'admin' ? 'admin' : 'user' }, scene)
+            traceEvent('project.published', { 't3.room.count': scene.apartment.rooms.length, 't3.building.count': scene.buildings.length })
+            this.write({ ...row, status: 'completed', projectId: row.id, updatedAt: new Date().toISOString() })
+            await this.credits.commit(`architecture:${row.id}`)
+          }), undefined, 'TOOL')
         })
-      } catch {
+      } catch (error) {
         try {
           const current = this.row(row.id)!
           // A temporary database failure leaves the reservation intact. Never
@@ -172,7 +178,8 @@ export class ProjectGenerations {
             this.write({ ...current, status: 'completed', projectId: row.id, error: null, updatedAt: new Date().toISOString() })
             await this.credits.commit(`architecture:${row.id}`)
           } else {
-            this.write({ ...current, status: current.status === 'cancelled' ? 'cancelled' : 'failed', error: current.status === 'cancelled' ? null : 'No se pudo generar un proyecto válido. Se devolvieron los créditos; probá con una descripción más clara.', updatedAt: new Date().toISOString() })
+            const message = error instanceof OpenAIProviderError ? planningError(error).message : 'No se pudo generar un proyecto válido. Se devolvieron los créditos; probá con una descripción más clara.'
+            this.write({ ...current, status: current.status === 'cancelled' ? 'cancelled' : 'failed', error: current.status === 'cancelled' ? null : message, updatedAt: new Date().toISOString() })
             const reservation = await this.credits.reservation(`architecture:${row.id}`)
             if (reservation?.state === 'reserved') await this.credits.refund(reservation.id)
           }

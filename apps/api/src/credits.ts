@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Transaction } from 'kysely'
 import type { AppDatabase, AppTables } from './app-database.ts'
+import { recordCreditTrace } from './telemetry.ts'
 
 export type CreditTier = 'standard' | 'premium'
 export type CreditKind = 'asset' | 'revision' | 'project' | 'building' | 'apartment'
@@ -195,7 +196,8 @@ export class CreditService {
   async reserve(userId: string, operationId: string, kind: CreditKind): Promise<CreditReservation> {
     if (!operationId.trim() || operationId.length > 300) throw new CreditError(400, 'Identificador de generación inválido.')
     if (!Object.hasOwn(this.config.costs, kind)) throw new CreditError(400, 'Tipo de generación inválido.')
-    return this.transaction(async transaction => {
+    let created = false
+    const result = await this.transaction(async transaction => {
       const account = await this.lock(transaction, userId)
       const previous = await transaction.selectFrom('t3_credit_reservation').selectAll().where('id', '=', operationId).executeTakeFirst()
       if (previous) {
@@ -219,13 +221,18 @@ export class CreditService {
         needed -= debit
       }
       await this.event(transaction, { userId, eventKey: `reserve:${operationId}`, type: 'reserve', amount: -amount, reason: `Reserva de generación: ${kind}`, grantId: null, operationId })
+      created = true
       return reservation
     })
+    if (created) recordCreditTrace(result)
+    return result
   }
   private async settle(operationId: string, state: 'committed' | 'refunded'): Promise<CreditReservation> {
     const candidate = await this.database.db.selectFrom('t3_credit_reservation').selectAll().where('id', '=', operationId).executeTakeFirst()
     if (!candidate) throw new CreditError(404, 'La reserva de créditos no existe.')
-    return this.transaction(async transaction => {
+    let actualRefunded: number | undefined
+    let changed = false
+    const result = await this.transaction(async transaction => {
       const account = await this.lock(transaction, candidate.userId)
       const reservation = await transaction.selectFrom('t3_credit_reservation').selectAll().where('id', '=', operationId).executeTakeFirstOrThrow()
       if (reservation.state === state) return reservation as CreditReservation
@@ -248,8 +255,12 @@ export class CreditService {
       }
       await transaction.updateTable('t3_credit_reservation').set({ state, updatedAt: now }).where('id', '=', operationId).execute()
       await this.event(transaction, { userId: account.userId, eventKey: `${state}:${operationId}`, type: state === 'committed' ? 'commit' : 'refund', amount: state === 'refunded' ? returned : -debt, reason: state === 'committed' ? 'Generación consumida' : 'Generación cancelada; devolución de créditos vigentes', grantId: null, operationId })
+      changed = true
+      actualRefunded = state === 'refunded' ? returned : 0
       return { ...reservation, state, updatedAt: now } as CreditReservation
     })
+    if (changed) recordCreditTrace(result, actualRefunded)
+    return result
   }
   commit(operationId: string): Promise<CreditReservation> { return this.settle(operationId, 'committed') }
   refund(operationId: string): Promise<CreditReservation> { return this.settle(operationId, 'refunded') }

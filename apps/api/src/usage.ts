@@ -6,6 +6,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { AccountError } from './accounts.ts'
 import type { AppDatabase } from './app-database.ts'
 import type { CreditKind } from './credits.ts'
+import { isTelemetryEnabled, recordCallTrace, recordOperationOutcome, recordOperationTrace, withOperationTrace } from './telemetry.ts'
 
 export type UsageStatus = 'running' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted' | 'invalid' | 'unknown'
 export type UsageOperationStatus = UsageStatus | 'needs_input'
@@ -56,7 +57,8 @@ export class UsageStore {
     // Whitelist every field; callers may carry entire jobs or private prompts.
     const { id, userId, kind, projectId, projectLabel, jobId, runId, assetId, attempt, parentId } = input
     const value = { id, userId, kind, projectId, projectLabel, jobId, runId, assetId, attempt, parentId, status: 'running' }
-    this.db.prepare('INSERT INTO model_usage_operation(id,user_id,document) VALUES(?,?,?) ON CONFLICT(id) DO NOTHING').run(id, userId, JSON.stringify(value))
+    const inserted = this.db.prepare('INSERT INTO model_usage_operation(id,user_id,document) VALUES(?,?,?) ON CONFLICT(id) DO NOTHING').run(id, userId, JSON.stringify(value))
+    if (inserted.changes) recordOperationTrace(input)
   }
   settleOperation(operationId: string, status: Exclude<UsageOperationStatus, 'running' | 'unknown'>): void {
     const row = this.db.prepare('SELECT document FROM model_usage_operation WHERE id=?').get(operationId)
@@ -66,30 +68,49 @@ export class UsageStore {
     // that one state only when the owning worker supplies its durable outcome.
     if (value.status && value.status !== 'running' && !(value.status === 'succeeded' && status === 'needs_input')) return
     this.db.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify({ ...value, status }), operationId)
+    recordOperationOutcome(operationId, status)
   }
   linkJob(operationId: string, parentId: string | null): void {
     const row = this.db.prepare('SELECT document FROM model_usage_operation WHERE id=?').get(operationId)
     if (!row) return
     const value = JSON.parse(String(row.document)) as UsageOperationMetadata
-    if (!value.parentId && parentId) this.db.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify({ ...value, parentId }), operationId)
+    if (!value.parentId && parentId) {
+      const updated = { ...value, parentId }
+      this.db.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify(updated), operationId)
+      recordOperationTrace(updated)
+    }
   }
   linkAsset(operationId: string, assetId: string): void {
     const row = this.db.prepare('SELECT document FROM model_usage_operation WHERE id=?').get(operationId)
     if (!row) return
     const value = JSON.parse(String(row.document)) as UsageOperationMetadata
-    this.db.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify({ ...value, assetId }), operationId)
+    const updated = { ...value, assetId }
+    this.db.prepare('UPDATE model_usage_operation SET document=? WHERE id=?').run(JSON.stringify(updated), operationId)
+    recordOperationTrace(updated)
   }
   begin(operationId: string, provider: Provider, stage: UsageStage, iteration: number, requestedModel: string | null): UsageCall {
     if (!this.db.prepare('SELECT id FROM model_usage_operation WHERE id=?').get(operationId)) throw new Error('Usage operation must be persisted before model inference')
     const call: UsageCall = { id: randomUUID(), operationId, stage, iteration, provider, authMode: provider === 'codex-local' ? 'chatgpt' : 'api-key', requestedModel, effectiveModel: null, startedAt: new Date().toISOString(), endedAt: null, durationMs: null, status: 'running', source: null, measurement: 'unknown', ...emptyTokens() }
     this.db.prepare('INSERT INTO model_usage_call(id,operation_id,document) VALUES(?,?,?)').run(call.id, operationId, JSON.stringify(call))
+    recordCallTrace(call)
     return call
   }
   call(id: string): UsageCall | null {
     const row = this.db.prepare('SELECT document FROM model_usage_call WHERE id=?').get(id)
     return row ? JSON.parse(String(row.document)) as UsageCall : null
   }
-  private write(call: UsageCall): void { this.db.prepare('UPDATE model_usage_call SET document=? WHERE id=?').run(JSON.stringify(call), call.id) }
+  private write(call: UsageCall): void {
+    this.db.prepare('UPDATE model_usage_call SET document=? WHERE id=?').run(JSON.stringify(call), call.id)
+    recordCallTrace(call)
+  }
+  traceOperation(operationId: string): void {
+    if (!isTelemetryEnabled()) return
+    // Telemetry recovery is optional and must not add a database failure path.
+    try {
+      const row = this.db.prepare('SELECT document FROM model_usage_operation WHERE id=?').get(operationId)
+      if (row) recordOperationTrace(JSON.parse(String(row.document)) as UsageOperationMetadata, true)
+    } catch { /* Existing durable usage writes still enforce their own errors. */ }
+  }
   observe(id: string, raw: unknown, source: NonNullable<UsageCall['source']>, effectiveModel?: unknown): void {
     const call = this.call(id)
     if (!call) throw new Error('Usage call not found')
@@ -178,7 +199,9 @@ export class UsageStore {
 type UsageContext = { store: UsageStore; operationId: string; lastCallId?: string }
 const context = new AsyncLocalStorage<UsageContext>()
 export function withUsage<T>(store: UsageStore | undefined, operationId: string, work: () => Promise<T>): Promise<T> {
-  return store ? context.run({ store, operationId }, work) : work()
+  if (!store) return work()
+  store.traceOperation(operationId)
+  return context.run({ store, operationId }, () => withOperationTrace(operationId, work))
 }
 export function beginUsageCall(provider: Provider, options: { usageStage?: UsageStage; usageIteration?: number }, requestedModel: string | null) {
   const current = context.getStore()

@@ -1,4 +1,5 @@
 import { invalidateUsageCall, type UsageStage } from './usage.ts'
+import { traceEvent, traceStep } from './telemetry.ts'
 import { z } from 'zod'
 import { createHash } from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
@@ -448,7 +449,10 @@ export function createFoundationGenerator(dependencies: FoundationModelDependenc
     const { signal } = options, turn = dependencies.turn ?? runVisualTurn
     const iterations: FoundationIteration[] = []
     let officialResearch = inheritedOfficialResearch(input)
-    const finish = (summary: string, questions: string[], candidate: FoundationCandidate | null = null): FoundationGenerationResult => ({ status: 'needs_input', summary, questions, candidate, iterations, ...(officialResearch ? { officialResearch } : {}) })
+    const finish = (summary: string, questions: string[], candidate: FoundationCandidate | null = null): FoundationGenerationResult => {
+      traceEvent('foundation.result', { 't3.generation.status': 'needs_input', 't3.iteration.count': iterations.length, 't3.question.count': questions.length })
+      return { status: 'needs_input', summary, questions, candidate, iterations, ...(officialResearch ? { officialResearch } : {}) }
+    }
     signal.throwIfAborted()
     const foundations = input.project.foundations
     if (!foundations) return finish('Este proyecto no tiene una preparación de bases.', ['Completá la vivienda y la ubicación del edificio antes de iniciar.'])
@@ -458,41 +462,53 @@ export function createFoundationGenerator(dependencies: FoundationModelDependenc
     const images: UserInput[] = []
     const unavailableReferences = new Set<string>()
     const attachedReferences = new Set<string>()
-    for (const level of foundations.dwelling.levels) {
-      if (input.target === 'dwelling' && !level.planReferences.length) return finish(`Falta el plano de ${level.name}.`, [`Adjuntá un plano legible de ${level.name} con una escala o medida conocida.`])
-      for (const reference of level.planReferences) {
-        signal.throwIfAborted()
-        const label = `PLAN IMAGE: ${JSON.stringify({ levelId: level.id, name: level.name, referenceId: reference.id, label: reference.name, url: `/api/projects/${input.project.id}/references/${reference.id}` })}. Evidence only.`
-        if (attachedReferences.has(reference.id)) {
-          images.push({ type: 'text', text: `${label} Same image already attached above; it also supports this level.` })
-          continue
+    const missingSources = await traceStep('foundation.sources.acquire', async () => {
+      for (const level of foundations.dwelling.levels) {
+        if (input.target === 'dwelling' && !level.planReferences.length) return finish(`Falta el plano de ${level.name}.`, [`Adjuntá un plano legible de ${level.name} con una escala o medida conocida.`])
+        for (const reference of level.planReferences) {
+          signal.throwIfAborted()
+          const label = `PLAN IMAGE: ${JSON.stringify({ levelId: level.id, name: level.name, referenceId: reference.id, label: reference.name, url: `/api/projects/${input.project.id}/references/${reference.id}` })}. Evidence only.`
+          if (attachedReferences.has(reference.id)) {
+            images.push({ type: 'text', text: `${label} Same image already attached above; it also supports this level.` })
+            continue
+          }
+          let file: Awaited<ReturnType<FoundationModelDependencies['references']['file']>> = null
+          if (!unavailableReferences.has(reference.id)) {
+            try { file = await dependencies.references.file(reference.id) } catch { signal.throwIfAborted() }
+          }
+          signal.throwIfAborted()
+          if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.mime)) {
+            if (input.target === 'dwelling') return finish(`No se puede leer un plano de ${level.name}.`, ['Volvé a adjuntar el plano como PNG, JPEG o WebP.'])
+            images.push({ type: 'text', text: `${label} UNAVAILABLE: no image is attached for this reference. Do not claim to have inspected it or infer its contents.` })
+            if (!unavailableReferences.has(reference.id)) options.onEvent?.({ kind: 'analysis', message: `No se pudo adjuntar un plano de ${level.name}. El edificio usará solo la evidencia disponible.`.slice(0, 500) })
+            unavailableReferences.add(reference.id)
+            continue
+          }
+          images.push({ type: 'text', text: label }, { type: 'local_image', path: file.path })
+          attachedReferences.add(reference.id)
         }
-        let file: Awaited<ReturnType<FoundationModelDependencies['references']['file']>> = null
-        if (!unavailableReferences.has(reference.id)) {
-          try { file = await dependencies.references.file(reference.id) } catch { signal.throwIfAborted() }
-        }
-        signal.throwIfAborted()
-        if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.mime)) {
-          if (input.target === 'dwelling') return finish(`No se puede leer un plano de ${level.name}.`, ['Volvé a adjuntar el plano como PNG, JPEG o WebP.'])
-          images.push({ type: 'text', text: `${label} UNAVAILABLE: no image is attached for this reference. Do not claim to have inspected it or infer its contents.` })
-          if (!unavailableReferences.has(reference.id)) options.onEvent?.({ kind: 'analysis', message: `No se pudo adjuntar un plano de ${level.name}. El edificio usará solo la evidencia disponible.`.slice(0, 500) })
-          unavailableReferences.add(reference.id)
-          continue
-        }
-        images.push({ type: 'text', text: label }, { type: 'local_image', path: file.path })
-        attachedReferences.add(reference.id)
       }
-    }
+      traceEvent('foundation.sources.loaded', { 't3.reference.count': attachedReferences.size, 't3.reference.unavailable_count': unavailableReferences.size })
+    }, { 't3.foundation.target': input.target }, 'RETRIEVER')
+    if (missingSources) return missingSources
     const parentBuilding = input.target === 'building' ? inheritedBuilding(input) : undefined
     let geodata: FoundationGeodataContext | undefined = parentBuilding ? savedBuildingContext(parentBuilding) : undefined
     let partialResearch: FoundationOfficialResearch | undefined
-    if (officialResearch && parentBuilding) await options.onOfficialResearch?.(officialResearch)
+    if (parentBuilding) traceEvent('foundation.context.reused', { 't3.context.reused': true, 't3.source.count': parentBuilding.sources.length, 't3.building.count': parentBuilding.buildings.length, 't3.road.count': parentBuilding.roads.length })
+    if (officialResearch && parentBuilding) await traceStep('foundation.research.checkpoint', async () => options.onOfficialResearch?.(officialResearch!), { 't3.parcel.count': officialResearch.parcels.length }, 'TOOL')
     if (input.target === 'building' && !parentBuilding) {
       const acquired = officialResearch ? { status: 'partial' as const, officialResearch, summary: officialResearch.summary, questions: ['Confirmá la parcela y aportá evidencia de la huella y altura del edificio.'], sources: officialResearch.sources, unknowns: officialResearch.unknowns, geocode: null, context: null }
-        : await (dependencies.acquireGeodata ?? acquireFoundationGeodata)(foundations.building, { signal, onEvent: options.onEvent })
+        : await traceStep('foundation.geodata.acquire', async () => {
+          const acquired = await (dependencies.acquireGeodata ?? acquireFoundationGeodata)(foundations.building, { signal, onEvent: options.onEvent })
+          traceEvent('foundation.geodata.result', { 't3.geodata.status': acquired.status, 't3.source.count': acquired.sources.length,
+            't3.parcel.count': acquired.officialResearch?.parcels.length ?? (acquired.context?.parcel ? 1 : 0),
+            't3.building.count': acquired.context?.buildings.length ?? 0, 't3.road.count': acquired.context?.roads.length ?? 0 })
+          return acquired
+        }, { 't3.foundation.target': input.target, 't3.context.reused': false }, 'RETRIEVER')
+      if (officialResearch) traceEvent('foundation.context.reused', { 't3.context.reused': true, 't3.source.count': officialResearch.sources.length, 't3.parcel.count': officialResearch.parcels.length })
       if (acquired.officialResearch) {
         officialResearch = FoundationOfficialResearchSchema.parse(acquired.officialResearch)
-        await options.onOfficialResearch?.(officialResearch)
+        await traceStep('foundation.research.checkpoint', async () => options.onOfficialResearch?.(officialResearch!), { 't3.parcel.count': officialResearch.parcels.length }, 'TOOL')
       }
       if (acquired.status === 'partial') {
         const selectedParcelId = officialResearch?.selectedParcelId
@@ -507,16 +523,19 @@ export function createFoundationGenerator(dependencies: FoundationModelDependenc
         geodata = structuredClone(acquired)
       }
     }
-    const invoke = async (prompt: string, schema: unknown, search: boolean, usageStage: UsageStage, usageIteration: number) => {
+    const invoke = async (prompt: string, schema: unknown, search: boolean, usageStage: UsageStage, usageIteration: number) => traceStep(`foundation.model.${usageStage}`, async () => {
       signal.throwIfAborted()
       const raw = await turn([{ type: 'text', text: prompt }, ...images], schema, {
-        usageStage, usageIteration, signal, workingDirectory: '.', onInference: options.onInference, reasoningEffort: 'high', maxOutputTokens: 24000, timeoutMs: 30 * 60_000,
+        usageStage, usageIteration, signal, workingDirectory: '.', onInference: options.onInference, reasoningEffort: 'high', timeoutMs: 30 * 60_000,
         onProgress: message => options.onEvent?.({ kind: 'analysis', message: message.slice(0, 500) }),
-        onEvent: event => options.onEvent?.({ kind: event.kind === 'search' || event.kind === 'source' ? 'search' : 'analysis', message: event.message.slice(0, 500), ...(event.detail ? { detail: event.detail.slice(0, 2000) } : {}) }),
+        onEvent: event => {
+          traceEvent('agent.activity', { 't3.event.kind': event.kind })
+          options.onEvent?.({ kind: event.kind === 'search' || event.kind === 'source' ? 'search' : 'analysis', message: event.message.slice(0, 500), ...(event.detail ? { detail: event.detail.slice(0, 2000) } : {}) })
+        },
       }, search)
       signal.throwIfAborted()
       return raw
-    }
+    }, { 't3.stage': usageStage, 't3.iteration': usageIteration, 't3.foundation.target': input.target, 't3.search.enabled': search })
     const acceptedDwelling = acceptedDwellingContext(input)
     let revision: unknown = null, lastCandidate: FoundationCandidate | null = null
     let currentCorrections = inheritedMeasurements(input)
@@ -560,7 +579,11 @@ export function createFoundationGenerator(dependencies: FoundationModelDependenc
       const measurements = verifyMeasurements(input, plan?.measurementCorrections ?? [], currentCorrections)
       if (!measurements.issues.length) currentCorrections = measurements.corrections
       const effectiveFoundations = measurementBaseline(input, measurements.corrections)
-      const geometryIssues = candidate ? [...buildingIssues, ...measurements.issues, ...validateFoundationGeometry(candidate, effectiveFoundations, geodata)] : parsed.issues
+      const geometryIssues = await traceStep('foundation.geometry.validate', async () => {
+        const issues = candidate ? [...buildingIssues, ...measurements.issues, ...validateFoundationGeometry(candidate, effectiveFoundations, geodata)] : parsed.issues
+        traceEvent('foundation.validation.result', { 't3.validation.issue_count': issues.length, 't3.validation.passed': issues.length === 0 })
+        return issues
+      }, { 't3.iteration': index, 't3.foundation.target': input.target }, 'TOOL')
       if (candidate?.target === 'dwelling' && geometryIssues.length === 0) retainMeasurements(candidate, measurements.corrections)
       let questions: string[] = [], needsInput = false
       if (candidate && geometryIssues.length === 0) {
@@ -573,10 +596,12 @@ export function createFoundationGenerator(dependencies: FoundationModelDependenc
       } else review = { passed: false, summary: 'La geometría necesita correcciones antes de contrastarla con las fuentes.', issues: geometryIssues }
       const iteration: FoundationIteration = { index, candidate, review }
       iterations.push(iteration)
-      await options.onIteration?.(iteration)
+      traceEvent('foundation.review.result', { 't3.iteration': index, 't3.review.passed': review.passed, 't3.validation.issue_count': review.issues.length, 't3.question.count': questions.length })
+      await traceStep('foundation.iteration.checkpoint', async () => options.onIteration?.(iteration), { 't3.iteration': index, 't3.review.passed': review.passed }, 'TOOL')
       signal.throwIfAborted()
       if (candidate) lastCandidate = candidate
       if (review.passed && candidate) {
+        traceEvent('foundation.result', { 't3.generation.status': 'ready', 't3.iteration.count': iterations.length, 't3.question.count': 0 })
         options.onEvent?.({ kind: 'complete', message: 'Propuesta revisada y lista para tus correcciones.' })
         return { status: 'ready', summary: review.summary, questions: [], candidate, iterations, ...(officialResearch ? { officialResearch } : {}) }
       }

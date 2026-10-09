@@ -1,6 +1,8 @@
 import { withUsage, type UsageStore } from './usage.ts'
+import { traceEvent, traceStep } from './telemetry.ts'
 import { acquireGenerationSlot } from './generation-coordinator.ts'
 import { DEFAULT_FOUNDATION_TIMEOUT_MS, validateFoundationTimeoutMs } from './foundation-limits.ts'
+import { CodexPlanningError } from './codex.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import {
@@ -304,7 +306,7 @@ export class FoundationAgent {
           if (row.target !== 'building' || acquiredResearch.countryCode !== row.project.foundations?.building.countryCode) throw new Error('La investigación oficial no corresponde a la ubicación del proyecto.')
           result.officialResearch = acquiredResearch
         }
-        await this.exclusive(async () => {
+        await withUsage(this.usage, operationId(row.id), () => traceStep('foundation.version.publish', async () => this.exclusive(async () => {
           // Collaborator removal, suspension and cancellation take effect even
           // when the model was already in flight. No result is published first.
           await this.authorizedUser(row.userId, row.projectId)
@@ -336,9 +338,10 @@ export class FoundationAgent {
             this.write(terminal)
             this.db.exec('COMMIT')
           } catch (error) { this.db.exec('ROLLBACK'); throw error }
+          traceEvent('foundation.version.published', { 't3.generation.status': version.status, 't3.iteration.count': version.iterations.length })
           await this.settle(terminal)
-        })
-      } catch {
+        }), { 't3.foundation.target': row.target }, 'TOOL'))
+      } catch (failure) {
         await this.exclusive(async () => {
           const current = this.row(row.id)!
           // A committed SQLite version and terminal run are atomic. A credit DB
@@ -349,8 +352,11 @@ export class FoundationAgent {
           let preserve = current.status !== 'cancelled' && (!!draft?.candidate || !!current.officialResearch)
           // Retaining a draft must not bypass the publication access check.
           if (preserve) { try { await this.authorizedUser(row.userId, row.projectId) } catch { preserve = false } }
-          const message = deadline?.aborted ? 'El intento alcanzó el límite de tiempo.' : 'No se pudo completar el intento.'
-          const error = preserve
+          const providerFailure = failure instanceof CodexPlanningError && ['usage_limit', 'authentication'].includes(failure.code) ? failure.message : null
+          const message = deadline?.aborted ? 'El intento alcanzó el límite de tiempo.' : providerFailure ?? 'No se pudo completar el intento.'
+          const error = providerFailure
+            ? `${message} ${preserve ? 'Se conservó el borrador; todavía no se puede aceptar esta versión.' : 'Las versiones anteriores siguen disponibles.'}`
+            : preserve
             ? `${message} Se conservó el borrador para continuar desde el chat. Se devolvieron los créditos; todavía no se puede aceptar esta versión.`
             : 'No se pudo completar el intento. Se devolvieron los créditos; las versiones anteriores siguen disponibles.'
           const version = preserve ? FoundationVersionSchema.parse({
@@ -359,7 +365,7 @@ export class FoundationAgent {
             status: 'needs_input', candidate: draft?.candidate ?? null, iterations: current.iterations,
             ...(current.officialResearch ? { officialResearch: current.officialResearch } : {}),
             summary: `${error}${last ? ` Última revisión: ${last.review.summary}` : ' Se conservaron la consulta oficial y sus fuentes.'}`.slice(0, 8_000),
-            questions: last?.review.issues.length ? last.review.issues : ['Reintentá desde este borrador para completar la información y revisión pendientes.'],
+            questions: providerFailure ? [providerFailure] : last?.review.issues.length ? last.review.issues : ['Reintentá desde este borrador para completar la información y revisión pendientes.'],
           }) : null
           if (version) this.event(row.id, { kind: 'error', message: error })
           const failed: Row = { ...this.row(row.id)!, status: current.status === 'cancelled' ? 'cancelled' : 'failed', updatedAt: now,

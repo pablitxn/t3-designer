@@ -26,6 +26,7 @@ test('usage filters retain the full period across pages and make the final local
 
 test('calendar periods cover month boundaries without using UTC dates', () => {
   const now = new Date(2026, 0, 12, 0, 30)
+  assert.deepEqual(usagePeriod('today', now), { from: '2026-01-12', to: '2026-01-12' })
   assert.deepEqual(usagePeriod('month', now), { from: '2026-01-01', to: '2026-01-12' })
   assert.deepEqual(usagePeriod('last30', now), { from: '2025-12-14', to: '2026-01-12' })
   assert.deepEqual(usagePeriod('all', now), { from: '', to: '' })

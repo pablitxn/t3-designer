@@ -20,17 +20,36 @@ at `/app/usage`: application credits and provider-reported model usage, with one
 row per attempt and its individual calls. It only covers generations invoked by
 T3, not the total usage of the operator's Codex account. Keep `usage.sqlite` with
 the account/job databases and library files when backing up or restoring.
+`/app/credits` shows T3 application credits. OpenAI dollar charges and the API
+balance are separate; follow the [funding and cost guide](../local-backend.md#api-funding-and-costs).
 
 ## Start
 
 Prerequisites: Node 24+, pnpm 12.7.0, Blender and an OpenAI API key configured
 privately as `OPENAI_API_KEY` in the ignored root `.env`. Use
-`T3_INFERENCE_PROVIDER=openai`. Tested with Blender 5.2.2 LTS. Never place the
-key in frontend variables, source files, logs or links.
+`T3_INFERENCE_PROVIDER=openai` and `T3_OPENAI_MODEL=gpt-6-astra`. Preserve an
+existing `.env` rather than copying the example over it. Tested with Blender
+5.2.2 LTS. Never place the key in frontend variables, source files, logs or links.
+
+Hosted planning, generation, corrections and visual review all default to
+`gpt-6-astra` with `reasoning.effort=max`. Reasoning effort is fixed across hosted
+calls. `T3_OPENAI_MODEL` remains an operator override. The default allowance is
+128,000 output tokens per call, including reasoning, with a thirty-minute call
+timeout. An allowance is a maximum, not a required token count. The model's
+supported effort levels are documented in the [Astra model reference](https://developers.openai.com/api/docs/models/gpt-6-astra).
+
+Enable `T3_GENERATION_ENABLED=true` in `.env`, then keep the API running in one
+terminal:
 
 ```sh
-pnpm install
-T3_GENERATION_ENABLED=true pnpm dev:full
+pnpm install --frozen-lockfile
+pnpm start:api
+```
+
+Start the frontend in a second terminal:
+
+```sh
+pnpm --filter @t3-designer/web dev:full --host 127.0.0.1 --port 5173
 ```
 
 After activating your administrator account, open
@@ -41,16 +60,10 @@ configured and Blender is available. Configuration presence is not a live API
 connectivity or account-quota check. The public `/#assets` page explains the
 workshop without accessing private data.
 
-To run each component independently:
-
-```sh
-T3_GENERATION_ENABLED=true pnpm start:api
-pnpm --filter @t3-designer/web dev:full --host 127.0.0.1 --port 5173
-```
-
-`pnpm dev:api` adds Node watch mode for backend development. Editing backend
-files restarts the process and interrupts an active job; retry it afterwards.
-Use `start:api` during long generation sessions.
+`pnpm dev:full` and `pnpm dev:api` use Node watch mode for backend development.
+Editing backend files restarts the process and interrupts an active job; retry
+it afterwards. Keep `start:api` during manual generation sessions, and restart
+it after configuration changes once active jobs have finished.
 
 The API validates sessions, ownership and Host/Origin and rejects cross-site
 requests. Local development binds loopback. The production configuration requires
@@ -76,7 +89,7 @@ in production. See the private-projects deployment boundary before exposure.
    questions shown in the job card. Attach photos or add dimensions as needed.
    A photo-only clarification is sufficient when photographs were requested.
 5. The worker renders perspective, front and side views and sends those images
-   together with the product photos to a separate Codex visual review. The
+   together with the product photos to a separate model call for visual review. The
    review can accept, return a corrected recipe, or ask for missing evidence.
    Up to three render/review rounds run per attempt. Dimensions stay fixed.
 6. Review the side-by-side photos and preview, findings and interactive 3D view.
@@ -186,7 +199,8 @@ For `T3_INFERENCE_PROVIDER=codex-local`, install the Codex CLI, run `codex login
 with the ChatGPT subscription and keep both the API host and browser origin on
 loopback. This adapter supports furniture and foundation workshops locally and
 is rejected in production. Hosted project generation still requires the API
-provider.
+provider. This is an explicit local choice: a missing `OPENAI_API_KEY` never
+automatically enables the Codex adapter.
 For a subscription-only session, set the provider explicitly and launch the API
 without inherited `OPENAI_API_KEY` or `CODEX_API_KEY`. The package start/dev commands
 load the root `.env`; use a dedicated sanitized launcher or invoke
@@ -197,10 +211,10 @@ Codex auth location, but removes API-key credentials. The wrapper ignores user
 configuration, project rules, MCP servers and hooks for these jobs. Codex uses
 a read-only sandbox, no approvals, no shell tools, and hosted web research.
 Only explicitly selected product photos, foundation plans and generated renders
-are attached to the hosted Codex service for comparison. Foundation attempts use
-a bounded thirty-minute timeout; asset calls retain the timeout below. No credentials are copied into the
-library or sent to the browser. A failed
-generation exposes a bounded, readable error instead of a raw Codex transcript.
+are attached to the hosted Codex service for comparison. Local asset calls retain
+the Codex timeout below. No credentials are copied into the library or sent to the
+browser. A failed generation exposes a bounded, readable error instead of a raw
+Codex transcript.
 
 ## Configuration
 
@@ -208,11 +222,17 @@ Set variables in the launching shell or the root `.env`, which API commands load
 Vite's `T3_API_PROXY_URL` override must be set in its launching shell. See
 `.env.example` and the private-projects guide for account and generation limits.
 
+Foundation attempts have a thirty-minute overall timeout by default for either
+provider. Local loopback development can set `T3_FOUNDATION_TIMEOUT_MS=7200000`
+for up to two hours overall, allowing multiple rendering/review rounds. This
+does not extend each hosted API call's thirty-minute timeout.
+
 | Variable | Default / purpose |
 | --- | --- |
-| `T3_INFERENCE_PROVIDER` | `openai` with an API key; `codex-local` for the local CLI signed in with ChatGPT |
+| `T3_INFERENCE_PROVIDER` | `openai`; requires an API key. Select `codex-local` explicitly for the local CLI signed in with ChatGPT |
 | `OPENAI_API_KEY` | Server-only API credential; never included in model inputs or Blender environment |
-| `T3_OPENAI_MODEL` | `gpt-6.1-sol` for hosted structured generation and review |
+| `T3_OPENAI_MODEL` | `gpt-6-astra` for all hosted structured generation and review; reasoning effort stays `max` |
+| `T3_FOUNDATION_TIMEOUT_MS` | `1800000` overall; local loopback development may override up to `7200000` (two hours); rejected outside local development |
 | `T3_LIBRARY_MAX_MIB` | `1536`; combined artifact budget with 256 MiB reserved before rendering |
 | `T3_API_PORT` | `8787` |
 | `T3_API_PROXY_URL` | `http://127.0.0.1:8787`; set for the Vite process if using another local API port |

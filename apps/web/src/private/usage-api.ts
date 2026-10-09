@@ -50,7 +50,7 @@ export function usagePeriod(period: string, now = new Date()): Pick<UsageFilters
   if (period === 'all') return { from: '', to: '' }
   const from = new Date(now)
   if (period === 'month') from.setDate(1)
-  else from.setDate(from.getDate() - 29)
+  else if (period === 'last30') from.setDate(from.getDate() - 29)
   return { from: localUsageDate(from), to: localUsageDate(now) }
 }
 

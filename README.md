@@ -252,6 +252,20 @@ Mercado Pago integration**. Payments are disabled until test credentials are
 configured; publishing the app does not enable real charges.
 [Credits, invitation privileges and payment states →](docs/credits-billing.md)
 
+### Follow generation and consumption
+
+Open **Settings → Usage** to inspect credits and recorded model tokens by task.
+The optional backend can also export generation traces through an OpenTelemetry
+gateway to **Arize Phoenix**. Follow an attempt through research, model calls,
+review and corrections, including its model, duration, token measurements and
+credit outcome. Hosted OpenAI API calls and local Codex sessions keep their
+provider and authentication mode visible.
+
+Tracing is opt-in and records metadata; prompts, images, addresses and tool
+payloads stay out of the exported traces. The existing credit ledger remains
+the source of truth for account balances.
+[Development tracing, setup and limitations →](docs/observability.md)
+
 ## How it works
 
 **Editable scene data, interactive exploration and reproducible assets.**

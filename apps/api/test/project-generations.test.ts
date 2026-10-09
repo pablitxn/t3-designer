@@ -10,7 +10,8 @@ import { AccountError, createAccounts, type User } from '../src/accounts.ts'
 import { openAppDatabase, type AppTables } from '../src/app-database.ts'
 import { CreditError } from '../src/credits.ts'
 import { acquireGenerationSlot } from '../src/generation-coordinator.ts'
-import { buildGeneratedProjectScene, type ProjectGenerationInput } from '../src/project-generation-model.ts'
+import { openaiVisualTurn } from '../src/openai.ts'
+import { buildGeneratedProjectScene, generateProjectScene, type ProjectGenerationInput } from '../src/project-generation-model.ts'
 import { ProjectGenerations } from '../src/project-generations.ts'
 import { createProjects } from '../src/projects.ts'
 import { createApi } from '../src/server.ts'
@@ -125,6 +126,50 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       assert.deepEqual(await f.projects.list(f.alice), [])
       await f.generations.reconcile()
       assert.equal((await f.credits.summary(f.alice.id)).balance, 100)
+    })
+
+    await t.test('conceptual generation allows thirty minutes of hosted reasoning and refunds an expired deadline', async t => {
+      const blocked = gate(), deadline = new AbortController(), timeouts: number[] = []
+      const f = await fixture(t, dialect, async (id, value, options) => { await blocked.wait(options.signal); return scene(id, value) })
+      t.mock.method(AbortSignal, 'timeout', (milliseconds: number) => { timeouts.push(milliseconds); return deadline.signal })
+      const job = await f.generations.create(f.alice, input, randomUUID())
+      await blocked.ready
+      assert.deepEqual(timeouts, [30 * 60_000], 'the conceptual generator must not retain its former three-minute limit')
+      assert.equal(f.generations.get(f.alice.id, job.id).status, 'running')
+      deadline.abort(new DOMException('Model call timed out', 'TimeoutError'))
+      await until(async () => (await f.credits.reservation(`architecture:${job.id}`))?.state === 'refunded')
+      assert.equal(f.generations.get(f.alice.id, job.id).status, 'failed')
+      assert.equal((await f.credits.summary(f.alice.id)).balance, 100)
+      assert.deepEqual(await f.projects.list(f.alice), [])
+    })
+
+    await t.test('hosted provider failures retain safe actionable guidance and refund the failed attempt', async t => {
+      const before = process.env.OPENAI_API_KEY
+      process.env.OPENAI_API_KEY = 'test-only'
+      t.after(() => { if (before === undefined) delete process.env.OPENAI_API_KEY; else process.env.OPENAI_API_KEY = before })
+      let code = 'insufficient_quota', status = 429, requests = 0
+      const f = await fixture(t, dialect, (id, value, options) => generateProjectScene(id, value, options,
+        (input, schema, options, search) => openaiVisualTurn(input, schema, options, search, (async () => {
+          requests++
+          return new Response(JSON.stringify({ error: { code, message: 'private-provider-output insufficient_quota' } }), { status })
+        }) as typeof fetch)))
+      for (const [providerCode, httpStatus, message] of [
+        ['insufficient_quota', 429, /API de OpenAI.*saldo.*facturación/],
+        ['rate_limit_exceeded', 429, /límite temporal de solicitudes/],
+        ['permission_denied', 403, /clave y los permisos/],
+        ['unknown_error', 500, /No se pudo generar un proyecto válido/],
+      ] as const) {
+        code = providerCode; status = httpStatus
+        const job = await f.generations.create(f.alice, input, randomUUID())
+        await until(async () => (await f.credits.reservation(`architecture:${job.id}`))?.state === 'refunded')
+        const result = f.generations.get(f.alice.id, job.id)
+        assert.equal(result.status, 'failed'); assert.match(result.error!, message)
+        assert.doesNotMatch(result.error!, /private-provider-output|insufficient_quota/)
+        if (providerCode !== 'unknown_error') assert.doesNotMatch(result.error!, /descripción más clara/)
+        assert.equal((await f.credits.summary(f.alice.id)).balance, 100)
+        assert.deepEqual(await f.projects.list(f.alice), [])
+      }
+      assert.equal(requests, 4)
     })
 
     await t.test('restart captures durable publication and refunds queued/orphan reservations idempotently', async t => {

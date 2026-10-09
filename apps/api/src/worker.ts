@@ -1,4 +1,5 @@
 import { withUsage, type UsageStore } from './usage.ts'
+import { traceEvent, traceStep } from './telemetry.ts'
 import { acquireGenerationSlot } from './generation-coordinator.ts'
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
@@ -149,10 +150,13 @@ export class AssetWorker {
           if (!allowed) throw new Error('La cuenta responsable ya no tiene permiso para generar este objeto.')
         }
         controller.signal.throwIfAborted()
+        const operationId = this.store.creditOperation(job.id)?.operationId ?? ''
+        const step = <T>(name: string, work: () => Promise<T>, attributes?: Record<string, string | number | boolean>, kind?: 'CHAIN' | 'TOOL' | 'RETRIEVER') =>
+          withUsage(this.usage, operationId, () => traceStep(name, work, attributes, kind))
         this.store.updateJob(job.id, { status: 'analyzing', stage: 'Consultando el producto con Codex', questions: [], error: null })
         this.store.appendEvent(job.id, { kind: 'analysis', message: 'Revisando el producto con Codex', detail: 'Buscando referencias y medidas para preparar el modelo.' })
         const workingDirectory = join(this.directory, 'jobs', job.id, randomUUID())
-        await mkdir(workingDirectory, { recursive: true })
+        await step('asset.prepare', () => mkdir(workingDirectory, { recursive: true }))
         const callbacks = {
           onInference: () => this.onInference?.(job.id),
           signal: controller.signal,
@@ -160,13 +164,16 @@ export class AssetWorker {
             if (!controller.signal.aborted) this.store.updateJob(job.id, { stage: activityText(stage, 240) })
           },
           onEvent: (event: JobEventInput) => {
-            if (!controller.signal.aborted) this.store.appendEvent(job.id, event)
+            if (!controller.signal.aborted) {
+              traceEvent('agent.activity', { 't3.event.kind': event.kind })
+              this.store.appendEvent(job.id, event)
+            }
           },
         }
         let references: Awaited<ReturnType<ReferenceLoader>>
         try {
           references = this.referenceLoader
-            ? await this.referenceLoader(job.input, workingDirectory, callbacks)
+            ? await step('asset.references', () => this.referenceLoader!(job.input, workingDirectory, callbacks), undefined, 'RETRIEVER')
             : { images: [], references: [], warnings: [] }
           const owner = this.store.owner('job', job.id)
           if (owner) for (const reference of references.references) this.store.assignOwner('reference', reference.id, owner)
@@ -192,13 +199,14 @@ export class AssetWorker {
         if (job.parentAssetId && !parent) throw new Error('El objeto original de esta revisión ya no está disponible.')
         const previousDirectory = candidate?.directory ?? parent?.directory
         const previousReview = candidate?.review ?? parent?.asset.visualReview
-        const previous = previousDirectory ? {
-          recipe: AssetRequestSchema.parse(candidate?.request ?? JSON.parse(await readFile(join(previousDirectory, 'request.json'), 'utf8'))),
-          feedback: [job.feedback, input.notes, previousReview?.summary, ...(previousReview?.issues ?? [])].filter(Boolean).join('\n\n'),
-          renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(previousDirectory, file)).filter(existsSync),
-        } : undefined
-        const operationId = this.store.creditOperation(job.id)?.operationId ?? ''
-        const plan = await withUsage(this.usage, operationId, () => this.planner(input, { ...callbacks, workingDirectory, referenceImages: references.images, previous }))
+        const plan = await step('asset.plan', async () => {
+          const previous = previousDirectory ? {
+            recipe: AssetRequestSchema.parse(candidate?.request ?? JSON.parse(await readFile(join(previousDirectory, 'request.json'), 'utf8'))),
+            feedback: [job.feedback, input.notes, previousReview?.summary, ...(previousReview?.issues ?? [])].filter(Boolean).join('\n\n'),
+            renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(previousDirectory, file)).filter(existsSync),
+          } : undefined
+          return this.planner(input, { ...callbacks, workingDirectory, referenceImages: references.images, previous })
+        }, { 't3.reference.count': references.images.length })
         if (controller.signal.aborted) throw new Error('Operation cancelled')
         if (plan.status === 'needs_input') {
           this.store.updateJob(job.id, {
@@ -223,44 +231,54 @@ export class AssetWorker {
         for (const url of [...new Set([request.source.url, ...(request.source.references ?? [])])].filter((url): url is string => Boolean(url)).slice(0, 20)) {
           this.store.appendEvent(job.id, { kind: 'source', message: 'Referencia del producto', url })
         }
-        await writeFile(join(workingDirectory, 'analysis.json'), JSON.stringify({ summary: plan.summary, warnings: plan.warnings }, null, 2) + '\n')
+        await step('asset.prepare', () => writeFile(join(workingDirectory, 'analysis.json'), JSON.stringify({ summary: plan.summary, warnings: plan.warnings }, null, 2) + '\n'))
         const warnings = [...references.warnings, ...plan.warnings]
         let visualReview: VisualReview | undefined
         let iterations = 0
         for (let iteration = 1; iteration <= 3; iteration++) {
           iterations = iteration
           const roundDirectory = join(workingDirectory, `round-${iteration}`)
-          await mkdir(roundDirectory)
           const inputPath = join(roundDirectory, 'request.json')
-          await writeFile(inputPath, JSON.stringify(request, null, 2) + '\n')
+          await step('asset.prepare', async () => {
+            await mkdir(roundDirectory)
+            await writeFile(inputPath, JSON.stringify(request, null, 2) + '\n')
+          }, { 't3.iteration': iteration })
           controller.signal.throwIfAborted()
           outputDirectory = join(roundDirectory, 'candidate')
           outputValidated = false
-          await this.beforeRender?.()
-          this.store.updateJob(job.id, { status: 'generating', stage: `Modelando en Blender · versión ${iteration}`, warnings })
-          this.store.appendEvent(job.id, { kind: 'modeling', message: `Iniciando Blender · versión ${iteration}`, detail: 'Construyendo la geometría y los materiales en tu máquina.' })
-          await this.renderer({ inputPath, outputDirectory, signal: controller.signal, onEvent: (event) => {
-            if (!controller.signal.aborted) {
-              this.store.appendEvent(job.id, event)
-              this.store.updateJob(job.id, { stage: activityText(event.message, 240) })
-            }
-          } })
+          await step('asset.render', async () => {
+            await this.beforeRender?.()
+            this.store.updateJob(job.id, { status: 'generating', stage: `Modelando en Blender · versión ${iteration}`, warnings })
+            this.store.appendEvent(job.id, { kind: 'modeling', message: `Iniciando Blender · versión ${iteration}`, detail: 'Construyendo la geometría y los materiales en tu máquina.' })
+            await this.renderer({ inputPath, outputDirectory: outputDirectory!, signal: controller.signal, onEvent: (event) => {
+              if (!controller.signal.aborted) {
+                traceEvent('agent.activity', { 't3.event.kind': event.kind })
+                this.store.appendEvent(job.id, event)
+                this.store.updateJob(job.id, { stage: activityText(event.message, 240) })
+              }
+            } })
+          }, { 't3.iteration': iteration }, 'TOOL')
           controller.signal.throwIfAborted()
           this.store.updateJob(job.id, { stage: 'Verificando medidas y archivos' })
           this.store.appendEvent(job.id, { kind: 'validation', message: 'Verificando medidas y archivos', detail: 'Comprobando dimensiones, integridad y archivos antes de revisar el objeto.' })
-          await validateArtifacts(outputDirectory, request, Boolean(this.reviewer))
+          await step('asset.validate', () => validateArtifacts(outputDirectory!, request, Boolean(this.reviewer)), {
+            't3.iteration': iteration, 't3.artifact.published': false,
+          }, 'TOOL')
           controller.signal.throwIfAborted()
           outputValidated = true
           this.store.setCandidate(job.id, { directory: outputDirectory, request, iteration })
           if (!this.reviewer) break
           this.store.updateJob(job.id, { stage: `Comparando fotos y renders · versión ${iteration}` })
           this.store.appendEvent(job.id, { kind: 'review', message: `Revisión visual · versión ${iteration}`, detail: 'Comparando la vista general, frontal y lateral del modelo con las fotos del producto.' })
-          visualReview = VisualReviewSchema.parse(await withUsage(this.usage, operationId, () => this.reviewer!(request, {
-            ...callbacks, workingDirectory: roundDirectory, referenceImages: references.images,
-            renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(outputDirectory!, file)), iteration,
-          })))
-          controller.signal.throwIfAborted()
-          await writeFile(join(outputDirectory, 'review.json'), JSON.stringify(visualReview, null, 2) + '\n')
+          visualReview = await step('asset.review', async () => {
+            const review = VisualReviewSchema.parse(await this.reviewer!(request, {
+              ...callbacks, workingDirectory: roundDirectory, referenceImages: references.images,
+              renderPaths: ['preview.png', 'front.png', 'side.png'].map((file) => join(outputDirectory!, file)), iteration,
+            }))
+            controller.signal.throwIfAborted()
+            await writeFile(join(outputDirectory!, 'review.json'), JSON.stringify(review, null, 2) + '\n')
+            return review
+          }, { 't3.iteration': iteration, 't3.reference.count': references.images.length })
           controller.signal.throwIfAborted()
           this.store.setCandidate(job.id, { directory: outputDirectory, request, iteration, review: visualReview })
           this.store.appendEvent(job.id, { kind: 'review', message: visualReview.verdict === 'accept' ? 'Comparación visual completada' : 'Diferencias visuales detectadas', detail: [visualReview.summary, ...visualReview.issues].join('\n\n') })
@@ -286,37 +304,41 @@ export class AssetWorker {
         if (visualReview?.verdict === 'needs_input') continue
         if (!outputDirectory || !outputValidated) throw new Error('No se obtuvo un modelo validado para publicar.')
         controller.signal.throwIfAborted()
-        if (this.beforePublish) {
-          let additionalBytes = 0
-          for (const filename of artifactFiles) {
-            const source = join(outputDirectory, filename)
-            if (existsSync(source)) additionalBytes += (await stat(source)).size
+        await step('asset.publish', async () => {
+          if (this.beforePublish) {
+            let additionalBytes = 0
+            for (const filename of artifactFiles) {
+              const source = join(outputDirectory!, filename)
+              if (existsSync(source)) additionalBytes += (await stat(source)).size
+            }
+            await this.beforePublish(additionalBytes)
+            controller.signal.throwIfAborted()
           }
-          await this.beforePublish(additionalBytes)
+          const assetId = randomUUID()
+          publishedDirectory = join(this.directory, 'assets', assetId)
+          await mkdir(publishedDirectory, { recursive: true })
+          for (const filename of artifactFiles) {
+            const source = join(outputDirectory!, filename)
+            if (existsSync(source)) await copyFile(source, join(publishedDirectory, filename))
+          }
           controller.signal.throwIfAborted()
-        }
-        const assetId = randomUUID()
-        publishedDirectory = join(this.directory, 'assets', assetId)
-        await mkdir(publishedDirectory, { recursive: true })
-        for (const filename of artifactFiles) {
-          const source = join(outputDirectory, filename)
-          if (existsSync(source)) await copyFile(source, join(publishedDirectory, filename))
-        }
-        controller.signal.throwIfAborted()
-        await validateArtifacts(publishedDirectory, request, Boolean(this.reviewer))
-        const file = (filename: string) => `/api/assets/${assetId}/files/${filename}`
-        const asset: Asset = {
-          id: assetId, jobId: job.id, label: request.label, kind: request.kind,
-          dimensions: request.dimensions, createdAt: new Date().toISOString(), source: request.source,
-          fidelityStatus: 'draft', warnings, revision: (parent?.asset.revision ?? (parent ? 1 : 0)) + 1,
-          ...(job.parentAssetId ? { parentAssetId: job.parentAssetId } : {}),
-          ...(references.references.length ? { referenceImages: references.references } : {}),
-          ...(visualReview ? { visualReview: { verdict: visualReview.verdict, summary: visualReview.summary, issues: visualReview.issues, iterations } } : {}),
-          files: { model: file('model.glb'), preview: file('preview.png'), blend: file('source.blend'), manifest: file('manifest.json'), request: file('request.json') },
-        }
-        controller.signal.throwIfAborted()
-        this.store.completeJob(job.id, asset, publishedDirectory)
-        publishedDirectory = null
+          await traceStep('asset.validate', () => validateArtifacts(publishedDirectory!, request, Boolean(this.reviewer)), {
+            't3.iteration': iterations, 't3.artifact.published': true,
+          }, 'TOOL')
+          const file = (filename: string) => `/api/assets/${assetId}/files/${filename}`
+          const asset: Asset = {
+            id: assetId, jobId: job.id, label: request.label, kind: request.kind,
+            dimensions: request.dimensions, createdAt: new Date().toISOString(), source: request.source,
+            fidelityStatus: 'draft', warnings, revision: (parent?.asset.revision ?? (parent ? 1 : 0)) + 1,
+            ...(job.parentAssetId ? { parentAssetId: job.parentAssetId } : {}),
+            ...(references.references.length ? { referenceImages: references.references } : {}),
+            ...(visualReview ? { visualReview: { verdict: visualReview.verdict, summary: visualReview.summary, issues: visualReview.issues, iterations } } : {}),
+            files: { model: file('model.glb'), preview: file('preview.png'), blend: file('source.blend'), manifest: file('manifest.json'), request: file('request.json') },
+          }
+          controller.signal.throwIfAborted()
+          this.store.completeJob(job.id, asset, publishedDirectory)
+          publishedDirectory = null
+        }, { 't3.iteration': iterations })
       } catch (error) {
         if (outputDirectory && !outputValidated) await rm(outputDirectory, { recursive: true, force: true }).catch(() => undefined)
         if (publishedDirectory) await rm(publishedDirectory, { recursive: true, force: true }).catch(() => undefined)

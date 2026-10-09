@@ -1,7 +1,7 @@
 const es = {
   title: 'Consumo', intro: 'Generaciones que invocaste desde T3. Incluye vivienda, edificio y muebles; no representa el consumo total de tu cuenta de Codex.',
   subscription: 'Uso mediante suscripción de Codex', api: 'OpenAI API', refresh: 'Actualizar', loading: 'Cargando consumo…', unavailable: 'No pudimos cargar el consumo. Volvé a intentar.',
-  period: 'Período', month: 'Este mes', last30: 'Últimos 30 días', allTime: 'Todo el historial', custom: 'Fechas personalizadas', from: 'Desde', to: 'Hasta', project: 'Proyecto', kind: 'Tipo de generación', provider: 'Proveedor', status: 'Estado', all: 'Todos',
+  filters: 'Filtros', period: 'Período', today: 'Hoy', month: 'Este mes', last30: 'Últimos 30 días', allTime: 'Todo el historial', custom: 'Fechas personalizadas', from: 'Desde', to: 'Hasta', project: 'Proyecto', kind: 'Tipo de generación', provider: 'Proveedor', status: 'Estado', all: 'Todos',
   credits: 'Créditos T3', consumed: 'Consumidos', reserved: 'Reservados', refunded: 'Devueltos efectivamente', input: 'Tokens de entrada', output: 'Tokens de salida', cached: 'Entrada en caché', cacheWrite: 'Escritura de caché', reasoning: 'Razonamiento',
   calls: 'Llamadas', attempts: 'Intentos', duration: 'Duración de llamadas', measurement: 'Medición', complete: 'Completa', partial: 'Parcial', unknown: 'Sin medición', measuredCalls: 'con medición completa', partialCalls: 'con medición parcial', unknownCalls: 'sin datos de tokens',
   observed: 'Tokens observados', unknownValue: 'No reportado', totalsNote: 'Totales del período y filtros completos, incluidos los resultados de otras páginas.', breakdownNote: 'Caché y razonamiento son desgloses reportados por el proveedor. No se vuelven a sumar a entrada y salida.',
@@ -18,7 +18,7 @@ export type UsageCopy = typeof es
 const en: UsageCopy = {
   title: 'Usage', intro: 'Generations you requested through T3: homes, buildings and furniture. This is not your total Codex account usage.',
   subscription: 'Uso mediante suscripción de Codex', api: 'OpenAI API', refresh: 'Refresh', loading: 'Loading usage…', unavailable: 'Usage could not be loaded. Please try again.',
-  period: 'Period', month: 'This month', last30: 'Last 30 days', allTime: 'All history', custom: 'Custom dates', from: 'From', to: 'Through', project: 'Project', kind: 'Generation type', provider: 'Provider', status: 'Status', all: 'All',
+  filters: 'Filters', period: 'Period', today: 'Today', month: 'This month', last30: 'Last 30 days', allTime: 'All history', custom: 'Custom dates', from: 'From', to: 'Through', project: 'Project', kind: 'Generation type', provider: 'Provider', status: 'Status', all: 'All',
   credits: 'T3 credits', consumed: 'Consumed', reserved: 'Reserved', refunded: 'Actually refunded', input: 'Input tokens', output: 'Output tokens', cached: 'Cached input', cacheWrite: 'Cache writes', reasoning: 'Reasoning',
   calls: 'Calls', attempts: 'Attempts', duration: 'Model call duration', measurement: 'Measurement', complete: 'Complete', partial: 'Partial', unknown: 'Unmeasured', measuredCalls: 'fully measured', partialCalls: 'partially measured', unknownCalls: 'without token data',
   observed: 'Observed tokens', unknownValue: 'Not reported', totalsNote: 'Totals cover the full filtered period, including results on other pages.', breakdownNote: 'Cache and reasoning are provider-reported breakdowns. They are not added to input and output again.',
@@ -34,7 +34,7 @@ const en: UsageCopy = {
 const fr: UsageCopy = {
   title: 'Consommation', intro: 'Générations demandées depuis T3 : logements, bâtiments et meubles. Ces chiffres ne représentent pas la consommation totale de votre compte Codex.',
   subscription: 'Uso mediante suscripción de Codex', api: 'OpenAI API', refresh: 'Actualiser', loading: 'Chargement de la consommation…', unavailable: 'Impossible de charger la consommation. Réessayez.',
-  period: 'Période', month: 'Ce mois-ci', last30: '30 derniers jours', allTime: 'Tout l’historique', custom: 'Dates personnalisées', from: 'Du', to: 'Au', project: 'Projet', kind: 'Type de génération', provider: 'Fournisseur', status: 'État', all: 'Tous',
+  filters: 'Filtres', period: 'Période', today: 'Aujourd’hui', month: 'Ce mois-ci', last30: '30 derniers jours', allTime: 'Tout l’historique', custom: 'Dates personnalisées', from: 'Du', to: 'Au', project: 'Projet', kind: 'Type de génération', provider: 'Fournisseur', status: 'État', all: 'Tous',
   credits: 'Crédits T3', consumed: 'Consommés', reserved: 'Réservés', refunded: 'Effectivement remboursés', input: 'Tokens d’entrée', output: 'Tokens de sortie', cached: 'Entrée en cache', cacheWrite: 'Écriture du cache', reasoning: 'Raisonnement',
   calls: 'Appels', attempts: 'Tentatives', duration: 'Durée des appels', measurement: 'Mesure', complete: 'Complète', partial: 'Partielle', unknown: 'Non mesurée', measuredCalls: 'entièrement mesurés', partialCalls: 'partiellement mesurés', unknownCalls: 'sans données de tokens',
   observed: 'Tokens observés', unknownValue: 'Non communiqué', totalsNote: 'Totaux de toute la période filtrée, y compris les résultats des autres pages.', breakdownNote: 'Cache et raisonnement sont des détails communiqués par le fournisseur. Ils ne sont pas ajoutés de nouveau aux entrées et sorties.',

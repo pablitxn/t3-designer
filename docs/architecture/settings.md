@@ -18,6 +18,11 @@ and the modal reports that they could not be saved.
 optional descriptions/icons, and React content; use its `sections` prop to add
 future groups. Visited sections remain mounted until the dialog closes.
 `SettingsRow` connects each native control to its label and description.
+Authenticated private workspaces also supply a **Usage** section, reusing the
+usage report with a compact layout inside the dialog. The report loads only when
+that section is visited, so checking credits and model tokens preserves the
+open project and unsaved edits. Public/demo and signed-out settings do not show
+account usage. See [generation consumption](../credits-billing.md#consumo-privado-de-generaciones).
 Escape, the close button, and backdrop clicks dismiss the dialog; keyboard focus
 stays inside while open and returns to the entry button on close.
 

@@ -38,7 +38,7 @@ test('foundation visual turns dispatch to the local subscription with high reaso
   } finally { process.env = original; await rm(directory, { recursive: true, force: true }) }
 })
 
-test('hosted foundation turns preserve their token budget and never fall back to a local session', async () => {
+test('hosted foundation turns use Astra maximum reasoning and never fall back to a local session', async () => {
   const original = process.env
   try {
     process.env = { ...original, NODE_ENV: 'development', T3_INFERENCE_PROVIDER: 'openai', OPENAI_API_KEY: 'test-only', T3_CODEX_BIN: '/no-codex-executable' }
@@ -46,10 +46,10 @@ test('hosted foundation turns preserve their token budget and never fall back to
     const fetcher = (async (_url, init) => {
       calls++
       const body = JSON.parse(String(init?.body))
-      assert.equal(body.max_output_tokens, 24000); assert.deepEqual(body.reasoning, { effort: 'high' })
+      assert.equal(body.model, 'gpt-6-astra'); assert.equal(body.max_output_tokens, 128000); assert.deepEqual(body.reasoning, { effort: 'max' })
       return new Response(JSON.stringify({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: '{"summary":"Hosted"}' }] }] }))
     }) as typeof fetch
-    assert.equal(await runVisualTurn([], outputSchema, { ...options(), reasoningEffort: 'high', maxOutputTokens: 24000 }, false, fetcher), '{"summary":"Hosted"}')
+    assert.equal(await runVisualTurn([], outputSchema, { ...options(), reasoningEffort: 'high' }, false, fetcher), '{"summary":"Hosted"}')
     assert.equal(calls, 1)
     await assert.rejects(runVisualTurn([], outputSchema, options(), false, (async () => new Response('private provider error', { status: 401 })) as typeof fetch), code('authentication'))
   } finally { process.env = original }

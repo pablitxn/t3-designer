@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { AssetRequestSchema } from '@t3-designer/asset-schema'
 import { codexConfig, codexEnvironment, multimodalInput, parsePlanResponse, parseReviewResponse, planAsset, planningError, productPrompt, reviewAsset, reviewPrompt, webActivity } from '../src/codex.ts'
+import { OpenAIProviderError } from '../src/openai.ts'
 
 const input = { url: 'https://example.com/product/table', notes: '' }
 const recipe = {
@@ -88,6 +89,18 @@ test('errors expose actionable categories without forwarding raw CLI output', ()
   assert.equal(planningError(new Error('a private local path')).code, 'codex_failed')
 })
 
+test('provider billing failures require replenishment while rate limits remain temporary', () => {
+  const billing = planningError(new OpenAIProviderError('billing'))
+  assert.equal(billing.code, 'usage_limit')
+  assert.match(billing.message, /API de OpenAI.*saldo.*facturación/)
+  assert.match(billing.message, /cargar saldo/)
+  assert.doesNotMatch(billing.message, /temporal|más tarde|devolver/)
+  const limited = planningError(new OpenAIProviderError('rate_limit'))
+  assert.equal(limited.code, 'usage_limit'); assert.match(limited.message, /temporal/)
+  const authentication = planningError(new OpenAIProviderError('authentication'))
+  assert.equal(authentication.code, 'authentication'); assert.match(authentication.message, /clave y los permisos/)
+})
+
 test('the prompt contains product data and the correct schema coordinate constraints', () => {
   const prompt = productPrompt({ ...input, notes: 'Roble claro' })
   assert.ok(prompt.includes(JSON.stringify({ ...input, notes: 'Roble claro' })))
@@ -148,6 +161,7 @@ test('visual verdicts enforce the correct recipe and question combinations', () 
 test('the SDK receives photo and prior-render attachments on planning, and all views on review', async () => {
   const directory = await mkdtemp(join(tmpdir(), 't3-codex-images-'))
   const previousBinary = process.env.T3_CODEX_BIN
+  const previousProvider = process.env.T3_INFERENCE_PROVIDER
   try {
     const command = join(directory, 'fake-codex')
     const capture = join(directory, 'captured.json')
@@ -156,6 +170,7 @@ test('the SDK receives photo and prior-render attachments on planning, and all v
       await chmod(command, 0o700)
     }
     process.env.T3_CODEX_BIN = command
+    process.env.T3_INFERENCE_PROVIDER = 'codex-local'
     const referenceImages = [{ path: join(directory, 'photo.jpg'), label: 'Producto real' }]
     const renderPaths = ['preview.png', 'front.png', 'side.png'].map((name) => join(directory, name))
     const options = { signal: new AbortController().signal, onProgress() {}, workingDirectory: directory, referenceImages }
@@ -184,6 +199,8 @@ test('the SDK receives photo and prior-render attachments on planning, and all v
   } finally {
     if (previousBinary === undefined) delete process.env.T3_CODEX_BIN
     else process.env.T3_CODEX_BIN = previousBinary
+    if (previousProvider === undefined) delete process.env.T3_INFERENCE_PROVIDER
+    else process.env.T3_INFERENCE_PROVIDER = previousProvider
     await rm(directory, { recursive: true, force: true })
   }
 })

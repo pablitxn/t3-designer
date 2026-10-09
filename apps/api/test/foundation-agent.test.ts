@@ -11,8 +11,10 @@ import pg from 'pg'
 import type { FoundationCandidate, FoundationGenerationResult, FoundationOfficialResearch } from '@t3-designer/scene-schema'
 import { AccountError, createAccounts, type User } from '../src/accounts.ts'
 import { openAppDatabase } from '../src/app-database.ts'
+import { planningError } from '../src/codex.ts'
 import { FoundationAgent, type FoundationGenerator } from '../src/foundation-agent.ts'
 import { acquireGenerationSlot } from '../src/generation-coordinator.ts'
+import { OpenAIProviderError } from '../src/openai.ts'
 import { buildGeneratedProjectScene } from '../src/project-generation-model.ts'
 import { createProjects } from '../src/projects.ts'
 import { createApi } from '../src/server.ts'
@@ -100,6 +102,34 @@ function parcelResearch(): FoundationOfficialResearch {
 
 for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : ['sqlite']) {
   test(`foundation agent persists chat, revisions and permissions (${dialect})`, async t => {
+    await t.test('billing guidance reaches failed runs and retained drafts while raw provider errors remain private', async t => {
+      for (const retained of [false, true]) {
+        let failure: Error = planningError(new OpenAIProviderError('billing'))
+        const f = await fixture(t, dialect, async (value, options) => {
+          options.onInference()
+          if (retained) await options.onIteration({ index: 1, candidate: candidate(value.project.id), review: { passed: false, summary: 'Falta revisión.', issues: [] } })
+          throw failure
+        })
+        const run = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+        await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'refunded')
+        const failed = await f.agent.get(f.alice, f.project.id, run.id)
+        assert.equal(failed.status, 'failed'); assert.match(failed.error!, /API de OpenAI.*saldo.*facturación/)
+        assert.doesNotMatch(failed.error!, /más tarde|devolv/)
+        if (retained) {
+          const version = await f.agent.getVersion(f.alice, f.project.id, run.id)
+          assert.equal(version.status, 'needs_input'); assert.match(version.summary, /cargar saldo/)
+          assert.match(version.questions[0], /cargar saldo/)
+          assert.match(failed.events.at(-1)!.message, /cargar saldo/)
+        } else assert.equal(failed.versionId, null)
+        assert.equal((await f.credits.summary(f.alice.id)).balance, 1000)
+        assert.equal((await f.projects.get(f.alice, f.project.id)).scene, null)
+        failure = new Error('private-provider-detail insufficient_quota')
+        const unknown = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+        await until(async () => (await f.credits.reservation(reserved(unknown.id)))?.state === 'refunded')
+        assert.doesNotMatch((await f.agent.get(f.alice, f.project.id, unknown.id)).error!, /private-provider-detail|insufficient_quota/)
+      }
+    })
+
     await t.test('partial parcel evidence is visible live, persists across restart and remains an unready chat parent without charging inference', async t => {
       const blocked = gate(), research = parcelResearch(); let calls = 0
       const f = await fixture(t, dialect, async (value, options) => {

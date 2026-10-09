@@ -11,10 +11,15 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",
     "test": "node --test test/*.test.ts",
-    "account": "node --env-file-if-exists=../../.env src/account-cli.ts"
+    "account": "node --env-file-if-exists=../../.env src/account-cli.ts",
+    "telemetry:smoke": "node --env-file-if-exists=../../.env src/telemetry-smoke.ts"
   },
   "dependencies": {
     "@openai/codex-sdk": "0.156.1",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/exporter-trace-otlp-http": "0.223.0",
+    "@opentelemetry/resources": "2.12.0",
+    "@opentelemetry/sdk-trace-base": "2.12.0",
     "@t3-designer/asset-schema": "workspace:*",
     "@t3-designer/scene-schema": "workspace:*",
     "better-auth": "1.7.7",

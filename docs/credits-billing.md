@@ -70,7 +70,11 @@ apto para construir.
 
 ## Consumo privado de generaciones
 
-La navegación privada ofrece **Consumo**, en `/app/usage`. Muestra únicamente las
+La cuenta autenticada ofrece **Ajustes → Consumo**, sin salir del proyecto
+ni perder el formulario abierto. También está disponible desde la navegación
+privada en `/app/usage`. El filtro **Hoy** usa el día local del navegador;
+**Actualizar** permite volver a consultar los resultados después de cada prueba.
+La vista muestra únicamente las
 operaciones de la cuenta autenticada: compartir un proyecto no comparte la
 facturación ni la actividad de otros usuarios. Su alcance son las llamadas al
 modelo invocadas por T3 para vivienda, edificio y muebles; no incluye los chats

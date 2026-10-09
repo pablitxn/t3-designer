@@ -142,7 +142,7 @@ test('building generation attaches immutable source geometry and citations; mode
   const acquired = await acquireFrenchFoundationGeodata(input, { ...options(), fetcher: fetcher() })
   let calls = 0
   const generate = createFoundationGenerator({ references: { file: async () => null }, acquireGeodata: async () => acquired, turn: async (input, _schema, settings, search) => {
-    calls++; assert.equal(search, false); assert.equal(JSON.stringify(_schema).includes('oneOf'), false, 'Responses structured output requires anyOf for operation alternatives'); assert.equal(settings.reasoningEffort, 'high'); assert.equal(settings.maxOutputTokens, 24000)
+    calls++; assert.equal(search, false); assert.equal(JSON.stringify(_schema).includes('oneOf'), false, 'Responses structured output requires anyOf for operation alternatives'); assert.equal(settings.reasoningEffort, 'high'); assert.equal(settings.maxOutputTokens, undefined, 'hosted generation retains the shared reasoning/output allowance')
     const prompt = input[0].type === 'text' ? input[0].text : ''
     assert.match(prompt, /SOURCE CONTEXT/); assert.match(prompt, /never claim it was applied/i)
     return calls === 1 ? ready() : accept

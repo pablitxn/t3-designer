@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useId, useState } from 'react'
 import { request } from './api'
 import { getUsageCopy, type UsageCopy } from './usage-copy'
 import { operationTokens, usageLinks, usagePeriod, usageQuery, type UsageCall, type UsageFilters, type UsageOperation, type UsageResponse } from './usage-api'
@@ -34,6 +34,7 @@ function CallDetails({ call, language, c }: { call: UsageCall; language: string;
 
 function OperationRow({ operation, language, c }: { operation: UsageOperation; language: string; c: UsageCopy }) {
   const [expanded, setExpanded] = useState(false)
+  const detailsId = useId()
   const links = usageLinks(operation)
   const number = (value: number | null) => tokenNumber(value, language, c)
   return <>
@@ -41,13 +42,13 @@ function OperationRow({ operation, language, c }: { operation: UsageOperation; l
       <td className={cell}><p className="tw:m-0 tw:font-medium">{c.kinds[operation.kind] ?? operation.kind}</p><p className={`${muted} tw:mb-2 tw:mt-1 tw:text-xs tw:leading-5`}>{operation.projectLabel ?? (operation.jobId ? c.asset : c.operation)}<br />{c.attempt} {operation.attempt ?? '—'}{operation.attempt !== null && operation.attempt > 1 ? ` · ${c.retry}` : ''}{operation.parentId ? ` · ${c.revision}` : ''}</p><time className={`${muted} tw:text-xs`} dateTime={operation.createdAt}>{new Date(operation.createdAt).toLocaleString(language)}</time><div className="tw:mt-2 tw:flex tw:flex-wrap tw:gap-3 tw:text-xs">{links.project && <a className={link} href={links.project}>{c.project} ↗</a>}{links.job && <a className={link} href={links.job}>{c.job} ↗</a>}{links.asset && <a className={link} href={links.asset}>{c.asset} ↗</a>}</div></td>
       <td className={cell}><span className="tw:text-xs">{c.statuses[operation.status] ?? operation.status}</span><p className={`${muted} tw:mb-0 tw:mt-2 tw:text-xs`}>{operation.calls.length} {c.calls.toLocaleLowerCase(language)}</p>{operation.calls.some(call => call.provider === 'codex-local') && <p className={`${muted} tw:mb-0 tw:mt-2 tw:text-xs tw:leading-5`}>{c.subscription}</p>}{operation.calls.some(call => call.provider === 'openai') && <p className={`${muted} tw:mb-0 tw:mt-2 tw:text-xs`}>{c.api}</p>}</td>
       <td className={`${cell} tw:text-xs tw:leading-6`}>{c.consumed}: {number(operation.credits.consumed)}<br />{c.reserved}: {number(operation.credits.reserved)}<br />{c.refunded}: {number(operation.credits.refunded)}</td>
-      <td className={`${cell} tw:text-xs tw:leading-6`}>{c.input}: {number(operationTokens(operation.calls, 'inputTokens'))}<br />{c.output}: {number(operationTokens(operation.calls, 'outputTokens'))}<button className={`${button} tw:mt-2 tw:min-h-8! tw:px-2! tw:py-1! tw:text-xs!`} aria-expanded={expanded} aria-controls={`usage-operation-${operation.id}`} onClick={() => setExpanded(value => !value)}>{c.details} {expanded ? '−' : '+'}</button></td>
+      <td className={`${cell} tw:text-xs tw:leading-6`}>{c.input}: {number(operationTokens(operation.calls, 'inputTokens'))}<br />{c.output}: {number(operationTokens(operation.calls, 'outputTokens'))}<button className={`${button} tw:mt-2 tw:min-h-8! tw:px-2! tw:py-1! tw:text-xs!`} aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded(value => !value)}>{c.details} {expanded ? '−' : '+'}</button></td>
     </tr>
-    {expanded && <tr className={border}><td colSpan={4} id={`usage-operation-${operation.id}`} className="tw:bg-[var(--settings-surface)] tw:p-4"><div className="tw:grid tw:gap-3">{operation.calls.length ? operation.calls.map(call => <CallDetails key={call.id} call={call} language={language} c={c} />) : <p className={`${muted} tw:m-0 tw:text-sm tw:leading-6`}>{c.noCalls}</p>}</div><p className={`${muted} tw:mb-0 tw:mt-4 tw:break-all tw:font-mono tw:text-[10px]`}>{c.operation}: {operation.id}{operation.parentId && <><br />{c.parent}: {operation.parentId}</>}</p></td></tr>}
+    {expanded && <tr className={border}><td colSpan={4} id={detailsId} className="tw:bg-[var(--settings-surface)] tw:p-4"><div className="tw:grid tw:gap-3">{operation.calls.length ? operation.calls.map(call => <CallDetails key={call.id} call={call} language={language} c={c} />) : <p className={`${muted} tw:m-0 tw:text-sm tw:leading-6`}>{c.noCalls}</p>}</div><p className={`${muted} tw:mb-0 tw:mt-4 tw:break-all tw:font-mono tw:text-[10px]`}>{c.operation}: {operation.id}{operation.parentId && <><br />{c.parent}: {operation.parentId}</>}</p></td></tr>}
   </>
 }
 
-export function UsagePage({ language }: { language: string }) {
+export function UsagePage({ language, embedded = false }: { language: string; embedded?: boolean }) {
   const c = getUsageCopy(language)
   const [period, setPeriod] = useState('month')
   const [filters, setFilters] = useState<UsageFilters>(() => ({ ...usagePeriod('month'), projectId: '', operationType: '', provider: '', status: '' }))
@@ -68,21 +69,29 @@ export function UsagePage({ language }: { language: string }) {
   }, [query, refresh, invalidDates, c.unavailable])
   function filter(key: keyof UsageFilters, value: string) { setFilters(previous => ({ ...previous, [key]: value })); setOffset(0) }
   const number = (value: number | null) => tokenNumber(value, language, c)
-  return <>
-    <div className="tw:mb-6 tw:flex tw:flex-wrap tw:items-start tw:justify-between tw:gap-4"><div><h1 className="tw:mt-0! tw:text-3xl! tw:font-medium!">{c.title}</h1><p className={`${muted} tw:max-w-3xl tw:text-sm tw:leading-6`}>{c.intro}</p></div><button className={button} disabled={loading || invalidDates} onClick={() => setRefresh(value => value + 1)}>{c.refresh}</button></div>
-    <section aria-label={c.period} className={`${panel} tw:mb-6 tw:grid tw:gap-4 tw:p-4 tw:sm:grid-cols-2 tw:xl:grid-cols-5`}>
-      <Field label={c.period}><select className={input} value={period} onChange={event => { const value = event.target.value; setPeriod(value); setOffset(0); if (value !== 'custom') setFilters(previous => ({ ...previous, ...usagePeriod(value) })) }}>{[['month', c.month], ['last30', c.last30], ['all', c.allTime], ['custom', c.custom]].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
+  const periodOptions = [['today', c.today], ['month', c.month], ['last30', c.last30], ['all', c.allTime], ['custom', c.custom]]
+  const filterSummary = [periodOptions.find(([value]) => value === period)?.[1],
+    response?.data.projects.find(project => project.id === filters.projectId)?.label,
+    Object.entries(c.kinds).find(([value]) => value === filters.operationType)?.[1],
+    filters.provider === 'openai' ? c.api : filters.provider === 'codex-local' ? 'Codex' : null,
+    Object.entries(c.statuses).find(([value]) => value === filters.status)?.[1],
+  ].filter(Boolean).join(' · ')
+  const filterFields = <section aria-label={c.period} className={`${panel} tw:grid tw:gap-4 tw:p-4 tw:sm:grid-cols-2 ${embedded ? '' : 'tw:xl:grid-cols-5'}`}>
+      <Field label={c.period}><select className={input} value={period} onChange={event => { const value = event.target.value; setPeriod(value); setOffset(0); if (value !== 'custom') setFilters(previous => ({ ...previous, ...usagePeriod(value) })) }}>{periodOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
       <Field label={c.project}><select className={input} value={filters.projectId} onChange={event => filter('projectId', event.target.value)}><option value="">{c.all}</option>{(response?.data.projects ?? []).map(project => <option key={project.id} value={project.id}>{project.label}</option>)}</select></Field>
       <Field label={c.kind}><select className={input} value={filters.operationType} onChange={event => filter('operationType', event.target.value)}><option value="">{c.all}</option>{Object.entries(c.kinds).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
       <Field label={c.provider}><select className={input} value={filters.provider} onChange={event => filter('provider', event.target.value)}><option value="">{c.all}</option><option value="codex-local">Codex</option><option value="openai">{c.api}</option></select></Field>
       <Field label={c.status}><select className={input} value={filters.status} onChange={event => filter('status', event.target.value)}><option value="">{c.all}</option>{Object.entries(c.statuses).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
       {period === 'custom' && <><Field label={c.from}><input className={input} type="date" value={filters.from} max={filters.to || undefined} onChange={event => filter('from', event.target.value)} /></Field><Field label={c.to}><input className={input} type="date" value={filters.to} min={filters.from || undefined} onChange={event => filter('to', event.target.value)} /></Field></>}
     </section>
+  return <>
+    <div className="tw:mb-6 tw:flex tw:flex-wrap tw:items-start tw:justify-between tw:gap-4">{!embedded && <div><h1 className="tw:mt-0! tw:text-3xl! tw:font-medium!">{c.title}</h1><p className={`${muted} tw:max-w-3xl tw:text-sm tw:leading-6`}>{c.intro}</p></div>}<button className={button} disabled={loading || invalidDates} onClick={() => setRefresh(value => value + 1)}>{c.refresh}</button></div>
+    {embedded ? <details className="tw:mb-6"><summary className="tw:cursor-pointer tw:py-2 tw:text-sm tw:leading-6">{c.filters} · {filterSummary}</summary><div className="tw:mt-2">{filterFields}</div></details> : <div className="tw:mb-6">{filterFields}</div>}
     <Feedback message={invalidDates ? c.invalidDates : error} error />
     {loading && !invalidDates && <p role="status" className={`${muted} tw:text-sm`}>{c.loading}</p>}
     {data && <div aria-busy={loading}>
       <p className={`${muted} tw:mb-4 tw:text-xs tw:leading-5`}>{c.totalsNote}</p>
-      <div className="tw:grid tw:gap-4 tw:md:grid-cols-2 tw:xl:grid-cols-4">
+      <div className={`tw:grid tw:gap-4 tw:sm:grid-cols-2 ${embedded ? '' : 'tw:xl:grid-cols-4'}`}>
         <section className={`${panel} tw:p-5`} aria-label={c.credits}><h2 className={`${muted} tw:m-0 tw:text-sm tw:font-normal`}>{c.credits}</h2><p className="tw:mb-1 tw:mt-3 tw:text-3xl tw:font-medium" data-testid="usage-credits-consumed">{number(data.totals.creditsConsumed)}</p><p className={`${muted} tw:mb-4 tw:mt-0 tw:text-xs`}>{c.consumed}</p><p className="tw:mb-0 tw:text-xs tw:leading-6">{c.reserved}: {number(data.totals.creditsReserved)}<br />{c.refunded}: {number(data.totals.creditsRefunded)}</p></section>
         <section className={`${panel} tw:p-5`} aria-label={c.observed}><h2 className={`${muted} tw:m-0 tw:text-sm tw:font-normal`}>{c.observed}</h2><p className="tw:mb-1 tw:mt-3 tw:text-2xl tw:font-medium" data-testid="usage-input-tokens">{number(data.totals.inputTokens)}</p><p className={`${muted} tw:mb-3 tw:mt-0 tw:text-xs`}>{c.input}</p><p className="tw:m-0 tw:text-sm">{c.output}: {number(data.totals.outputTokens)}</p><TokenBreakdown tokens={data.totals} language={language} c={c} /></section>
         <section className={`${panel} tw:p-5`} aria-label={c.calls}><h2 className={`${muted} tw:m-0 tw:text-sm tw:font-normal`}>{c.calls}</h2><p className="tw:my-3 tw:text-3xl tw:font-medium">{number(data.totals.calls)}</p><p className="tw:mb-0 tw:text-xs tw:leading-6">{c.attempts}: {number(data.totals.attempts)}<br />{c.duration}: {duration(data.totals.durationMs, c)}</p><p className={`${muted} tw:mb-0 tw:text-xs tw:leading-5`}>{c.durationNote}</p></section>

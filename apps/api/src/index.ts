@@ -1,4 +1,5 @@
 import { UsageStore } from './usage.ts'
+import { configureTelemetry } from './telemetry.ts'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Health } from '@t3-designer/asset-schema'
@@ -29,6 +30,7 @@ async function main() {
   const database = openAppDatabase({ url: config.databaseURL, sqlitePath: resolve(config.accountDirectory, 'accounts.sqlite') })
   const accounts = await createAccounts({ database, baseURL: config.publicURL, secret: config.secret, production: config.production, trustedProxyIPs: config.trustedProxyIPs, creditConfig: config.creditConfig })
   const releaseLock = acquireLibraryLock(directory)
+  const telemetry = configureTelemetry()
   const store = new AssetStore(resolve(directory, 'library.sqlite'))
   store.recoverInterrupted()
   const usage = new UsageStore(resolve(directory, 'usage.sqlite'))
@@ -132,6 +134,7 @@ async function main() {
       worker.close(), projectGenerations.close(), foundationAgent.close(),
     ])
     usage.close()
+    await telemetry?.shutdown()
     store.close()
     await database.close()
     releaseLock()

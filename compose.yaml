@@ -36,7 +36,7 @@ services:
       T3_GENERATION_ENABLED: ${T3_GENERATION_ENABLED:-false}
       T3_INFERENCE_PROVIDER: openai
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      T3_OPENAI_MODEL: ${T3_OPENAI_MODEL:-gpt-5.4}
+      T3_OPENAI_MODEL: ${T3_OPENAI_MODEL:-gpt-6-astra}
       T3_BILLING_MODE: disabled
       T3_LIBRARY_MAX_MIB: ${T3_LIBRARY_MAX_MIB:-1536}
     volumes:

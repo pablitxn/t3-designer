@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process'
 import { beginUsageCall, invalidateUsageCall, type UsageStage } from './usage.ts'
-import { inferenceProvider, openaiVisualTurn } from './openai.ts'
+import { inferenceProvider, openaiVisualTurn, OpenAIProviderError, OPENAI_TIMEOUT_MS } from './openai.ts'
 import { fileURLToPath } from 'node:url'
 import { isDeepStrictEqual, promisify } from 'node:util'
 import { basename } from 'node:path'
@@ -278,11 +278,16 @@ export function parseReviewResponse(response: string, request: AssetRequest): Vi
 
 export function planningError(error: unknown): CodexPlanningError {
   if (error instanceof CodexPlanningError) return error
+  if (error instanceof OpenAIProviderError) {
+    if (error.code === 'billing') return new CodexPlanningError('usage_limit', 'La API de OpenAI no tiene saldo disponible o alcanzó su cuota de facturación. El administrador debe cargar saldo o revisar la facturación del proyecto para continuar.')
+    if (error.code === 'rate_limit') return new CodexPlanningError('usage_limit', 'La API de OpenAI alcanzó su límite temporal de solicitudes. Reintentá más tarde.')
+    return new CodexPlanningError('authentication', 'El servicio de generación necesita revisar la clave y los permisos de la API de OpenAI.')
+  }
   const detail = error instanceof Error ? error.message : ''
   if (inferenceProvider() === 'openai') {
-    if (/quota|rate.limit|429/i.test(detail)) return new CodexPlanningError('usage_limit', 'El servicio de generación alcanzó su límite temporal. Tus créditos se devolverán; reintentá más tarde.')
-    if (/auth|401|403/i.test(detail)) return new CodexPlanningError('authentication', 'El servicio de generación necesita revisar su configuración. Tus créditos se devolverán.')
-    return new CodexPlanningError('codex_failed', 'No se pudo completar la generación. Tus créditos se devolverán; podés reintentar.')
+    if (/quota|rate.limit|429/i.test(detail)) return new CodexPlanningError('usage_limit', 'La API de OpenAI alcanzó un límite de uso. Revisá el saldo, la facturación y los límites de solicitudes antes de reintentar.')
+    if (/auth|401|403/i.test(detail)) return new CodexPlanningError('authentication', 'El servicio de generación necesita revisar su configuración.')
+    return new CodexPlanningError('codex_failed', 'No se pudo completar la generación. Podés reintentar.')
   }
   if (/quota|usage limit|rate.limit|429|credits/i.test(detail)) return new CodexPlanningError('usage_limit', 'La sesión de Codex alcanzó un límite de uso. Reintentá cuando se restablezca tu suscripción.')
   if (/auth|login|401|403|token.*expired/i.test(detail)) return new CodexPlanningError('authentication', 'La sesión local de Codex necesita iniciar sesión de nuevo. Ejecutá codex login en esta máquina.')
@@ -290,6 +295,7 @@ export function planningError(error: unknown): CodexPlanningError {
 }
 
 export type VisualTurnOptions = PlanOptions & {
+  /** Local CLI preference only. Hosted generation always uses maximum effort. */
   reasoningEffort?: 'low' | 'medium' | 'high'
   /** Hosted API token budget. Codex CLI has no equivalent supported SDK option;
    * local turns retain the same 200k-character response and wall-clock bounds. */
@@ -305,6 +311,7 @@ export async function runVisualTurn(input: UserInput[], outputSchema: unknown, o
   if (options.timeoutMs !== undefined && (!Number.isSafeInteger(options.timeoutMs) || options.timeoutMs < 1)) throw new CodexPlanningError('configuration', 'El límite de tiempo de generación no es válido.')
   const configuredTimeout = Number(process.env.T3_CODEX_TIMEOUT_MS)
   const timeoutMs = options.timeoutMs !== undefined ? Math.min(options.timeoutMs, 30 * 60_000)
+    : provider === 'openai' ? OPENAI_TIMEOUT_MS
     : Number.isFinite(configuredTimeout) && configuredTimeout >= 10_000 ? Math.min(configuredTimeout, 10 * 60_000) : 3 * 60_000
   const controller = new AbortController()
   const abort = () => controller.abort(options.signal.reason)
