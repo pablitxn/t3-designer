@@ -20,12 +20,22 @@ import { ProjectGenerations } from './project-generations.ts'
 import { FoundationAgent } from './foundation-agent.ts'
 import { createFoundationGenerator } from './foundation-agent-model.ts'
 import { inferenceProvider } from './openai.ts'
+import { initializeCodexSession, closeCodexSession } from './codex-session.ts'
 import { ensureLibraryCapacity } from './storage-capacity.ts'
 
 async function main() {
   process.umask(0o077)
   const root = fileURLToPath(new URL('../../../', import.meta.url))
   const config = await runtimeConfig(root)
+  const loginController = new AbortController()
+  const cancelLogin = () => loginController.abort()
+  process.once('SIGINT', cancelLogin)
+  process.once('SIGTERM', cancelLogin)
+  try { await initializeCodexSession(loginController.signal) }
+  finally {
+    process.removeListener('SIGINT', cancelLogin)
+    process.removeListener('SIGTERM', cancelLogin)
+  }
   const { directory, port } = config
   const database = openAppDatabase({ url: config.databaseURL, sqlitePath: resolve(config.accountDirectory, 'accounts.sqlite') })
   const accounts = await createAccounts({ database, baseURL: config.publicURL, secret: config.secret, production: config.production, trustedProxyIPs: config.trustedProxyIPs, creditConfig: config.creditConfig })
@@ -133,6 +143,7 @@ async function main() {
       new Promise<void>((done) => server.close(() => done())),
       worker.close(), projectGenerations.close(), foundationAgent.close(),
     ])
+    await closeCodexSession()
     usage.close()
     await telemetry?.shutdown()
     store.close()
@@ -155,7 +166,8 @@ async function main() {
   if (config.generation.enabled) worker.kick()
 }
 
-void main().catch((error: unknown) => {
+void main().catch(async (error: unknown) => {
+  await closeCodexSession()
   console.error(error instanceof Error ? error.message : 'No se pudo iniciar el backend')
   process.exitCode = 1
 })

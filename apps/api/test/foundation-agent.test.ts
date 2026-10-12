@@ -130,6 +130,33 @@ for (const dialect of process.env.TEST_DATABASE_URL ? ['sqlite', 'postgres'] : [
       }
     })
 
+    await t.test('local connection, authentication and permission guidance survives failure and draft preservation without raw details', async t => {
+      const original = process.env
+      process.env = { ...original, T3_INFERENCE_PROVIDER: 'codex-local' }
+      t.after(() => { process.env = original })
+      for (const detail of ['proxy CONNECT failed: 403 Forbidden', 'HTTP 401 token rejected', 'HTTP 403 Forbidden']) for (const retained of [false, true]) {
+        const failure = planningError(new Error(`${detail}; private-provider-detail token=private-token`))
+        const f = await fixture(t, dialect, async (value, options) => {
+          options.onInference()
+          if (retained) await options.onIteration({ index: 1, candidate: candidate(value.project.id), review: { passed: false, summary: 'Falta revisión.', issues: [] } })
+          throw failure
+        })
+        const run = await f.agent.create(f.alice, f.project.id, input(), randomUUID())
+        await until(async () => (await f.credits.reservation(reserved(run.id)))?.state === 'refunded')
+        const failed = await f.agent.get(f.alice, f.project.id, run.id)
+        assert.equal(failed.status, 'failed'); assert.ok(failed.error!.startsWith(failure.message))
+        assert.doesNotMatch(failed.error!, /private-provider-detail|private-token|codex login/)
+        if (retained) {
+          const version = await f.agent.getVersion(f.alice, f.project.id, run.id)
+          assert.equal(version.status, 'needs_input'); assert.ok(version.summary.startsWith(failure.message))
+          assert.equal(version.questions[0], failure.message)
+          assert.ok(failed.events.at(-1)!.message.startsWith(failure.message))
+        } else assert.equal(failed.versionId, null)
+        assert.equal((await f.credits.summary(f.alice.id)).balance, 1000)
+        assert.equal((await f.projects.get(f.alice, f.project.id)).scene, null)
+      }
+    })
+
     await t.test('partial parcel evidence is visible live, persists across restart and remains an unready chat parent without charging inference', async t => {
       const blocked = gate(), research = parcelResearch(); let calls = 0
       const f = await fixture(t, dialect, async (value, options) => {

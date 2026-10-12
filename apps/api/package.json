@@ -12,6 +12,7 @@
     "build": "tsc --noEmit",
     "test": "node --test test/*.test.ts",
     "account": "node --env-file-if-exists=../../.env src/account-cli.ts",
+    "codex:check": "node --env-file-if-exists=../../.env src/codex-smoke.ts",
     "telemetry:smoke": "node --env-file-if-exists=../../.env src/telemetry-smoke.ts"
   },
   "dependencies": {

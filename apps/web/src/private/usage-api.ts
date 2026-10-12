@@ -10,7 +10,7 @@ export type UsageCall = UsageTokens & {
   id: string; operationId: string; stage: 'analysis' | 'generation' | 'review' | 'correction'; iteration: number;
   provider: 'codex-local' | 'openai'; authMode: 'chatgpt' | 'api-key'; requestedModel: string | null; effectiveModel: string | null;
   startedAt: string; endedAt: string | null; durationMs: number | null; status: UsageStatus;
-  measurement: UsageMeasurement; source: 'codex.turn.completed' | 'openai.responses' | null;
+  measurement: UsageMeasurement; source: 'codex.turn.completed' | 'codex.app-server' | 'openai.responses' | null;
 }
 export type UsageOperation = {
   id: string; kind: UsageKind; userId: string; projectId: string | null; projectLabel: string | null;
