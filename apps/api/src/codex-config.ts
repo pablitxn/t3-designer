@@ -48,4 +48,3 @@ export const codexConfig: NonNullable<CodexOptions['config']> = {
     sleep_tool: false,
   },
 }
-
