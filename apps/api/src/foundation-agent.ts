@@ -352,7 +352,7 @@ export class FoundationAgent {
           let preserve = current.status !== 'cancelled' && (!!draft?.candidate || !!current.officialResearch)
           // Retaining a draft must not bypass the publication access check.
           if (preserve) { try { await this.authorizedUser(row.userId, row.projectId) } catch { preserve = false } }
-          const providerFailure = failure instanceof CodexPlanningError && ['usage_limit', 'authentication'].includes(failure.code) ? failure.message : null
+          const providerFailure = failure instanceof CodexPlanningError && ['usage_limit', 'authentication', 'connection', 'permission'].includes(failure.code) ? failure.message : null
           const message = deadline?.aborted ? 'El intento alcanzó el límite de tiempo.' : providerFailure ?? 'No se pudo completar el intento.'
           const error = providerFailure
             ? `${message} ${preserve ? 'Se conservó el borrador; todavía no se puede aceptar esta versión.' : 'Las versiones anteriores siguen disponibles.'}`

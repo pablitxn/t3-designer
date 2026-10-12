@@ -43,6 +43,8 @@
     "test:demo": "pnpm --filter @t3-designer/web test:demo",
     "check:all": "pnpm audit:history && pnpm check && pnpm test:e2e && pnpm test:analytics && pnpm test:accounts && pnpm test:demo",
     "account": "pnpm --filter @t3-designer/api account",
+    "codex:check": "pnpm --filter @t3-designer/api codex:check",
+    "codex:session": "node --env-file-if-exists=.env apps/api/src/codex-session-cli.ts",
     "test:accounts": "pnpm --filter @t3-designer/web test:accounts",
     "audit:public": "node scripts/audit_public_artifacts.mjs",
     "audit:dist": "node scripts/audit_public_artifacts.mjs --build apps/web/dist",

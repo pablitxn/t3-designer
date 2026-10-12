@@ -19,7 +19,7 @@ export type UsageCall = Tokens & {
   id: string; operationId: string; stage: UsageStage; iteration: number; provider: Provider
   authMode: 'chatgpt' | 'api-key'; requestedModel: string | null; effectiveModel: string | null
   startedAt: string; endedAt: string | null; durationMs: number | null; status: UsageStatus
-  measurement: Measurement; source: 'codex.turn.completed' | 'openai.responses' | null
+  measurement: Measurement; source: 'codex.turn.completed' | 'codex.app-server' | 'openai.responses' | null
 }
 export type UsageOperationMetadata = {
   id: string; userId: string; kind: CreditKind; projectId: string | null; projectLabel: string | null
@@ -114,7 +114,7 @@ export class UsageStore {
   observe(id: string, raw: unknown, source: NonNullable<UsageCall['source']>, effectiveModel?: unknown): void {
     const call = this.call(id)
     if (!call) throw new Error('Usage call not found')
-    const observed = source === 'codex.turn.completed' ? codexUsage(raw) : responsesUsage(raw)
+    const observed = source === 'openai.responses' ? responsesUsage(raw) : codexUsage(raw)
     // One terminal usage report per invocation. Repeated events never add tokens.
     // Reconciliation may fill absent fields, but never overwrite observed values.
     const tokens = Object.fromEntries(metrics.map(metric => [metric, call[metric] ?? observed[metric]])) as Tokens
@@ -203,12 +203,12 @@ export function withUsage<T>(store: UsageStore | undefined, operationId: string,
   store.traceOperation(operationId)
   return context.run({ store, operationId }, () => withOperationTrace(operationId, work))
 }
-export function beginUsageCall(provider: Provider, options: { usageStage?: UsageStage; usageIteration?: number }, requestedModel: string | null) {
+export function beginUsageCall(provider: Provider, options: { usageStage?: UsageStage; usageIteration?: number }, requestedModel: string | null, source: NonNullable<UsageCall['source']> = provider === 'codex-local' ? 'codex.turn.completed' : 'openai.responses') {
   const current = context.getStore()
   if (!current) return undefined
   const call = current.store.begin(current.operationId, provider, options.usageStage ?? 'generation', options.usageIteration ?? 1, requestedModel)
   current.lastCallId = call.id
-  return { observe: (raw: unknown, effectiveModel?: unknown) => current.store.observe(call.id, raw, provider === 'codex-local' ? 'codex.turn.completed' : 'openai.responses', effectiveModel),
+  return { observe: (raw: unknown, effectiveModel?: unknown) => current.store.observe(call.id, raw, source, effectiveModel),
     finish: (status: Exclude<UsageStatus, 'running' | 'unknown'>) => current.store.finish(call.id, status) }
 }
 export function invalidateUsageCall(): void {

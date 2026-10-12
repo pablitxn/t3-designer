@@ -12,7 +12,7 @@ import { GenerationCredits } from '../src/generation-credits.ts'
 import { openaiVisualTurn } from '../src/openai.ts'
 import { createApi } from '../src/server.ts'
 import { AssetStore } from '../src/store.ts'
-import { UsageStore, withUsage } from '../src/usage.ts'
+import { beginUsageCall, UsageStore, withUsage } from '../src/usage.ts'
 import { AssetWorker } from '../src/worker.ts'
 
 const metadata = (id: string, userId = 'owner') => ({ id, userId, kind: 'asset' as const, projectId: null, projectLabel: null, jobId: 'job', runId: null, assetId: null, parentId: null, attempt: 1 })
@@ -61,6 +61,32 @@ test('controlled Codex stream persists start before inference, captures terminal
   assert.equal(calls[0].measurement, 'complete'); assert.equal(calls[0].source, 'codex.turn.completed')
   assert.doesNotMatch(JSON.stringify(calls), /private|prompt|agent_message/)
   assert.doesNotMatch((await readFile(path)).toString(), /private prompt|private-result/)
+})
+
+test('app-server terminal usage retains its source and token totals once across duplicate observations and database restart', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 't3-usage-app-server-'))
+  const path = join(directory, 'usage.sqlite')
+  let usage = new UsageStore(path)
+  t.after(async () => { usage.close(); await rm(directory, { recursive: true, force: true }) })
+  usage.operation(metadata('app-server'))
+  const total = { input_tokens: 100, output_tokens: 40, cached_input_tokens: 25, cache_write_input_tokens: 10, reasoning_output_tokens: 12 }
+  await withUsage(usage, 'app-server', async () => {
+    const call = beginUsageCall('codex-local', { usageStage: 'analysis' }, 'requested-model', 'codex.app-server')
+    assert.ok(call)
+    assert.equal(usage.calls('app-server')[0].measurement, 'unknown')
+    call.observe(total, 'effective-model')
+    call.observe(total, 'effective-model')
+    call.finish('succeeded')
+  })
+  usage.close(); usage = new UsageStore(path)
+  const calls = usage.calls('app-server')
+  assert.equal(calls.length, 1)
+  const [call] = calls
+  assert.equal(call.source, 'codex.app-server'); assert.equal(call.measurement, 'complete'); assert.equal(call.status, 'succeeded')
+  assert.equal(call.inputTokens, 100); assert.equal(call.outputTokens, 40)
+  assert.equal(call.cachedInputTokens, 25); assert.equal(call.cacheWriteInputTokens, 10); assert.equal(call.reasoningOutputTokens, 12)
+  assert.equal(call.provider, 'codex-local'); assert.equal(call.authMode, 'chatgpt'); assert.equal(call.stage, 'analysis')
+  assert.equal(call.requestedModel, 'requested-model'); assert.equal(call.effectiveModel, 'effective-model')
 })
 
 test('controlled Responses completion, incomplete and failure preserve observed usage without real API traffic', async t => {

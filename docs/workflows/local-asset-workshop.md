@@ -195,9 +195,11 @@ does not discard the recorded activity. Candidate checkpoints also persist:
 answering a question or retrying after review reuses the most recent valid
 candidate and observed differences rather than starting without context.
 
-For `T3_INFERENCE_PROVIDER=codex-local`, install the Codex CLI, run `codex login`
-with the ChatGPT subscription and keep both the API host and browser origin on
-loopback. This adapter supports furniture and foundation workshops locally and
+For `T3_INFERENCE_PROVIDER=codex-local`, install the Codex CLI and authenticate
+with the ChatGPT subscription (`codex login` on a machine where you manage the
+CLI login; use the platform's supported authentication in a managed cloud runtime).
+Keep both the API host and browser origin on loopback.
+This adapter supports furniture and foundation workshops locally and
 is rejected in production. Hosted project generation still requires the API
 provider. This is an explicit local choice: a missing `OPENAI_API_KEY` never
 automatically enables the Codex adapter.
@@ -216,6 +218,76 @@ the Codex timeout below. No credentials are copied into the library or sent to t
 browser. A failed generation exposes a bounded, readable error instead of a raw
 Codex transcript.
 
+Verify a private development environment with an explicit inference check:
+
+```bash
+T3_INFERENCE_PROVIDER=codex-local T3_CODEX_MODEL=gpt-6-astra pnpm codex:check
+```
+
+This makes one small real subscription request through the selected workshop
+transport and isolation settings, without web research or file attachments.
+It can consume subscription usage. It exits successfully only after validating
+the model's structured reply; stored login and inference results are reported
+separately. The requested model is a preference, not proof of the effective model.
+Do not run it in recurring health checks. `/api/health` and `codex login status`
+only recognize stored authentication; they do not validate service access.
+
+A cloud environment may recognize a stored ChatGPT session while the service
+rejects its token with 401. Test with `codex doctor --json` when supported by the
+installed CLI. If the same rejection occurs independently of T3, investigate the
+platform's managed authentication for child CLI processes. Changing application
+code or allowing a hostname does not repair a rejected token. Do not copy tokens,
+overwrite managed credentials, or substitute an API key. The CLI also needs
+writable runtime state in its existing session directory, even with ephemeral
+turns; use the environment's supported process permissions. The model's own
+sandbox remains read-only.
+
+### Cloud device login with an in-memory session
+
+When managed CLI credentials are rejected, opt into the official
+[device authorization flow](https://developers.openai.com/codex/auth/)
+using `codex app-server` (tested protocol: CLI 0.159.2):
+
+```bash
+export T3_INFERENCE_PROVIDER=codex-local
+export T3_CODEX_TRANSPORT=app-server
+export T3_CODEX_MODEL=gpt-6-astra
+node apps/api/src/index.ts
+```
+
+Startup prints the official verification URL and a short-lived device code.
+Authorize that code with ChatGPT in your browser; T3 starts the backend after
+login completes. If requested by OpenAI, enable device authorization in your
+ChatGPT security settings or ask your workspace administrator. No login endpoint
+is exposed by the application. The backend and browser origin must be loopback,
+and production continues to require the API provider.
+
+The backend owns one app-server for all local inference calls. It uses
+`cli_auth_credentials_store=ephemeral`: credentials remain in that process's
+memory, while HOME, CODEX_HOME and managed authentication files are preserved.
+Restarting, watch mode or publishing/restoring a cloud environment requires
+another browser login. A separate `codex exec` cannot inherit this session.
+If the app-server stops, new calls fail; T3 never silently switches to another
+login or the API. Cancellation interrupts the active turn; calls from the two
+workshops share a serial queue. Provider-reported totals are recorded once per
+call with source `codex.app-server`.
+Threads are unsubscribed after each call, but the protocol does not promise that
+the server releases their memory immediately. Restart the backend between long
+development sessions when needed; this also requires another device login.
+
+For a standalone script using T3's `runVisualTurn`, keep authorization and the
+script in the same process:
+
+```bash
+T3_INFERENCE_PROVIDER=codex-local T3_CODEX_TRANSPORT=app-server \
+  T3_CODEX_MODEL=gpt-6-astra pnpm codex:session /absolute/path/to/script.mjs
+```
+
+The script must await its work at module scope; the launcher closes the session
+when it finishes. `pnpm codex:check` also supports this transport and requests its
+own device login before making a small inference call. Health checks read the
+backend's current app-server account, without triggering login or inference.
+
 ## Configuration
 
 Set variables in the launching shell or the root `.env`, which API commands load.
@@ -230,6 +302,7 @@ does not extend each hosted API call's thirty-minute timeout.
 | Variable | Default / purpose |
 | --- | --- |
 | `T3_INFERENCE_PROVIDER` | `openai`; requires an API key. Select `codex-local` explicitly for the local CLI signed in with ChatGPT |
+| `T3_CODEX_TRANSPORT` | `exec` (default): existing local CLI login. `app-server`: explicit device login with credentials held in the backend process's memory |
 | `OPENAI_API_KEY` | Server-only API credential; never included in model inputs or Blender environment |
 | `T3_OPENAI_MODEL` | `gpt-6-astra` for all hosted structured generation and review; reasoning effort stays `max` |
 | `T3_FOUNDATION_TIMEOUT_MS` | `1800000` overall; local loopback development may override up to `7200000` (two hours); rejected outside local development |
@@ -239,7 +312,7 @@ does not extend each hosted API call's thirty-minute timeout.
 | `T3_ASSET_DATA_DIR` | `artifacts/asset-library`, relative to repository root or absolute |
 | `BLENDER_BIN` | macOS app path when present, otherwise `blender` on PATH |
 | `T3_CODEX_BIN` | `codex` on PATH; use the existing signed-in CLI |
-| `T3_CODEX_MODEL` | omitted; Codex's built-in default, since user config is isolated |
+| `T3_CODEX_MODEL` | omitted for `exec` (Codex's default); `gpt-6-astra` for `app-server` |
 | `T3_CODEX_TIMEOUT_MS` | 180000; configurable from 10000 to a maximum of 600000 |
 | `CODEX_HOME` | existing CLI auth location if customized; never copy its credentials into this repo |
 
@@ -315,8 +388,14 @@ retain the 0.63 × 0.68 × 0.75 m envelope. Evidence is in
 passed. Runtime is one observation, not a promise for other products.
 
 - **Backend offline:** start `pnpm start:api` and use the local Vite page.
-- **Codex unavailable/login required:** verify `codex login status` in the same
-  shell/environment. Sign in normally; never paste credentials into the app.
+- **Codex unavailable/authentication rejected:** verify `codex login status` and
+  run the explicit `codex:check` above in the backend's environment. A recognized
+  login alone does not prove usable authentication. Use normal login on your own
+  machine or the supported platform flow for a managed runtime; never paste
+  credentials into the app.
+- **Codex connection/proxy/TLS failure:** check the environment's egress policy,
+  proxy and trusted certificates. A proxy CONNECT 403 is not proof of an expired
+  ChatGPT session. A service 403 may instead require account or model permissions.
 - **Usage limit:** wait for the subscription window to reset, then retry.
 - **Blender missing:** set `BLENDER_BIN` to the installed executable and restart.
 - **Blender SIGSEGV before Python on macOS:** during agent testing, an outer

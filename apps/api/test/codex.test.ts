@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import { AssetRequestSchema } from '@t3-designer/asset-schema'
-import { codexConfig, codexEnvironment, multimodalInput, parsePlanResponse, parseReviewResponse, planAsset, planningError, productPrompt, reviewAsset, reviewPrompt, webActivity } from '../src/codex.ts'
+import { codexConfig, codexEnvironment, multimodalInput, parsePlanResponse, parseReviewResponse, planAsset, planningError, productPrompt, reviewAsset, reviewPrompt, runVisualTurn, webActivity } from '../src/codex.ts'
 import { OpenAIProviderError } from '../src/openai.ts'
 
 const input = { url: 'https://example.com/product/table', notes: '' }
@@ -87,6 +87,53 @@ test('errors expose actionable categories without forwarding raw CLI output', ()
   assert.doesNotMatch(failure.message, /super-secret-value/)
   assert.equal(planningError(new Error('429 quota')).code, 'usage_limit')
   assert.equal(planningError(new Error('a private local path')).code, 'codex_failed')
+})
+
+test('local diagnostics distinguish transport, rejected authentication and permissions without assuming a fresh login fixes them', t => {
+  const original = process.env
+  process.env = { ...original, T3_INFERENCE_PROVIDER: 'codex-local' }
+  t.after(() => { process.env = original })
+  const failures = [
+    ['Tunnel connection failed: 403 Forbidden', 'connection'],
+    ['proxy CONNECT denied with HTTP 403', 'connection'],
+    ['TLS error: certificate verify failed', 'connection'],
+    ['invalid peer certificate: UnknownIssuer', 'connection'],
+    ['connect ECONNREFUSED', 'connection'],
+    ['HTTP 401: authentication token could not be parsed', 'authentication'],
+    ['HTTP 401 Unauthorized; request_id=abc429def', 'authentication'],
+    ['Authentication failed: token expired', 'authentication'],
+    ['HTTP 403 Forbidden at authorization endpoint', 'permission'],
+    ['429 usage limit', 'usage_limit'],
+    ['unexpected status 429 Too Many Requests', 'usage_limit'],
+    ['unexpected failure', 'codex_failed'],
+  ] as const
+  for (const [detail, expected] of failures) {
+    const failure = planningError(new Error(`${detail}; https://private.example/session?token=private-token /private/operator/path`))
+    assert.equal(failure.code, expected, detail)
+    assert.doesNotMatch(failure.message, /private\.example|private-token|\/private\/operator|codex login|API key/)
+  }
+})
+
+test('local streamed connection and credential failures stay isolated and never fall back to hosted inference', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 't3-codex-diagnostics-')), original = process.env
+  t.after(async () => { process.env = original; await rm(directory, { recursive: true, force: true }) })
+  const command = join(directory, 'fake-codex'), capture = join(directory, 'capture.json')
+  process.env = { ...original, NODE_ENV: 'development', T3_INFERENCE_PROVIDER: 'codex-local', T3_CODEX_BIN: command,
+    OPENAI_API_KEY: 'unused-private-key', CODEX_API_KEY: 'unused-private-key', DATABASE_URL: 'unused-private-database' }
+  let hostedCalls = 0
+  const fetcher = (async () => { hostedCalls++; throw new Error('Hosted inference must not be called') }) as typeof fetch
+  for (const [message, expected] of [['proxy CONNECT failed: 403 Forbidden', 'connection'], ['HTTP 401 token rejected', 'authentication'], ['HTTP 403 Forbidden', 'permission']] as const) {
+    const failure = { type: 'turn.failed', error: { message: `${message}; private-cli-detail` } }
+    await writeFile(command, `#!${process.execPath}\nimport {writeFileSync} from 'node:fs';\nprocess.stdin.resume();process.stdin.on('end',()=>{writeFileSync(${JSON.stringify(capture)},JSON.stringify({args:process.argv.slice(2),apiKey:!!process.env.OPENAI_API_KEY,codexKey:!!process.env.CODEX_API_KEY,database:!!process.env.DATABASE_URL}));process.stdout.write(JSON.stringify(${JSON.stringify(failure)})+'\\n');});\n`)
+    await chmod(command, 0o700)
+    await assert.rejects(runVisualTurn([], {}, { signal: new AbortController().signal, workingDirectory: directory, onProgress() {} }, false, fetcher),
+      error => error instanceof Error && 'code' in error && error.code === expected && !/private-cli-detail|codex login/.test(error.message))
+    const captured = JSON.parse(await readFile(capture, 'utf8')) as { args: string[]; apiKey: boolean; codexKey: boolean; database: boolean }
+    assert.equal(captured.apiKey, false); assert.equal(captured.codexKey, false); assert.equal(captured.database, false)
+    assert.ok(captured.args.includes('forced_login_method="chatgpt"')); assert.ok(captured.args.includes('--ignore-user-config'))
+    assert.ok(captured.args.includes('read-only')); assert.ok(captured.args.includes('features.shell_tool=false'))
+  }
+  assert.equal(hostedCalls, 0)
 })
 
 test('provider billing failures require replenishment while rate limits remain temporary', () => {
