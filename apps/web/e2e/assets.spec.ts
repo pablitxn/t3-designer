@@ -266,8 +266,9 @@ test('switching history discards delayed events from the previous creation on a 
 test('initial workshop connection completes without waiting for the polling interval after StrictMode replay', async ({ page }) => {
   // Delay only workshop polling; React's lazy loading and scheduler stay real.
   await page.addInitScript(() => {
-    const interval = window.setInterval.bind(window)
-    window.setInterval = (handler, delay, ...args) => interval(handler, delay === 3000 ? 60_000 : delay, ...args)
+    const browserWindow: Window = window
+    const interval = browserWindow.setInterval.bind(browserWindow)
+    browserWindow.setInterval = (handler, delay, ...args) => interval(handler, delay === 3000 ? 60_000 : delay, ...args)
   })
   await page.route('**/api/**', route => {
     const path = new URL(route.request().url()).pathname
