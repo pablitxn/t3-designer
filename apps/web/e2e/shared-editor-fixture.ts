@@ -22,7 +22,7 @@ export async function startSharedEditorScenario() {
   if (!address || typeof address === 'string') throw new Error('No local API port')
   const apiPort = address.port
   available.close(); await once(available, 'close')
-  const vite = await createServer({ mode: 'full', configFile: join(root, 'apps/web/vite.config.ts'), root: join(root, 'apps/web'),
+  const vite = await createServer({ mode: 'full', cacheDir: join(directory, 'vite-cache'), configFile: join(root, 'apps/web/vite.config.ts'), root: join(root, 'apps/web'),
     server: { host: '127.0.0.1', port: 0, strictPort: true, proxy: { '/api': `http://127.0.0.1:${apiPort}` } } })
   await vite.listen()
   const origin = vite.resolvedUrls!.local[0].replace(/\/$/, '')

@@ -153,8 +153,8 @@ ni deploy de esta tanda.
 
 Corrida final estable: **54 PASS, 0 FAIL, 0 skips, 0 retries**: 18 flujos en
 cada uno de los tres viewports Chromium. Inicio 11:05:04Z, duracion 14m22s.
-JSON: [verified/results.json](../../artifacts/qa-project-viewer/verified/results.json).
-Indice de capturas/trazas: [evidence-index.md](../../artifacts/qa-project-viewer/evidence-index.md).
+JSON: verified/results.json (`../../artifacts/qa-project-viewer/verified/results.json`).
+Indice de capturas/trazas: evidence-index.md (`../../artifacts/qa-project-viewer/evidence-index.md`).
 Evidencia local ignorada por Git; los fixtures y comandos permiten regenerarla.
 
 | Flujo/caso | 375x812 touch | 430x932 touch | 1440x1000 desktop | WebKit (3 viewports) |

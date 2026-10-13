@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
+  ...(process.env.T3_VITE_CACHE_DIR ? { cacheDir: process.env.T3_VITE_CACHE_DIR } : {}),
   define: { __T3_BACKEND_ENABLED__: JSON.stringify(mode === 'full') },
   server: {
     host: '127.0.0.1', port: 5173, strictPort: true,

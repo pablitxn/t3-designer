@@ -384,3 +384,34 @@ test('late save response cannot replace another project after confirmed navigati
     expect((await stored(scenario, seed)).notes).toBe('Committed during navigation')
   } finally { release?.() }
 })
+
+
+test('focus revalidation preserves dirty editor draft across newer saved revisions', async ({ page, scenario, seed }) => {
+  await open(page, scenario, seed)
+  await notes(page, 'Keep my unsaved draft on focus')
+  await scenario.database.db.updateTable('t3_project').set({ notes: 'New owner revision', revision: seed.project.revision + 1 }).where('id', '=', seed.project.id).execute()
+  const checked = page.waitForResponse(response => response.url().endsWith(`/api/projects/${seed.project.id}`) && response.request().method() === 'GET')
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await checked
+  await expect(page.getByLabel(/^Notas del proyecto/)).toHaveValue('Keep my unsaved draft on focus')
+  await page.getByRole('button', { name: 'Guardar cambios', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('cambió en otra sesión')
+  expect((await stored(scenario, seed)).notes).toBe('New owner revision')
+  await screenshot(page, 'focus-preserves-conflicted-draft')
+})
+
+test('focus downgrade and membership revocation remove stale editor controls', async ({ page, scenario, seed }) => {
+  await open(page, scenario, seed)
+  await notes(page, 'Discard when permission changes')
+  await scenario.database.db.updateTable('t3_project_member').set({ role: 'viewer' }).where('projectId', '=', seed.project.id).where('userId', '=', seed.editor.id).execute()
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByRole('button', { name: 'Guardar cambios', exact: true })).toHaveCount(0)
+  await expect(page.getByLabel(/^Notas del proyecto/)).toHaveAttribute('readonly', '')
+  await expect(page.getByLabel(/^Notas del proyecto/)).toHaveValue('Fictional shared project')
+  await scenario.database.db.deleteFrom('t3_project_member').where('projectId', '=', seed.project.id).where('userId', '=', seed.editor.id).execute()
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByRole('alert')).toContainText('Este proyecto no está disponible')
+  await expect(page.getByLabel('Variantes del departamento')).toHaveCount(0)
+  expect((await stored(scenario, seed)).notes).toBe('Fictional shared project')
+  await screenshot(page, 'focus-revoked-editor')
+})

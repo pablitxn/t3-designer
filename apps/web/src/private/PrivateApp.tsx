@@ -172,6 +172,7 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
   const [walking, setWalking] = useState(false)
   const generation = useRef(0)
   const denyAccess = useCallback(() => {
+    generation.current++
     setProject(null); setDirty(false); setConflict(false); setNotice(''); setError(copy.current.projectUnavailable)
   }, [])
   const load = useCallback(async (signal?: AbortSignal) => {
@@ -181,7 +182,8 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
   }, [id, denyAccess])
   useEffect(() => { const abort = new AbortController(); void load(abort.signal); return () => { generation.current++; abort.abort() } }, [load])
   useEffect(() => {
-    if (project?.role !== 'viewer') return
+    const role = project?.role
+    if (role !== 'viewer' && role !== 'editor') return
     const abort = new AbortController()
     let latest = 0
     const recheck = () => {
@@ -192,9 +194,11 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
       // the new account while its current session check is still in flight.
       void request<{ project: Project }>(`/api/projects/${id}`, { signal: abort.signal }, false).then(({ project: current }) => {
         if (abort.signal.aborted || sequence !== latest) return
-        // Keep local floor/variant navigation when the saved document did not
-        // change. New permissions or revisions come from the server.
-        setProject(previous => previous && previous.revision === current.revision && previous.role === current.role ? previous : current)
+        // Preserve a member's local draft and viewer navigation. A changed role
+        // takes effect immediately; a changed revision stays a save conflict
+        // while the editor has unsaved changes.
+        if (current.role !== role) { generation.current++; setDirty(false); setConflict(false); setNotice('') }
+        setProject(previous => previous && previous.role === current.role && (dirty || previous.revision === current.revision) ? previous : current)
       }).catch(reason => {
         if (!abort.signal.aborted && sequence === latest && reason instanceof PrivateApiError && [403, 404].includes(reason.status)) denyAccess()
       })
@@ -203,7 +207,7 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
     document.addEventListener('visibilitychange', recheck)
     const interval = setInterval(recheck, 60_000)
     return () => { abort.abort(); clearInterval(interval); window.removeEventListener('focus', recheck); document.removeEventListener('visibilitychange', recheck) }
-  }, [id, project?.role, denyAccess])
+  }, [id, project?.role, dirty, denyAccess])
   useEffect(() => {
     if (!dirty) return
     const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = '' }

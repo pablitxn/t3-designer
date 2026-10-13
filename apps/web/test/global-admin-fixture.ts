@@ -22,7 +22,7 @@ export async function globalAdminFixture(mode: 'disabled' | 'mock' = 'mock') {
   if (!address || typeof address === 'string') throw new Error('No local port')
   const apiPort = address.port
   socket.close(); await once(socket, 'close')
-  const vite = await createServer({ mode: 'full', root: join(root, 'apps/web'), configFile: join(root, 'apps/web/vite.config.ts'),
+  const vite = await createServer({ mode: 'full', cacheDir: join(directory, 'vite-cache'), root: join(root, 'apps/web'), configFile: join(root, 'apps/web/vite.config.ts'),
     server: { host: '127.0.0.1', port: 0, strictPort: true, proxy: { '/api': `http://127.0.0.1:${apiPort}` } } })
   await vite.listen()
   const origin = vite.resolvedUrls!.local[0].replace(/\/$/, '')

@@ -29,3 +29,34 @@ jobs:
       - run: pnpm test:accounts
       - run: pnpm test:demo
       - run: pnpm test:anonymous
+
+  role-regressions:
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - role: admin
+            command: pnpm test:admin
+          - role: owner
+            command: pnpm test:owner
+          - role: owner-webgl
+            command: T3_QA_WEBGL=true pnpm test:owner
+          - role: shared-editor
+            command: pnpm test:shared-editor --project chromium-mobile-narrow --project chromium-mobile-wide --project chromium-desktop
+          - role: viewer
+            command: pnpm test:viewer
+          - role: anonymous-webgl
+            command: pnpm test:anonymous:webgl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: corepack enable && corepack prepare pnpm@12.7.0 --activate
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm --filter @t3-designer/web exec playwright install --with-deps chromium
+      - run: ${{ matrix.command }}

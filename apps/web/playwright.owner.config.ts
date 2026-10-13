@@ -14,7 +14,7 @@ export default defineConfig({
   outputDir: `../../${directory}/browser-results`,
   reporter: [['list'], ['json', { outputFile: `../../${directory}/results.json` }], ['html', { outputFolder: `../../${directory}/html`, open: 'never' }]],
   use: { actionTimeout: 20_000, baseURL, locale: 'es-AR', trace: 'on', screenshot: 'on',
-    launchOptions: { executablePath: process.env.T3_QA_CHROMIUM ?? '/usr/bin/chromium', args: webgl ? ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] : ['--disable-webgl'] } },
+    launchOptions: { ...(process.env.T3_QA_CHROMIUM ? { executablePath: process.env.T3_QA_CHROMIUM } : {}), args: webgl ? ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] : ['--disable-webgl'] } },
   projects: [
     { name: 'chromium-touch-360', use: { viewport: { width: 360, height: 800 }, hasTouch: true, isMobile: true } },
     { name: 'chromium-touch-430', use: { viewport: { width: 430, height: 932 }, hasTouch: true, isMobile: true } },
@@ -23,6 +23,6 @@ export default defineConfig({
   webServer: [
     { command: 'node ../api/test/owner-qa-backend.ts', url: `http://127.0.0.1:${apiPort}/api/live`, reuseExistingServer: false,
       env: { NODE_ENV: 'development', T3_OWNER_QA: 'isolated-fixtures', T3_QA_DIRECTORY: directory, T3_QA_ORIGIN: baseURL, T3_QA_API_PORT: String(apiPort), T3_DATABASE_URL: '', OPENAI_API_KEY: '', CODEX_API_KEY: '', OTEL_EXPORTER_OTLP_ENDPOINT: '' } },
-    { command: `pnpm dev:full --host 127.0.0.1 --port ${port} --strictPort`, url: baseURL, reuseExistingServer: false, env: { T3_API_PROXY_URL: `http://127.0.0.1:${apiPort}` } },
+    { command: `pnpm dev:full --host 127.0.0.1 --port ${port} --strictPort`, url: baseURL, reuseExistingServer: false, env: { T3_VITE_CACHE_DIR: `../../${directory}/vite-cache`, T3_API_PROXY_URL: `http://127.0.0.1:${apiPort}` } },
   ],
 })
