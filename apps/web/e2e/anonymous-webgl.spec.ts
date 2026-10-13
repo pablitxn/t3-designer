@@ -156,8 +156,19 @@ test('public walkthrough movement, jump, pause/resume and return never write pri
     await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2); await page.mouse.down()
     await expect.poll(translation).not.toBe(before); await page.mouse.up()
   }
+  // Observe the real airborne transition before input: a slow compositor can
+  // return from click after landing, so sampling only afterward loses the jump.
+  await visit.locator('.walk-map').evaluate(element => {
+    const values = [element.getAttribute('data-grounded')]
+    const observer = new MutationObserver(records => {
+      values.push(...records.map(record => record.oldValue), element.getAttribute('data-grounded'))
+      element.setAttribute('data-qa-grounded-history', JSON.stringify(values))
+      if (values.includes('false') && element.getAttribute('data-grounded') === 'true') observer.disconnect()
+    })
+    observer.observe(element, { attributes: true, attributeOldValue: true, attributeFilter: ['data-grounded'] })
+  })
   await visit.getByRole('button', { name: 'Jump', exact: true }).click()
-  await expect(visit.locator('.walk-map')).toHaveAttribute('data-grounded', 'false')
+  await expect(visit.locator('.walk-map')).toHaveAttribute('data-qa-grounded-history', /false/)
   // Physics advances on real rendered frames; slow software WebGL can take
   // tens of seconds to complete the same jump. Keep the landing assertion.
   await expect(visit.locator('.walk-map')).toHaveAttribute('data-grounded', 'true', { timeout: 60_000 })

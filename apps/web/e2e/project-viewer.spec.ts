@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { readFile, rename } from 'node:fs/promises'
 import { expect, test as base, type Page } from '@playwright/test'
+import { captureWebGL } from './webgl-capture'
 import { demoPassword, startViewerScenario } from '../../../scripts/qa/project-viewer-scenario.mjs'
 
 type Scenario = Awaited<ReturnType<typeof startViewerScenario>>
@@ -333,7 +334,7 @@ test('walkthrough renders existing assets, moves, pauses, cancels input and keep
     await expect.poll(() => map.locator('g').getAttribute('transform')).not.toBe(before)
     await page.keyboard.up('KeyW')
   }
-  await page.screenshot({ path: info.outputPath('walkthrough-live.png') })
+  await captureWebGL(page, info, 'walkthrough-live')
   await page.keyboard.press('Escape'); await expect(walk).toHaveAttribute('data-active', 'false')
   await walk.locator('.walk-start-card').scrollIntoViewIfNeeded()
   // Check actual paint/hit order where the paused card and minimap overlap.
@@ -347,7 +348,7 @@ test('walkthrough renders existing assets, moves, pauses, cancels input and keep
     try { map.style.pointerEvents = 'auto'; return card.contains(document.elementFromPoint((left + right) / 2, (top + bottom) / 2)) }
     finally { map.style.pointerEvents = original }
   })).toBe(true)
-  await fits(page); await page.screenshot({ path: info.outputPath('walkthrough.png') })
+  await fits(page); await captureWebGL(page, info, 'walkthrough')
   await page.reload(); await expect(page.getByTestId('walkthrough')).toBeVisible()
   await page.getByRole('button', { name: /Volver al diseño/ }).click()
   await expect(page.getByLabel('Variantes del departamento')).toBeVisible()
