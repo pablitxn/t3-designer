@@ -212,5 +212,7 @@
 .public-gallery-account p { max-width: 670px; color: var(--workshop-muted); font-size: 12px; line-height: 1.7; margin: 8px 0 0; }
 .public-gallery-account .workshop-primary { width: auto; flex-shrink: 0; }
 .public-gallery-curated { margin-top: 18px; }
+.public-preview-error { min-height: 240px; display: grid; align-content: center; justify-items: center; gap: 12px; padding: 24px; text-align: center; color: var(--workshop-muted); }
+.public-preview-error .workshop-primary { width: auto; }
 @media (max-width: 760px) { .public-gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; } .public-gallery-grid .workshop-card img { height: 140px; } .public-gallery-grid .workshop-card > div { padding: 10px; } .public-gallery-account { flex-direction: column; align-items: stretch; gap: 20px; } .public-gallery-variant { font-size: 10px; } }
 @media (max-width: 480px) { .public-gallery-grid { grid-template-columns: minmax(0, 1fr); } .public-gallery-grid .workshop-card { display: grid; grid-template-columns: 125px minmax(0, 1fr); align-items: center; } .public-gallery-grid .workshop-card img { height: 140px; } .public-asset-gallery .workshop-preview-tabs { flex-shrink: 1; } .public-gallery-history li { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; } }

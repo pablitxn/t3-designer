@@ -6,7 +6,8 @@ const baseURL = `http://127.0.0.1:${port}`
 export default defineConfig({
   testDir: './e2e',
   // Analytics has a separate production-only server/configuration.
-  testIgnore: ['**/analytics.spec.ts', '**/demo.spec.ts'],
+  // Visitor integration tests own a real, disposable API in their configuration.
+  testIgnore: ['**/analytics.spec.ts', '**/demo.spec.ts', '**/anonymous*.spec.ts'],
   // Concurrent work in this checkout must not delete another run's traces.
   outputDir: process.env.CI ? 'test-results/i18n' : `/tmp/t3-designer-i18n-results-${process.pid}`,
   fullyParallel: true,

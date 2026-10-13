@@ -47,6 +47,7 @@ browser:
     - pnpm test:analytics
     - pnpm test:accounts
     - pnpm test:demo
+    - pnpm test:anonymous
   artifacts:
     when: always
     paths: [apps/web/test-results/]
