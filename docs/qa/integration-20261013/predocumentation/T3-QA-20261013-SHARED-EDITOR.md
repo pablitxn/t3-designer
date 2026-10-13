@@ -1,17 +1,19 @@
-# T3-QA-20261013-SHARED-EDITOR — Editor de proyecto compartido
+<a id="t3-qa-20261013-shared-editor--editor-de-proyecto-compartido"></a>
 
-Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
+# T3-QA-20261013-SHARED-EDITOR — Shared-project editor
 
-Fuente primaria: [informe del rol](../../shared-project-editor-2026-10-13.md), [PR original](https://github.com/pablitxn/t3-designer/pull/6). Rama original `qa/shared-project-editor-20261013`; SHA verificado `7fe34e94419fe4c074937072dc55f85d5b216f3e`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
+Status: **pending consolidation**. This is an intake draft in the product repository, not an approved Atlas entry or new protocol.
 
-Correcciones: Cancelar Atrás/Adelante/link/logout conserva borrador; 403/404 retiran editor; downgrade refresca permiso viewer; respuestas abortadas o guardados tardios no cambian otro proyecto.
+Primary source: [role report](../../shared-project-editor-2026-10-13.md), [original PR](https://github.com/pablitxn/t3-designer/pull/6). Original branch `qa/shared-project-editor-20261013`; verified SHA `7fe34e94419fe4c074937072dc55f85d5b216f3e`. Shared base `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integration `qa/t3-integration-20261013`; tested code checkpoint `657060b0b459753c2d52c0643357bc1dd732ba51` (see report for final revision and later corrections).
 
-Decisiones al consolidar: Un solo evento t3:before-navigate en App/ProjectEditor. Integracion agrega revalidacion compartida: cambio de revision conserva borrador hasta conflicto; cambio de rol retira controles y borrador no autorizado.
+Corrections: Cancelled Back/Forward/link/logout retains draft; 403/404 remove editor; downgrade refreshes viewer permission; aborted responses/late saves do not change another project.
 
-Evidencia: Informe original: 45 casos compuestos (15x3), mas regresiones; integracion agrega 2 casos x3 y reejecuta 51 combinaciones. Historia del SHA fuente falla audit:history por ruta personal en borrador anterior; el tip final no se usa como ancestro. [Reporte integrado](../README.md). Los informes por rol son evidencia historica de sus propias revisiones; sus limites y fechas se mantienen. Capturas/trazas son archivos locales ignorados y se identifican por ruta/indice, sin afirmar que esten publicados en Git.
+Consolidation decisions: One t3:before-navigate event in App/ProjectEditor. Integration adds shared revalidation: revision changes retain draft until conflict; role changes remove unauthorized controls/draft.
 
-Pendientes y limites: WebKit bloqueado. Reporte remoto detallado 403; diagnostico local de historial confirmado. Inferencia, Blender, infraestructura, PostgreSQL no ejecutados.
+Evidence: Original report: 45 compound cases (15x3), plus regressions; integration adds 2 cases x3 and reruns 51 combinations. Source history fails audit:history due to a personal path in an earlier draft; final tip is not used as an ancestor. [Integrated report](../README.md). Role reports are historical evidence of their own revisions; dates and limits remain. Captures/traces are ignored local files identified by path/index, not claimed published in Git.
 
-Destinos Atlas propuestos, sujetos a revision posterior: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` para recepcion, `atlas/wiki/t3-designer.md` para estado sintetico, una entrada fechada en `atlas/entries/` para decisiones/evidencia y `atlas/catalog/sources.yaml` para las fuentes aprobadas. No actualizar deploy historico ni afirmar release/produccion con QA local. Atlas consultado en `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, sin escrituras en esta tanda.
+Pending items and limits: WebKit blocked. Detailed remote report 403; local history diagnosis confirmed. Inference, Blender, infrastructure and PostgreSQL not run.
 
-Corte posterior de estabilizacion UI/renderer `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pausa sin repaint continuo, captura de frame real con loop restaurado y transicion de salto observada desde antes del input. Evidencia y limites de CI en el reporte integrado; estado pendiente de consolidacion sin escrituras Atlas.
+Proposed Atlas destinations, subject to later review: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` for receipt, `atlas/wiki/t3-designer.md` for summarized state, a dated `atlas/entries/` entry for decisions/evidence and `atlas/catalog/sources.yaml` for approved sources. Do not update historical deployment or claim release/production from local QA. Atlas consulted at `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, without writes in this batch.
+
+Later UI/renderer stabilization checkpoint `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pause without continuous repaint, capture real frame with restored loop and observe jump transition from before input. CI evidence/limits are in the integrated report; consolidation remains pending with no Atlas writes.

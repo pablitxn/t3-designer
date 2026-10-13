@@ -51,6 +51,7 @@
     "test:admin": "pnpm --filter @t3-designer/web exec playwright test --config playwright.admin.config.ts",
     "qa:admin": "node scripts/qa-global-admin.mjs",
     "test:viewer": "pnpm --filter @t3-designer/web test:viewer",
+    "audit:english": "node scripts/audit_english.mjs",
     "audit:public": "node scripts/audit_public_artifacts.mjs",
     "audit:dist": "node scripts/audit_public_artifacts.mjs --build apps/web/dist",
     "audit:history": "node scripts/audit_public_history.mjs",

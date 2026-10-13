@@ -1,17 +1,19 @@
-# T3-QA-20261013-ANONYMOUS — Visitante anonimo
+<a id="t3-qa-20261013-anonymous--visitante-anonimo"></a>
 
-Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
+# T3-QA-20261013-ANONYMOUS — Anonymous visitor
 
-Fuente primaria: [informe del rol](../../../workflows/anonymous-qa.md), [PR original](https://github.com/pablitxn/t3-designer/pull/3). Rama original `qa/t3-anonymous-20261013`; SHA verificado `cf8fc398aa0d4d3f23a3bf5773296d2a502734be`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
+Status: **pending consolidation**. This is an intake draft in the product repository, not an approved Atlas entry or new protocol.
 
-Correcciones: Foco del dossier al cerrar; recuperacion de imagenes/versiones de galeria; etiquetas explicitas de sliders; entrada del paseo por encima del minimapa.
+Primary source: [role report](../../../workflows/anonymous-qa.md), [original PR](https://github.com/pablitxn/t3-designer/pull/3). Original branch `qa/t3-anonymous-20261013`; verified SHA `cf8fc398aa0d4d3f23a3bf5773296d2a502734be`. Shared base `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integration `qa/t3-integration-20261013`; tested code checkpoint `657060b0b459753c2d52c0643357bc1dd732ba51` (see report for final revision and later corrections).
 
-Decisiones al consolidar: Se conserva la asociacion label/input por ID y un unico z-index del overlay. El estado publico sigue siendo local y aislado por contexto.
+Corrections: Dossier close focus; gallery image/version recovery; explicit slider labels; walkthrough entry above minimap.
 
-Evidencia: Informe original: 60 UI focalizados, 21 WebGL y tandas ampliadas; no sumarlos como una sola corrida. Integracion: ver matriz CSV y reporte final. [Reporte integrado](../README.md). Los informes por rol son evidencia historica de sus propias revisiones; sus limites y fechas se mantienen. Capturas/trazas son archivos locales ignorados y se identifican por ruta/indice, sin afirmar que esten publicados en Git.
+Consolidation decisions: Retain label/input association by ID and one overlay z-index. Public state remains local and isolated by context.
 
-Pendientes y limites: WebKit bloqueado; dispositivos fisicos y proveedores/servicios reales sin ejecutar. WebGL usa geometria existente, sin acreditar calidad 3D.
+Evidence: Original report: 60 focused UI cases, 21 WebGL and expanded batches; do not add them as one run. Integration: see final CSV matrix/report. [Integrated report](../README.md). Role reports are historical evidence of their own revisions; dates and limits remain. Captures/traces are ignored local files identified by path/index, not claimed published in Git.
 
-Destinos Atlas propuestos, sujetos a revision posterior: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` para recepcion, `atlas/wiki/t3-designer.md` para estado sintetico, una entrada fechada en `atlas/entries/` para decisiones/evidencia y `atlas/catalog/sources.yaml` para las fuentes aprobadas. No actualizar deploy historico ni afirmar release/produccion con QA local. Atlas consultado en `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, sin escrituras en esta tanda.
+Pending items and limits: WebKit blocked; physical devices and real providers/services not run. WebGL uses existing geometry without establishing 3D quality.
 
-Corte posterior de estabilizacion UI/renderer `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pausa sin repaint continuo, captura de frame real con loop restaurado y transicion de salto observada desde antes del input. Evidencia y limites de CI en el reporte integrado; estado pendiente de consolidacion sin escrituras Atlas.
+Proposed Atlas destinations, subject to later review: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` for receipt, `atlas/wiki/t3-designer.md` for summarized state, a dated `atlas/entries/` entry for decisions/evidence and `atlas/catalog/sources.yaml` for approved sources. Do not update historical deployment or claim release/production from local QA. Atlas consulted at `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, without writes in this batch.
+
+Later UI/renderer stabilization checkpoint `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pause without continuous repaint, capture real frame with restored loop and observe jump transition from before input. CI evidence/limits are in the integrated report; consolidation remains pending with no Atlas writes.
