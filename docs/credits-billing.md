@@ -1,194 +1,203 @@
-# Créditos, suscripciones y Mercado Pago de prueba
+<a id="créditos-suscripciones-y-mercado-pago-de-prueba"></a>
 
-La aplicación mantiene sus cuentas, proyectos y edición gratuitos. Las operaciones
-de generación reservan créditos antes de llamar al proveedor. Los pagos están en
-desarrollo: `T3_BILLING_MODE=disabled` es el valor predeterminado y esta versión no
-ofrece un modo de cobros productivos. Publicar la aplicación no activa pagos.
+# Credits, subscriptions and test Mercado Pago payments
 
-## Catálogo inicial
+Accounts, projects and editing remain free. Generation operations reserve credits
+before calling the provider. Payments are under development:
+`T3_BILLING_MODE=disabled` is the default, and this version offers no production
+payment mode. Publishing the application does not enable payments.
 
-Los valores son preliminares, configurables y expresados en pesos argentinos:
+<a id="catálogo-inicial"></a>
 
-| Producto | Créditos | Precio ARS | Vencimiento |
+## Initial catalog
+
+Values are preliminary, configurable and expressed in Argentine pesos:
+
+| Product | Credits | Price ARS | Expiration |
 | --- | ---: | ---: | --- |
-| Suscripción mensual | 500 | 10.000 | Un mes calendario desde el pago aprobado |
-| Paquete pequeño | 100 | 3.000 | Sin vencimiento |
-| Paquete grande | 500 | 12.000 | Sin vencimiento |
+| Monthly subscription | 500 | 10,000 | One calendar month after approved payment |
+| Small pack | 100 | 3,000 | No expiration |
+| Large pack | 500 | 12,000 | No expiration |
 
-Cada orden conserva una copia del precio y de los créditos que tenía al crearse.
-Cambiar el catálogo no cambia suscripciones existentes ni recargas pendientes.
-Una suscripción paga no convierte una cuenta en invitado premium: ese privilegio
-de invitación es una concesión independiente del administrador.
+Each order retains its price and credits at creation. Catalog changes do not
+change existing subscriptions or pending top-ups. A paid subscription does not
+make an account a premium invitee: that invitation privilege is a separate
+administrator grant.
 
-Las cuentas normales reciben por defecto 100 créditos durante 15 días. El acceso
-premium regalado recibe 1.000 créditos por mes calendario UTC, sin acumular meses
-en los que no se usó la aplicación. Los créditos vencen al finalizar su período.
-Los administradores existentes se migran al beneficio regalado. Estos valores
-son también configurables; el saldo siempre procede del servidor.
+Normal accounts receive 100 credits for 15 days by default. Gifted premium access
+receives 1,000 credits per UTC calendar month, without accumulating months in
+which the application was unused. Credits expire at the end of their period.
+Existing administrators migrate to the gifted benefit. These values are also
+configurable; the balance always comes from the server.
 
-## Invitaciones y uso de créditos
+<a id="invitaciones-y-uso-de-créditos"></a>
 
-En **Personas e invitaciones**, el administrador crea cuentas normales o premium,
-concede acceso premium a una cuenta existente y otorga créditos con un motivo
-registrado. Los premium pueden crear enlaces para cuentas normales. Solo admin y
-premium tienen esta capacidad; suscribirse no cambia el permiso. Los enlaces
-compartibles tienen vencimiento, máximo de usos e historial; se pueden revocar.
-El token aparece únicamente al crear el enlace y viaja en su fragmento `#token`,
-no en la query de las peticiones HTTP. La activación inicia la prueba de 15 días.
+## Invitations and credit use
 
-| Operación | Créditos predeterminados |
+In **People and invitations** (Spanish UI: **Personas e invitaciones**), the
+administrator creates normal or premium accounts, grants premium access to an
+existing account and grants credits with a recorded reason. Premium users can
+create links for normal accounts. Only admin and premium users have this
+capability; subscribing does not change permissions. Shareable links have an
+expiration, maximum uses and history, and can be revoked. The token appears only
+when the link is created and travels in its `#token` fragment, not HTTP request
+queries. Activation starts the 15-day trial.
+
+| Operation | Default credits |
 | --- | ---: |
-| Objeto nuevo | 20 |
-| Revisión de objeto | 10 |
-| Proyecto conceptual | 50 |
-| Departamento conceptual | 50 |
-| Edificio conceptual | 100 |
-| Crear proyecto manual, editar, compartir y ver | 0 |
+| New object | 20 |
+| Object revision | 10 |
+| Conceptual project | 50 |
+| Conceptual apartment | 50 |
+| Conceptual building | 100 |
+| Create a manual project, edit, share and view | 0 |
 
-Antes de iniciar se muestran costo y saldo. El servidor reserva el importe de
-forma transaccional; dos operaciones simultáneas no pueden gastar el mismo saldo.
-Al terminar se confirma el consumo. Un fallo, cancelación o reinicio que impide
-entregar un resultado devuelve la reserva. Si el análisis de un objeto ya usó
-inferencia y termina pidiendo información, ese intento se consume; responder
-inicia otro intento con su costo. Si faltan fotos antes de llamar a OpenAI, se
-libera la reserva. Las correcciones visuales automáticas están incluidas en el
-precio del intento. Cada operación usa una clave idempotente para reintentos de
-red; reutilizarla con otro contenido se rechaza.
+Cost and balance are shown before starting. The server reserves the amount
+transactionally; simultaneous operations cannot spend the same balance. Use is
+confirmed on completion. A failure, cancellation or restart preventing delivery
+refunds the reservation. If object analysis used inference and ends by requesting
+information, that attempt is consumed; answering starts another attempt at its
+own cost. Missing photos detected before calling OpenAI release the reservation.
+Automatic visual corrections are included in the attempt price. Each operation
+uses an idempotency key for network retries; reuse with different content is
+rejected.
 
-Además del saldo hay límites diarios: 5 intentos por persona y 20 globales por
-día UTC. Son límites de solicitudes, no equivalencias exactas de gasto en dólares.
-La cuenta de OpenAI pertenece al servidor; la clave no se entrega al navegador.
-Una vez vencida la prueba, siguen disponibles los proyectos y las funciones
-manuales. Los créditos comprados o concedidos con otro vencimiento conservan sus
-propias condiciones.
+Daily limits apply in addition to the balance: 5 attempts per person and 20
+globally per UTC day. These are request limits, not exact dollar-spending
+conversions. The OpenAI account belongs to the server; the browser never receives
+its key. Projects and manual features remain available after the trial expires.
+Purchased or granted credits with other expiration dates retain their own terms.
 
-La ruta de proyectos conceptuales genera una envolvente aproximada y una sola
-planta interior. Los agentes de **Nuevo proyecto** tienen su propio flujo de bases
-y planos por planta. Las dimensiones, ubicación y zona horaria las indica la persona; las
-aberturas y distribuciones son estimaciones. No es un relevamiento ni un plano
-apto para construir.
+Conceptual projects generate an approximate envelope and a single interior
+floor. The **New project** agents (Spanish UI: **Nuevo proyecto**) have their own
+foundations and per-floor plan workflow. The person supplies dimensions,
+location and timezone; openings and layouts are estimates. This is neither a
+survey nor a construction-ready plan.
 
-## Consumo privado de generaciones
+<a id="consumo-privado-de-generaciones"></a>
 
-La cuenta autenticada ofrece **Ajustes → Consumo**, sin salir del proyecto
-ni perder el formulario abierto. También está disponible desde la navegación
-privada en `/app/usage`. El filtro **Hoy** usa el día local del navegador;
-**Actualizar** permite volver a consultar los resultados después de cada prueba.
-La vista muestra únicamente las
-operaciones de la cuenta autenticada: compartir un proyecto no comparte la
-facturación ni la actividad de otros usuarios. Su alcance son las llamadas al
-modelo invocadas por T3 para vivienda, edificio y muebles; no incluye los chats
-ni subagentes usados para desarrollar T3, ni representa el consumo total de una
-cuenta de Codex.
+## Private generation usage
 
-`GET /api/usage` devuelve `totals`, `operations`, `projects` y `pagination`.
-Acepta `from`, `to`, `projectId`, `operationType`, `provider`, `status`, `limit`
-(1–100) y `offset`. El período selecciona operaciones por la fecha de creación
-de su reserva: `from` inclusivo y `to` exclusivo. Cada fila representa un intento
-y permite inspeccionar todas sus llamadas. Los totales se calculan sobre todas
-las operaciones filtradas antes de paginar, sin el límite de los últimos
-movimientos del historial de créditos. La duración suma el tiempo observado de
-las llamadas, no el tiempo de Blender ni la duración completa del trabajo.
+The authenticated account offers **Settings → Usage** (Spanish UI:
+**Ajustes → Consumo**) without leaving the project or losing the open form. It is
+also available in private navigation at `/app/usage`. **Today** (Spanish: **Hoy**)
+uses the browser's local day; **Refresh** (Spanish: **Actualizar**) queries results
+again after each test. The view shows only the authenticated account's operations:
+sharing a project does not share billing or other users' activity. It covers model
+calls invoked by T3 for homes, buildings and furniture, excluding chats and
+subagents used to develop T3 and total Codex account consumption.
 
-Los créditos siguen teniendo una única fuente de verdad: las reservas y el
-ledger existentes. Consumo lee ambos en una misma consulta para no duplicar una
-reserva que se confirma durante la lectura. **Consumidos** corresponde a reservas
-confirmadas; **Reservados**, al saldo todavía retenido; **Devueltos efectivamente**,
-al importe registrado por el reembolso. Una concesión vencida o revocada puede
-impedir devolver parte o todo el importe reservado. Un reembolso de créditos T3
-no elimina los tokens observados. Reutilizar un mueble en varios proyectos tampoco
-vuelve a contabilizar su generación.
+`GET /api/usage` returns `totals`, `operations`, `projects` and `pagination`.
+It accepts `from`, `to`, `projectId`, `operationType`, `provider`, `status`, `limit`
+(1–100) and `offset`. The period selects operations by reservation creation time:
+`from` inclusive and `to` exclusive. Each row represents an attempt and exposes
+all its calls. Totals cover all filtered operations before pagination, without
+the credit history's recent-movement limit. Duration sums observed call time,
+not Blender time or the entire job duration.
 
-### Registro y procedencia
+Credits retain one source of truth: existing reservations and ledger. Usage
+reads both in one query to avoid duplicating a reservation confirmed during the
+read. **Consumed** (Spanish: **Consumidos**) means confirmed reservations;
+**Reserved** (**Reservados**) is the balance still held; **Actually refunded**
+(**Devueltos efectivamente**) is the recorded refund. An expired or revoked grant
+can prevent refunding some or all of the reserved amount. A T3 credit refund does
+not erase observed tokens. Reusing furniture across projects does not count its
+generation again.
 
-`usage.sqlite`, dentro de la biblioteca configurada, contiene dos tablas:
+<a id="registro-y-procedencia"></a>
 
-| Tabla | Contenido |
+### Recording and provenance
+
+`usage.sqlite` in the configured library contains two tables:
+
+| Table | Contents |
 | --- | --- |
-| `model_usage_operation` | Operación de créditos, usuario, proyecto cuando corresponde, trabajo/run, intento, versión padre, asset publicado y estado del intento |
-| `model_usage_call` | ID de llamada y operación, etapa, iteración, proveedor, modalidad de autenticación, modelos solicitado/efectivo, inicio/fin/duración, estado y métricas |
+| `model_usage_operation` | Credit operation, user, project where applicable, job/run, attempt, parent version, published asset and attempt status |
+| `model_usage_call` | Call and operation IDs, stage, iteration, provider, authentication mode, requested/effective models, start/end/duration, status and metrics |
 
-Los trabajadores persisten el inicio de cada llamada antes de invocar al
-proveedor. Si esa escritura falla, no se inicia la inferencia. El SDK local
-registra `turn.completed.usage` con procedencia `codex.turn.completed`; Responses
-registra `usage` con procedencia `openai.responses`, también cuando la respuesta
-terminal es incompleta o fallida. La captura precede al parseo y a la validación
-de la propuesta: una respuesta inválida puede tener consumo medido. El estado
-del intento es independiente de cada llamada; una corrección posterior puede
-completar un intento que contiene una respuesta inválida. `needs_input` indica
-que el intento necesita una respuesta, aunque la llamada al proveedor haya
-terminado correctamente y corresponda confirmar sus créditos. La conciliación
-puede precisar una antigua etiqueta `succeeded` usando el estado persistido de
-ese mismo intento, sin cambiar sus llamadas ni sus créditos.
+Workers persist each call's start before invoking the provider. If that write
+fails, inference does not start. The local SDK records `turn.completed.usage`
+with `codex.turn.completed` provenance; Responses records `usage` with
+`openai.responses` provenance, including incomplete or failed terminal responses.
+Capture precedes proposal parsing and validation: an invalid response can have
+measured usage. Attempt status is independent of each call; a later correction
+can complete an attempt containing an invalid response. `needs_input` means the
+attempt needs an answer, even if the provider call completed successfully and its
+credits should be confirmed. Reconciliation can refine an old `succeeded` label
+using that same attempt's persisted state, without changing calls or credits.
 
-| Métrica persistida | Codex `usage` | Responses `usage` |
+| Persisted metric | Codex `usage` | Responses `usage` |
 | --- | --- | --- |
 | `inputTokens` | `input_tokens` | `input_tokens` |
 | `outputTokens` | `output_tokens` | `output_tokens` |
 | `cachedInputTokens` | `cached_input_tokens` | `input_tokens_details.cached_tokens` |
-| `cacheWriteInputTokens` | `cache_write_input_tokens` | `input_tokens_details.cache_write_tokens`, si se informa |
+| `cacheWriteInputTokens` | `cache_write_input_tokens` | `input_tokens_details.cache_write_tokens`, if reported |
 | `reasoningOutputTokens` | `reasoning_output_tokens` | `output_tokens_details.reasoning_tokens` |
 
-El SDK instalado contempla los cinco campos de Codex; esto no demuestra que el
-runtime entregue todos en una generación real. La verificación del subconjunto
-efectivamente observado pertenece a la evidencia de cada ejecución. El modelo
-efectivo permanece ausente cuando el proveedor no lo informa; no se copia el
-modelo solicitado para completar ese dato.
+The installed SDK includes all five Codex fields; this does not prove the runtime
+returns them all in a real generation. Each execution's evidence establishes the
+observed subset. The effective model stays absent when the provider does not
+report it; the requested model is not copied into that field.
 
-Los valores ausentes son `null`, nunca cero estimado. Una llamada tiene medición
-**completa** cuando se conocen entrada y salida, **parcial** cuando solo hay alguna
-métrica, y **sin medición** cuando no se recibió ninguna. Los desgloses opcionales
-pueden faltar aun con entrada/salida completas. Caché y razonamiento no se suman
-de nuevo a entrada/salida. Un fallo, cancelación o timeout sin uso terminal no
-demuestra consumo cero; tras un reinicio tampoco se inventa la hora de fin.
+Absent values are `null`, never estimated zero. Measurement is **complete** when
+input and output are known, **partial** when only some metrics exist, and
+**unmeasured** when none were received. Optional breakdowns can be absent even
+with complete input/output. Cache and reasoning are not added to input/output
+again. Failure, cancellation or timeout without terminal usage does not prove
+zero consumption; a restart does not justify inventing an end time.
 
-Un evento repetido completa únicamente campos ausentes, sin sumar otra vez los
-tokens. Cada reintento conserva una operación de créditos diferente y el vínculo
-histórico en `job_credit_history`; una revisión conserva su versión padre. Los
-datos históricos que nunca se registraron permanecen desconocidos. Resguardar
-`usage.sqlite` junto con las bases de cuentas, trabajos y versiones y los archivos
-de la biblioteca; restaurar solo una de estas partes puede perder sus relaciones.
-El registro de consumo no guarda prompts, imágenes, claves ni razonamiento.
+A repeated event fills only absent fields without adding tokens again. Every
+retry retains a different credit operation and its historical link in
+`job_credit_history`; a revision retains its parent version. Historical data
+never recorded remains unknown. Back up `usage.sqlite` with account, job and
+version databases and library files; restoring only one part can lose
+relationships. The usage record stores no prompts, images, keys or reasoning.
 
-Para `codex-local` se muestra **Uso mediante suscripción de Codex**. No se calculan
-dólares con tarifas API, porcentajes de cuota restante ni facturas del proveedor.
+For `codex-local`, the UI shows **Usage through a Codex subscription** (Spanish:
+**Uso mediante suscripción de Codex**). It does not calculate dollars from API
+rates, remaining quota percentages or provider invoices.
 
-### Verificación de medición
+<a id="verificación-de-medición"></a>
+
+### Measurement verification
 
 ```sh
 node --test apps/api/test/usage.test.ts apps/api/test/generation-credits.test.ts
 ```
 
-Estas pruebas usan SQLite real, un ejecutable Codex simulado y transportes
-Responses controlados. Verifican uso antes de validar, datos ausentes, eventos
-duplicados, interrupciones/reinicio, reintentos y versiones, devoluciones reales,
-aislamiento entre cuentas y totales con paginación. No realizan generaciones
-pagadas mediante API y no acreditan el recorrido E2E real de un proyecto. Las
-ejecuciones reales, sus campos observados y la reapertura del proyecto requieren
-evidencia de integración independiente.
+These tests use real SQLite, a simulated Codex executable and controlled
+Responses transports. They verify capture before validation, missing data,
+duplicate events, interruptions/restarts, retries and versions, actual refunds,
+account isolation and paginated totals. They do not perform paid API generations
+or establish a project's real E2E journey. Real executions, observed fields and
+project reopening need independent integration evidence.
 
-## Qué se considera un pago
+<a id="qué-se-considera-un-pago"></a>
 
-Abrir el checkout, volver a la aplicación o autorizar una suscripción no entrega
-créditos. La API vuelve a consultar Mercado Pago y exige un pago `approved`, sin
-reembolso, `live_mode=false`, vendedor de prueba argentino, monto y moneda exactos
-y correspondencia con la orden local. En suscripciones comprueba la factura y su
-`preapproval_id`; en recargas también comprueba la orden comercial y su preferencia.
+## What counts as a payment
 
-El identificador canónico del pago es único. La escritura del pago y la concesión
-de créditos ocurren en la misma transacción de base de datos. Webhooks repetidos,
-consultas simultáneas y reintentos no conceden el mismo saldo dos veces. Los pagos
-pendientes o rechazados conservan su estado sin entregar créditos. Un reembolso,
-incluso parcial, o contracargo retira la concesión completa: los créditos ya
-consumidos quedan como deuda y reducen el saldo disponible futuro.
+Opening checkout, returning to the application or authorizing a subscription
+does not grant credits. The API queries Mercado Pago again and requires an
+`approved` payment without refund, `live_mode=false`, an Argentine test seller,
+exact amount/currency and a matching local order. Subscriptions verify the invoice
+and its `preapproval_id`; top-ups also verify the merchant order and preference.
 
-Cancelar la suscripción detiene sus renovaciones; los créditos ya concedidos
-conservan su vencimiento original. Las órdenes canceladas siguen incluidas en la
-conciliación de reembolsos. Suspender una cuenta no impide registrar una reversión.
+The canonical payment identifier is unique. Payment recording and credit grants
+share one database transaction. Repeated webhooks, simultaneous queries and
+retries do not grant the same balance twice. Pending or rejected payments retain
+their state without credits. A refund, even partial, or chargeback removes the
+entire grant: already consumed credits become debt and reduce future available
+balance.
 
-## Configuración
+Cancellation stops subscription renewals; granted credits retain their original
+expiration. Cancelled orders remain in refund reconciliation. Suspending an
+account does not prevent recording a reversal.
 
-Variables de catálogo (valores predeterminados):
+<a id="configuración"></a>
+
+## Configuration
+
+Catalog variables (defaults):
 
 ```dotenv
 T3_TRIAL_DAYS=15
@@ -203,79 +212,80 @@ T3_LARGE_PACK_CREDITS=500
 T3_BILLING_MODE=disabled
 ```
 
-Para desarrollo local sin Mercado Pago, establecer `T3_BILLING_MODE=mock` y usar
-un `T3_PUBLIC_URL` de loopback. El modo mock está prohibido con `NODE_ENV=production`
-y con un origen público. Crear una orden no acredita saldo: hay que pulsar la
-confirmación explícita de simulación. Solo su propietario puede confirmarla; la
-misma orden no se acredita de nuevo al repetir la acción. Este modo no hace llamadas
-a Mercado Pago y sus órdenes quedan separadas de las órdenes sandbox.
+For local development without Mercado Pago, set `T3_BILLING_MODE=mock` and a
+loopback `T3_PUBLIC_URL`. Mock mode is prohibited with `NODE_ENV=production` or a
+public origin. Creating an order does not grant a balance: click the explicit
+simulation confirmation. Only its owner can approve it; repeating approval does
+not grant the order again. This mode makes no Mercado Pago calls and keeps its
+orders separate from sandbox orders.
 
-Para pruebas con el proveedor, configurar `T3_BILLING_MODE=sandbox`, origen HTTPS,
-`MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` (al menos 32 caracteres) y
-`MP_SANDBOX_PAYER_EMAIL`. Usar exclusivamente vendedor y comprador de prueba de
-Argentina. No poner claves en `VITE_*`, commits, imágenes, logs ni enlaces. El
-servidor consulta `/users/me` y exige la etiqueta `test_user` y el sitio `MLA`
-antes de crear o cancelar una operación. El prefijo del token no basta para
-determinar si la cuenta es de prueba.
+For provider testing, configure `T3_BILLING_MODE=sandbox`, an HTTPS origin,
+`MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` (at least 32 characters) and
+`MP_SANDBOX_PAYER_EMAIL`. Use only Argentine test sellers and buyers. Never put
+keys in `VITE_*`, commits, images, logs or links. Before creating or cancelling an
+operation, the server queries `/users/me` and requires `test_user` and site `MLA`.
+A token prefix alone does not establish a test account.
 
-Configurar el webhook HTTPS en `/api/billing/webhook` para los tópicos `payment`,
-`subscription_preapproval` y `subscription_authorized_payment`. El handler exige
-`x-signature`, `x-request-id` y un `data.id` de query igual al identificador del
-cuerpo. Comprueba HMAC-SHA256 en tiempo constante con tolerancia de cinco minutos.
-Las notificaciones no firmadas se rechazan; el botón **Actualizar estado** permite
-conciliar operaciones aunque no haya llegado un webhook. Mantener sincronizado el
-reloj del servidor.
+Configure the HTTPS webhook at `/api/billing/webhook` for `payment`,
+`subscription_preapproval` and `subscription_authorized_payment`. The handler
+requires `x-signature`, `x-request-id` and a query `data.id` matching the body ID.
+It verifies HMAC-SHA256 in constant time with a five-minute tolerance. Unsigned
+notifications are rejected; **Refresh status** (Spanish: **Actualizar estado**)
+reconciles operations even without a webhook. Keep the server clock synchronized.
 
-Los enlaces devueltos se limitan a HTTPS en `www.mercadopago.com.ar`. Checkout Pro
-usa `init_point` con la cuenta de prueba. Ninguna URL de retorno acredita saldo.
+Returned links are restricted to HTTPS on `www.mercadopago.com.ar`. Checkout Pro
+uses `init_point` with the test account. A return URL never grants a balance.
 
-## Operación y recuperación
+<a id="operación-y-recuperación"></a>
 
-La API persiste la referencia local antes de enviar el POST. Si el proveedor
-aceptó la operación y la conexión se interrumpió, el siguiente intento busca esa
-misma referencia y recupera el checkout. No envía un segundo POST a ciegas. Si no
-puede determinar el resultado, muestra `CHECKOUT_UNCONFIRMED`: volver a consultar
-o verificar la operación en el panel de pruebas. No borrar la fila ni forzar otro
-alta para ocultar ese estado.
+## Operation and recovery
 
-Rutas autenticadas, limitadas al usuario de sesión:
+The API persists the local reference before sending the POST. If the provider
+accepted it and the connection broke, the next attempt searches that same
+reference and recovers checkout instead of blindly sending a second POST. If the
+outcome is unknown, it shows `CHECKOUT_UNCONFIRMED`: query again or verify the
+operation in the test dashboard. Do not delete the row or force another creation
+to hide that state.
 
-| Método y ruta | Acción |
+Authenticated routes, restricted to the session user:
+
+| Method and route | Action |
 | --- | --- |
-| `GET /api/billing` | Catálogo, suscripción, últimas órdenes y pagos |
-| `POST /api/billing/checkout` | `{ "product": "monthly" }`, `pack100` o `pack500` |
-| `POST /api/billing/refresh` | Consulta canónica y conciliación de operaciones |
-| `POST /api/billing/cancel` | Cancela la renovación de la suscripción |
-| `POST /api/billing/mock/:orderId/approve` | Confirmación local explícita; solo mock |
+| `GET /api/billing` | Catalog, subscription, latest orders and payments |
+| `POST /api/billing/checkout` | `{ "product": "monthly" }`, `pack100` or `pack500` |
+| `POST /api/billing/refresh` | Canonical query and operation reconciliation |
+| `POST /api/billing/cancel` | Cancel subscription renewal |
+| `POST /api/billing/mock/:orderId/approve` | Explicit local confirmation; mock only |
 
-La conciliación consulta también pagos previamente almacenados aunque hayan
-desaparecido del historial de búsqueda del proveedor. Las búsquedas remotas están
-acotadas a 1.000 resultados y fallan de manera explícita si quedan incompletas;
-no presentan una búsqueda truncada como conciliación completa. La vista de estado
-muestra las últimas 50 órdenes y 100 pagos; el historial persistido no se elimina.
+Reconciliation also queries previously stored payments that disappeared from the
+provider's search history. Remote searches are bounded at 1,000 results and fail
+explicitly if incomplete; a truncated search is not presented as full
+reconciliation. The status view shows the latest 50 orders and 100 payments;
+persisted history is not deleted.
 
-Para desactivar nuevas operaciones, volver a `T3_BILLING_MODE=disabled`. Esto no
-cancela mandatos que ya se hubieran creado: cancelar cada suscripción de prueba
-antes de desactivar la integración si también se desean detener sus renovaciones.
-No borrar las tablas de pagos/créditos durante una vuelta atrás de código.
+To disable new operations, restore `T3_BILLING_MODE=disabled`. This does not cancel
+existing mandates: cancel each test subscription first if its renewals should
+also stop. Do not delete payment/credit tables during a code rollback.
 
-## Verificación y límites
+<a id="verificación-y-límites"></a>
+
+## Verification and limits
 
 ```sh
 node --test apps/api/test/billing.test.ts
 pnpm --filter @t3-designer/api typecheck
 ```
 
-La suite usa el transporte del proveedor simulado y una base SQLite real; con
-`TEST_DATABASE_URL` ejecuta además PostgreSQL local en un schema aislado. La URL
-debe apuntar a `localhost`/`127.0.0.1` y a una base desechable cuyo nombre termine
-en `_test`. Comprueba concurrencia, renovaciones, reversión, ownership, sandbox,
-firma, reintentos y separación mock. Estos tests no equivalen a un checkout real
-completado en Mercado Pago. La activación sandbox requiere verificar aparte las
-credenciales, notificaciones públicas, conectividad y checkout de prueba.
+The suite uses a simulated provider transport and real SQLite; with
+`TEST_DATABASE_URL`, it also exercises local PostgreSQL in an isolated schema.
+The URL must point to `localhost`/`127.0.0.1` and a disposable database ending in
+`_test`. It checks concurrency, renewals, reversal, ownership, sandbox, signatures,
+retries and mock separation. These tests do not equal a completed real Mercado
+Pago checkout. Sandbox activation needs separate verification of credentials,
+public notifications, connectivity and test checkout.
 
-Referencias oficiales consultadas para esta implementación:
+Official references consulted for this implementation:
 
-- [Crear suscripción](https://www.mercadopago.com.ar/developers/en/reference/online-payments/subscriptions/create-preapproval/post) y [buscar facturas](https://www.mercadopago.com.ar/developers/en/reference/online-payments/subscriptions/authorized-payment-search/get).
-- [Crear preferencia](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/create-preference/post), [buscar preferencias](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/search-preferences/get) y [obtener orden comercial](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/merchant-orders/get-merchant-order/get).
-- [Validación de notificaciones](https://www.mercadopago.com.ar/developers/en/docs/checkout-api-orders/optional-notifications).
+- [Create a subscription](https://www.mercadopago.com.ar/developers/en/reference/online-payments/subscriptions/create-preapproval/post) and [search invoices](https://www.mercadopago.com.ar/developers/en/reference/online-payments/subscriptions/authorized-payment-search/get).
+- [Create a preference](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/create-preference/post), [search preferences](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/search-preferences/get) and [get a merchant order](https://www.mercadopago.com.ar/developers/en/reference/online-payments/checkout-pro-preferences/merchant-orders/get-merchant-order/get).
+- [Notification validation](https://www.mercadopago.com.ar/developers/en/docs/checkout-api-orders/optional-notifications).
