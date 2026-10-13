@@ -15,15 +15,20 @@ export async function captureWebGL(page: Page, info: TestInfo, name: string, sel
       const previous = state.frameloop
       state.setFrameloop('never')
       state.gl.render(state.scene, state.camera)
+      // render() queues GPU work; finish the real frame before readback.
+      state.gl.getContext().finish()
       return previous as 'always' | 'demand' | 'never'
     })
   })
+  if (!loops.some(loop => loop !== null)) throw new Error('No active Fiber renderer was frozen for capture')
   try {
     await info.attach('capture-mode', { body: JSON.stringify({ temporaryFrameFreeze: true, previousLoops: loops, geometryChanged: false, quality3DValidated: false }), contentType: 'application/json' })
     const path = info.outputPath(`${name}.png`)
     if (selector) await page.locator(selector).screenshot({ path, timeout: 15_000 })
     else await page.screenshot({ path, fullPage: false, timeout: 15_000 })
     await info.attach(name, { path, contentType: 'image/png' })
+  } catch (error) {
+    throw new Error(`Capture ${name}, loops=${JSON.stringify(loops)}: ${error instanceof Error ? error.message : String(error)}`, { cause: error })
   } finally {
     await page.locator('canvas').evaluateAll(async (canvases, previous) => {
       const resource = performance.getEntriesByType('resource').find(entry => entry.name.includes('/@react-three_fiber.js'))
