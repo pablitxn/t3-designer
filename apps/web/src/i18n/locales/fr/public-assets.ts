@@ -8,6 +8,7 @@ export default {
   curated: 'Sélection publique de l’atelier · 3 octobre 2026. Ce sont des approximations indépendantes, pas des modèles officiels IKEA.',
   history: 'Historique enregistré', historyHelp: 'Chaque entrée correspond à une version enregistrée. Les corrections restantes sont indiquées à côté du modèle.',
   generated: 'Créé le', front: 'Face', side: 'Profil', perspective: 'Perspective',
+  imageFailed: 'Impossible de charger cette image. Réessayez ou choisissez une autre vue.', retryImage: 'Réessayer l’image',
   draftHelp: 'Les dimensions extérieures proviennent de la fiche produit archivée. La forme, les détails et les matériaux nécessitent encore une vérification visuelle.',
   measurements: 'Fiche IKEA consultée le 3 octobre 2026',
   correction: 'Nouvelle correction nécessaire', correctionHelp: 'L’examen visuel de cette version relève encore des différences dans l’assise, le volume du dossier et la jonction avec le piètement. Ce modèle n’est pas considéré comme une réplique fidèle.',

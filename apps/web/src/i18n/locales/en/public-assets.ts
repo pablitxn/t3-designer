@@ -8,6 +8,7 @@ export default {
   curated: 'Public workshop selection · 3 October 2026. These are independent approximations, not official IKEA models.',
   history: 'Saved history', historyHelp: 'Each entry is a saved version. Outstanding corrections remain visible alongside the model.',
   generated: 'Created', front: 'Front', side: 'Side', perspective: 'Perspective',
+  imageFailed: 'We could not load this image. You can retry or choose another view.', retryImage: 'Retry image',
   draftHelp: 'Outer dimensions come from the archived product page. Shape, details and materials still need visual review.',
   measurements: 'IKEA product page consulted on 3 October 2026',
   correction: 'Further correction needed', correctionHelp: 'The visual review of this version still identifies differences in the seat, backrest volume and connection to the base. It is not considered a faithful replica.',

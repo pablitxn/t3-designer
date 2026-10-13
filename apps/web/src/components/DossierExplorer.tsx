@@ -52,8 +52,14 @@ function SourceDialog({ source, onClose, facts }: { source: DossierSource; onClo
   const dialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const element = dialog.current
+    const opener = document.activeElement
     element?.showModal()
-    return () => element?.close()
+    return () => {
+      element?.close()
+      // React removes the dialog before effect cleanup, so native close alone
+      // cannot reliably restore focus to the source button.
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true })
+    }
   }, [])
   const linkedFacts = facts.filter(fact => fact.sourceIds.includes(source.id))
   return <dialog ref={dialog} className="dossier-dialog" onCancel={onClose} onClick={event => { if (event.target === event.currentTarget) onClose() }} aria-labelledby="dossier-source-title">

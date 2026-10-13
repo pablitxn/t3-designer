@@ -10,6 +10,16 @@ const AssetModelPreview = lazy(() => import('./AssetModelPreview').then(module =
 type PreviewMode = 'perspective' | 'front' | 'side' | 'model'
 const imageFiles = { perspective: 'preview.png', front: 'front.png', side: 'side.png' } as const
 
+function PreviewImage({ url, alt }: { url: string; alt: string }) {
+  const { t } = useTranslation('assets')
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+  return failed ? <div className="public-preview-error">
+    <p role="status">{t('publicDemo.imageFailed')}</p>
+    <button type="button" className="workshop-primary" onClick={() => { setAttempt(previous => previous + 1); setFailed(false) }}>{t('publicDemo.retryImage')}</button>
+  </div> : <img key={attempt} src={url} alt={alt} width="512" height="512" onError={() => setFailed(true)} />
+}
+
 /** The public gallery never connects to the private workshop or starts a job. */
 export function PublicAssetsExplorer() {
   const { t } = useTranslation('assets')
@@ -61,7 +71,7 @@ export function PublicAssetsExplorer() {
       </div>
       <div className="workshop-detail-body">
         <div className="workshop-preview">
-          {mode === 'model' ? <Suspense fallback={<p className="workshop-canvas-message" role="status">{t('library.loading')}</p>}><AssetModelPreview url={publicAssetFile(revision, 'model.glb')} /></Suspense> : <img src={publicAssetFile(revision, imageFiles[mode])} alt={`${selected.name} · ${t('revision.version', { count: revision.version })} · ${t(`publicDemo.${mode}`)}`} width="512" height="512" />}
+          {mode === 'model' ? <Suspense fallback={<p className="workshop-canvas-message" role="status">{t('library.loading')}</p>}><AssetModelPreview url={publicAssetFile(revision, 'model.glb')} /></Suspense> : <PreviewImage key={publicAssetFile(revision, imageFiles[mode])} url={publicAssetFile(revision, imageFiles[mode])} alt={`${selected.name} · ${t('revision.version', { count: revision.version })} · ${t(`publicDemo.${mode}`)}`} />}
         </div>
         <div className="workshop-specs">
           <span className="workshop-draft">{t('library.draft')}</span>
