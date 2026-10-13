@@ -162,3 +162,22 @@ are available in the separate stacked language PR for the owner to review.
 Checker smoke verification in a disposable local Git fixture: English prose
 passes; a known Spanish heading fails; a malformed new commit subject fails.
 The fixture was deleted afterward. This is not a test of general English quality.
+
+## Reconciliation and CI observation
+
+The language branch reconciles `d3e54ad90c8c792d43d2944874149bbd381246eb` with a
+Conventional Commit merge on its own branch. The integration remote was fetched
+again at 2026-10-13T15:56:19Z and still matched that SHA. This task never pushed
+integration. Reconciled-tree `pnpm check` and full build/distribution audit pass;
+latest demo audit 710 files and full audit 742 files. Original source QA matrices
+were not rerun locally for these prose changes.
+
+New source-SHA CI observation: PR3, PR4, PR5 and PR7 global checks were in progress;
+GitGuardian passed on all five. PR6 run
+[38425930520](https://github.com/pablitxn/t3-designer/actions/runs/38425930520) failed
+its `Run pnpm audit:history` step, confirmed through job metadata. The local
+baseline already reproduced the historical editor blob finding. It remains
+unresolved because fixing it by rewriting published history or weakening the gate
+is outside this task. Earlier matrix “pending” records publication-time status;
+this observation supersedes it for PR6. The stacked draft PR's own CI must be
+reported against its published head, not inferred from source or integration runs.
