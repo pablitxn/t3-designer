@@ -187,7 +187,7 @@ export function AssetsExplorer() {
     const interval = setInterval(() => { if (!document.hidden) void refresh() }, 3000)
     const onVisibility = () => { if (!document.hidden) void refresh() }
     document.addEventListener('visibilitychange', onVisibility)
-    return () => { mounted.current = false; clearInterval(interval); poll.current?.abort(); document.removeEventListener('visibilitychange', onVisibility) }
+    return () => { mounted.current = false; clearInterval(interval); poll.current?.abort(); poll.current = null; document.removeEventListener('visibilitychange', onVisibility) }
   }, [refresh])
 
   const connected = snapshot.connection === 'online'
