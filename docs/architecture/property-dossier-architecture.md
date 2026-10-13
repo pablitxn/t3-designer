@@ -1,77 +1,84 @@
-# Expedientes privados: arquitectura futura
+<a id="expedientes-privados-arquitectura-futura"></a>
 
-Estado: propuesta opcional. La aplicación pública conserva un expediente de
-demostración generalizado y toda su geometría reutilizable. Los identificadores,
-la ubicación precisa y los documentos del caso original se mantienen fuera del
-software público. Esta separación no implementa S3 ni un importador documental.
+# Private property dossiers: future architecture
 
-## Recomendación
+Status: optional proposal. The public application retains a generalized demo
+dossier and all its reusable geometry. Identifiers, precise location and original
+case documents stay outside public software. This separation implements neither
+S3 nor a document importer.
 
-Separar el repositorio público de la aplicación y el repositorio privado del
-expediente. Usar Markdown estructurado como fuente de verdad del conocimiento
-revisado, almacenamiento compatible con S3 para los documentos y una base SQL
-para las consultas y el trabajo de incorporación de información.
+<a id="recomendación"></a>
 
-La fuente de verdad se define **por tipo de información**. No habrá un dato
-revisado editable independientemente en Markdown y en SQL. La DB será una copia
-consultable de ese conocimiento, pero tendrá también información operativa propia.
+## Recommendation
 
-| Información | Lugar autoritativo | Función de las demás copias |
+Separate the public application repository from the private dossier repository.
+Use structured Markdown as the source of truth for reviewed knowledge, S3-compatible
+storage for documents and SQL for queries and information intake workflows.
+
+The source of truth is defined **by information type**. Reviewed data will not be
+independently editable in both Markdown and SQL. The database is a queryable copy
+of that knowledge, with additional operational data of its own.
+
+| Information | Authoritative location | Role of other copies |
 | --- | --- | --- |
-| Código, esquema, migraciones, importadores y documentación técnica | Git público de la aplicación | Imágenes y despliegues se construyen desde una revisión de código. |
-| Investigación, conclusiones, medidas revisadas, citas y relaciones del inmueble | Markdown estructurado en Git privado del expediente | SQL permite consultar, filtrar y presentar una revisión importada. |
-| PDFs, fotos, videos y binarios originales del expediente | Objetos privados en S3, con ID y hash estables | Git conserva manifiestos/referencias; SQL mantiene el catálogo operativo. |
-| Capturas pequeñas de APIs y manifiestos de evidencia | Archivos versionados del expediente privado | Se indexan junto a sus citas; una captura grande puede residir en S3. Cada fuente declara dónde está su original. |
-| Cargas recibidas, extracción pendiente, candidatos, tareas y errores | DB | Aún no son hechos revisados; archivos asociados en S3. |
-| Usuarios, permisos, sesiones y auditoría de operación | DB | No se reconstruyen a partir de los Markdown. |
-| Texto OCR, miniaturas y otros derivados | S3 para bytes; DB para estado/versiones | Regenerables solo si se conservan original, configuración y herramientas necesarias. |
-| Búsqueda y tablas de hechos revisados | SQL como proyección | Reconstruibles desde Git privado y manifiestos validados. |
-| Ejemplos ficticios y assets genéricos redistribuibles | Git público o paquete público de assets | Pueden sembrar un entorno demo; no incorporan el caso real. |
+| Code, schema, migrations, importers and technical docs | Public application Git | Images and deployments are built from a code revision. |
+| Research, conclusions, reviewed dimensions, citations and property relationships | Structured Markdown in private dossier Git | SQL queries, filters and presents an imported revision. |
+| Original dossier PDFs, photos, videos and binaries | Private S3 objects with stable ID and hash | Git stores manifests/references; SQL keeps the operational catalog. |
+| Small API snapshots and evidence manifests | Versioned private dossier files | Indexed with citations; large snapshots may live in S3. Each source declares its original location. |
+| Received uploads, pending extraction, candidates, tasks and errors | Database | Not yet reviewed facts; associated files in S3. |
+| Users, permissions, sessions and operational audit | Database | Not reconstructed from Markdown. |
+| OCR text, thumbnails and other derivatives | S3 for bytes; database for state/versions | Regenerable only with original, configuration and necessary tools retained. |
+| Search and reviewed-fact tables | SQL projection | Reconstructible from private Git and validated manifests. |
+| Fictional examples and redistributable generic assets | Public Git or public asset package | Can seed a demo without incorporating the real case. |
 
-Que una dirección o ficha catastral venga de una API pública no convierte en
-público nuestro expediente, sus relaciones con el interior ni la identidad del
-propietario. El ejemplo de la aplicación abierta será generalizado. La instalación
-que consulta el departamento real será privada.
+A public API address or cadastral record does not make our dossier, its interior
+relationships or the owner's identity public. The open application's example
+will be generalized. The installation accessing the real apartment will be private.
 
-## Repositorios y archivos
+<a id="repositorios-y-archivos"></a>
 
-Estructura propuesta, todavía no creada:
+## Repositories and files
+
+Proposed structure, not yet created. Spanish path names below are proposed
+identifiers retained from the original design:
 
 ```text
-t3-designer/                         # Repo público de software
-  apps/web/                         # Las tres vistas, sin datos reales embebidos
-  apps/api/                         # Lectura y futura ingestión autorizada
-  packages/dossier-schema/           # Contrato y validadores puros
-  packages/dossier-import/           # Lector Markdown y reconciliación
-  migrations/                       # Esquema de la base de datos
-  docs/                             # Arquitectura, método y documentación técnica
-  examples/demo/                    # Markdown y assets ficticios/licenciados
+t3-designer/                         # Public software repository
+  apps/web/                         # Three views without embedded real data
+  apps/api/                         # Reading and future authorized ingestion
+  packages/dossier-schema/           # Contract and pure validators
+  packages/dossier-import/           # Markdown reader and reconciliation
+  migrations/                       # Database schema
+  docs/                             # Architecture, method and technical docs
+  examples/demo/                    # Fictional/licensed Markdown and assets
 
-t3-dossier/                         # Repo Git privado, fuera del checkout público
-  inmueble.md                       # Índice y referencias por ID
-  entidades/*.md                    # Parcela, edificio, lote, departamento, estancia
-  hechos/*.md                       # Afirmaciones revisadas y evidencia
-  investigaciones/*.md              # Narrativa y cuestiones abiertas
-  fuentes/*.md                      # Emisor, versión, acceso, citas y ubicación
-  snapshots/                        # Capturas pequeñas con procedencia
-  manifests/                        # Índice de objetos y revisiones de contenido
+t3-dossier/                         # Private Git outside the public checkout
+  inmueble.md                       # Index and references by ID
+  entidades/*.md                    # Parcel, building, lot, apartment, room
+  hechos/*.md                       # Reviewed assertions and evidence
+  investigaciones/*.md              # Narrative and open questions
+  fuentes/*.md                      # Issuer, version, access, citations, location
+  snapshots/                        # Small snapshots with provenance
+  manifests/                        # Object index and content revisions
 ```
 
-Los nombres de repositorio son propuestas. El ejemplo público puede convertirse
-en una plantilla de contenido, pero no publica el expediente original.
+Repository names are proposals. The public example can become a content template
+without publishing the original dossier.
 
-Un checkout del repo privado proporciona los `.md` en el filesystem. En ejecución
-puede montarse como solo lectura para el importador; no se copia dentro de la
-imagen pública. El backend de lectura no necesita escribir en Git para mostrar
-información. Las revisiones de contenido son independientes de las de software.
+A private repository checkout provides `.md` files on the filesystem. At runtime
+it can be mounted read-only for the importer, without copying it into the public
+image. The read backend does not need Git writes to display information. Content
+revisions are independent of software revisions.
 
-## Markdown como fuente de verdad útil
+<a id="markdown-como-fuente-de-verdad-útil"></a>
 
-Los campos que alimentan la aplicación estarán en frontmatter YAML validado.
-El cuerpo Markdown explica la interpretación, las diferencias y las decisiones.
-No se extraerán cifras de tablas libres mediante heurísticas para poblar SQL.
+## Markdown as a useful source of truth
 
-Ejemplo **ficticio**, abreviado para explicar el formato:
+Application fields will use validated YAML frontmatter. The Markdown body
+explains interpretations, differences and decisions. Free-form tables will not
+be heuristically mined for SQL values.
+
+Abbreviated **fictional** format example:
 
 ```markdown
 ---
@@ -90,178 +97,185 @@ assertions:
     locator:
       printedPage: "3"
 ---
-# Superficie del ejemplo
+# Example area
 
-Dato inventado para probar la aplicación. No describe un inmueble real.
+Invented data for application testing. It describes no real property.
 ```
 
-Cada afirmación real necesita ámbito, definición, unidad, tipo de evidencia,
-estado de revisión, fuente y localizador. La fuente añade emisor, fechas,
-versión, privacidad y referencia al archivo/objeto original. Separar página real
-del PDF y numeración impresa; en APIs, conservar campo/JSON Pointer; en videos,
-ID y tiempo. Una relación entre entidades también requiere evidencia.
+Every real assertion needs scope, definition, unit, evidence type, review status,
+source and locator. Sources add issuer, dates, version, privacy and an original
+file/object reference. Distinguish PDF page position from printed numbering;
+preserve fields/JSON Pointers for APIs and ID/time for videos. Entity relationships
+also require evidence.
 
-Las tablas de la web se generan desde esos campos. Cuando una tabla Markdown
-repita valores, se generará o comprobará su consistencia; no habrá otro catálogo
-JSON editable con las mismas cantidades. Una exportación JSON generada puede
-existir como artefacto de una revisión, sin convertirse en otro origen editable.
+Web tables are generated from these fields. Markdown tables repeating values
+will be generated or checked for consistency; there will be no independently
+editable JSON catalog with the same quantities. Generated JSON may be a revision
+artifact without becoming another editable source.
 
-Mantener alternativas y discrepancias: la misma superficie con otra definición,
-fecha o ámbito no reemplaza automáticamente una afirmación. La precisión
-numérica tampoco mejora la precisión de la fuente. Lo desconocido se conserva
-como desconocido, y el modelo 3D sigue identificado como representación estimada.
+Retain alternatives and discrepancies: an area with another definition, date or
+scope does not automatically replace an assertion. Numeric precision does not
+improve source accuracy. Unknowns remain unknown; the 3D model stays identified
+as an estimated representation.
 
-## Flujo de datos y autoridad
+<a id="flujo-de-datos-y-autoridad"></a>
+
+## Data flow and authority
 
 ```mermaid
 flowchart LR
-  Code["Git público: aplicación y demo"] --> Seed["Importador validado"]
-  MD["Git privado: Markdown y manifiestos"] --> Import["Importador validado"]
-  Seed --> Demo["Entorno demo"]
-  Import --> Projection["SQL: proyección de hechos revisados"]
-  Upload["Carga privada"] --> Objects["S3: originales y derivados"]
-  Upload --> Workflow["SQL: recepción y extracción pendiente"]
-  Objects --> Review["Extracción y revisión"]
+  Code["Public Git: application and demo"] --> Seed["Validated importer"]
+  MD["Private Git: Markdown and manifests"] --> Import["Validated importer"]
+  Seed --> Demo["Demo environment"]
+  Import --> Projection["SQL: reviewed-fact projection"]
+  Upload["Private upload"] --> Objects["S3: originals and derivatives"]
+  Upload --> Workflow["SQL: receipt and pending extraction"]
+  Objects --> Review["Extraction and review"]
   Workflow --> Review
-  Review --> Draft["Propuesta de cambio documental"]
+  Review --> Draft["Proposed document change"]
   Draft --> MD
-  Projection --> API["API privada"]
+  Projection --> API["Private API"]
   Workflow --> API
   Objects --> API
-  API --> View["Vista Documentación"]
+  API --> View["Documentation view"]
 ```
 
-Una corrección de un hecho consolidado modifica su Markdown y después se
-reimporta. Si la interfaz permite editar más adelante, producirá una propuesta de
-cambio contra la revisión de Git conocida; no escribirá directamente el mismo
-valor en SQL. La primera versión puede usar importación por comando y edición de
-archivos: evita implementar escritura automática en Git antes de necesitarla.
+Correcting an established fact changes its Markdown, followed by reimport. A
+future editing UI will propose a change against the known Git revision rather
+than writing the same value directly to SQL. The first version can use command
+imports and file editing, avoiding automatic Git writes before they are needed.
 
-Una carga nueva crea un registro operativo privado y un objeto. La extracción
-produce candidatos, no hechos confirmados. Revisarlos permite incorporarlos a
-Markdown con sus citas. Guardar la relación entre la recepción, el candidato y la
-afirmación incorporada; no perder la evidencia ni confundir pendiente con vigente.
+A new upload creates a private operational record and object. Extraction produces
+candidates, not confirmed facts. Review incorporates them into Markdown with
+citations. Preserve links between receipt, candidate and incorporated assertion;
+do not lose evidence or confuse pending with current state.
 
-## Sembrar DB y storage desde archivos
+<a id="sembrar-db-y-storage-desde-archivos"></a>
 
-La idea de llenar la DB y storage desde el codebase funciona para el catálogo y
-assets **que realmente están en ese origen**. Habrá entradas separadas:
+## Seed database and storage from files
 
-- Demo: repo público, datos generalizados y recursos redistribuibles.
-- Expediente real: repo privado y archivos originales privados que se incorporen.
-- Cargas realizadas desde la aplicación: DB/S3, fuera del alcance de la semilla.
+Seeding works for catalogs and assets **actually present in that source**.
+Separate entrypoints cover:
 
-Contrato del importador:
+- Demo: public repository, generalized data and redistributable resources.
+- Real dossier: private repository and incorporated private originals.
+- Application uploads: database/S3, outside seed scope.
 
-1. Validar esquema, referencias, ámbito y acceso; mostrar un plan de cambios antes
-   de aplicarlo. Distinguir versión de esquema, revisión Git y revisión importada.
-2. Identificar cada registro por `originNamespace` e ID estable; conservar hash,
-   revisión de origen y qué importador lo administra. No emparejar por nombre.
-3. Importar dos veces la misma revisión produce el mismo estado. Un cambio solo
-   actualiza registros administrados por ese origen, nunca cargas operativas.
-4. Publicar la proyección SQL en una transacción después de validar el conjunto.
-   Una revisión inválida deja la anterior activa e identifica el error.
-5. Un registro ausente puede marcarse retirado dentro de su origen. No borrar
-   automáticamente objetos, historial ni cargas porque falten en un manifiesto.
-6. Un objeto nuevo recibe una referencia estable y hash de contenido. Nunca
-   reemplazar silenciosamente los bytes de un documento al que ya apuntan citas.
+Importer contract:
 
-SQL y S3 no comparten una transacción. La ingestión usará estados explícitos
-(`pending`, `stored`, `indexed`, `failed`) y operaciones reintentables: comprobar
-objeto y hash antes de marcar disponible; tolerar cortes entre ambos sistemas;
-reconciliar objetos huérfanos con revisión, sin eliminaciones automáticas.
+1. Validate schema, references, scope and access; show a change plan before applying.
+   Distinguish schema version, Git revision and imported revision.
+2. Identify records by `originNamespace` and stable ID; retain hash, origin
+   revision and managing importer. Do not match by name.
+3. Reimporting the same revision produces the same state. Changes update only
+   records managed by that origin, never operational uploads.
+4. Publish the SQL projection transactionally after validating the whole set.
+   An invalid revision leaves the previous one active and identifies the error.
+5. Missing records may be marked withdrawn within their origin. Do not
+   automatically delete objects, history or uploads absent from a manifest.
+6. New objects receive stable references and content hashes. Never silently
+   replace bytes of a document already referenced by citations.
 
-No ejecutar un reset de datos al arrancar o desplegar. Una semilla inicial y una
-actualización controlada son operaciones distintas del inicio de la aplicación.
-Comandos orientativos: `dossier:validate`, `dossier:plan`, `dossier:import` y
-`demo:seed`; aún no existen.
+SQL and S3 share no transaction. Ingestion uses explicit states (`pending`,
+`stored`, `indexed`, `failed`) and retryable operations: verify object/hash before
+marking availability, tolerate interruptions between systems and reconcile orphan
+objects with review rather than automatic deletion.
 
-## Qué se puede reconstruir y qué necesita conservarse
+Do not reset data at startup or deployment. Initial seeds and controlled updates
+are separate from application startup. Illustrative commands `dossier:validate`,
+`dossier:plan`, `dossier:import` and `demo:seed` do not exist yet.
 
-| Elemento perdido | ¿Se recupera desde Git? |
+<a id="qué-se-puede-reconstruir-y-qué-necesita-conservarse"></a>
+
+## What is reconstructible and what must be retained
+
+| Lost item | Recoverable from Git? |
 | --- | --- |
-| Código y demo versionada | Sí, desde su revisión y dependencias. |
-| Proyección SQL de hechos revisados | Sí, desde el repo documental y manifiestos; los objetos citados deben seguir disponibles. |
-| Original subido únicamente a S3 | No. Un manifiesto con hash no contiene los bytes. |
-| Carga/OCR pendiente, usuarios, permisos o auditoría | No necesariamente; requieren conservar la DB y objetos correspondientes. |
-| Contenedor de aplicación | Debe poder reemplazarse manteniendo el contenido persistente. |
+| Code and versioned demo | Yes, from their revision and dependencies. |
+| Reviewed-fact SQL projection | Yes, from document repository and manifests; cited objects must remain available. |
+| Original uploaded only to S3 | No. A hash manifest does not contain bytes. |
+| Pending upload/OCR, users, permissions or audit | Not necessarily; retain database and corresponding objects. |
+| Application container | Must be replaceable while retaining persistent content. |
 
-La estrategia de recuperación debe contemplar **Git privado, DB y objetos**, no
-solo volver a ejecutar semillas. La versión de un objeto puede ayudar a recuperar
-sobrescrituras; S3 la tiene desactivada por defecto y hay que configurarla
-explícitamente. Validar su soporte al elegir un proveedor compatible.
-[Documentación oficial de S3 Versioning](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html).
+Recovery must cover **private Git, database and objects**, not only reseeding.
+Object versioning can recover overwrites; S3 disables it by default and requires
+explicit configuration. Validate support when choosing a compatible provider.
+[Official S3 Versioning documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html).
 
-## Containers y elección de servicios
+<a id="containers-y-elección-de-servicios"></a>
 
-Propuesta mínima: una API, una base PostgreSQL, un proveedor S3 y un importador
-que corre como comando/job. PostgreSQL es una recomendación de diseño, no una
-instancia creada ni una exigencia de infraestructura existente. No hacen falta
-por ahora microservicios adicionales, CMS, buscador vectorial ni cola separada.
+## Containers and service selection
 
-PostgreSQL y el servidor de objetos pueden correr en containers. Lo que debe
-persistir fuera de su capa descartable son sus datos, mediante volúmenes/discos o
-servicios externos. Docker documenta que los volúmenes sobreviven a la eliminación
-del container; un archivo en su capa escribible no lo hace. Persistencia no
-significa necesariamente otro servidor. [Docker: almacenamiento](https://docs.docker.com/engine/storage/).
+Minimal proposal: an API, PostgreSQL database, S3 provider and importer running
+as a command/job. PostgreSQL is a design recommendation, not a created instance
+or existing infrastructure requirement. Additional microservices, CMS, vector
+search and a separate queue are unnecessary for now.
 
-Definir un adaptador S3 por contrato, sin depender de funciones exclusivas de un
-producto. **No elegir automáticamente MinIO Community:** al consultar su
-[repositorio oficial](https://github.com/minio/minio) el 27/09/2026 aparece archivado
-el 25/04/2026 y declara que ya no se mantiene. El proveedor se decidirá al evaluar
-el despliegue, mantenimiento y funciones necesarias. Esto no cambia el reparto
-de responsabilidades de esta propuesta.
+PostgreSQL and object servers can run in containers. Their data must persist
+outside the disposable layer, using volumes/disks or external services. Docker
+volumes survive container deletion; files in the writable layer do not.
+Persistence does not necessarily mean another server.
+[Docker storage](https://docs.docker.com/engine/storage/).
 
-## Acceso privado y publicación del software
+Define an S3 adapter by contract, without product-exclusive features. **Do not
+automatically choose MinIO Community:** its [official repository](https://github.com/minio/minio),
+consulted on 27/09/2026, appeared archived on 25/04/2026 and stated it was no longer
+maintained. Choose a provider after assessing deployment, maintenance and required
+features. This does not change the proposal's division of responsibilities.
 
-La API verifica acceso al expediente antes de devolver metadatos o documentos.
-Los buckets reales son privados. Los originales se sirven mediante la API o con
-URLs firmadas de corta duración tras autorización; no se guardan URLs firmadas
-como referencias duraderas. El manifiesto usa IDs, claves/versiones de objeto y
-hashes; no credenciales ni rutas personales del disco.
+<a id="acceso-privado-y-publicación-del-software"></a>
 
-La UI de un mismo software puede funcionar como demo pública con datos generalizados
-y como instalación privada con el expediente real. Cambiar el dataset no habilita
-su acceso público. Los derivados, extracciones y miniaturas heredan el acceso del
-original. Ningún contenido privado entra en frontend estático, fixtures públicos,
-imágenes de container, logs de CI públicos ni documentación del repo abierto.
+## Private access and software publication
 
-## Frontera actual del ejemplo público
+The API verifies dossier access before returning metadata/documents. Real buckets
+are private. Originals are served through the API or short-lived signed URLs
+after authorization; signed URLs are not durable references. Manifests use IDs,
+object keys/versions and hashes, never credentials or personal disk paths.
 
-La geometría de la demo permanece reutilizable, con IDs locales, origen solar
-regional aproximado y datos descritos como ilustrativos. Los originales del caso
-real, evidencias operativas y registros de ubicación están fuera del repo público.
-Conservar geometría distintiva no garantiza anonimato frente a comparación de
-formas. Un expediente real futuro requiere autorización y control de acceso.
+One software UI can serve a public generalized demo and a private real dossier.
+Changing the dataset does not authorize public access. Derivatives, extractions
+and thumbnails inherit original access. Private content never enters static
+frontend, public fixtures, container images, public CI logs or open-repository docs.
 
-Los nuevos originales y derivados no deben entrar automáticamente en fuentes,
-fixtures, snapshots, binarios, capturas ni builds públicos. La limpieza del árbol
-actual no borra contenido del historial Git: revisar la historia por separado y
-no reescribirla sin una decisión explícita y coordinada.
+<a id="frontera-actual-del-ejemplo-público"></a>
 
-## Fases de implementación
+## Current public-example boundary
 
-1. **Contrato y clasificación:** consolidar este reparto, formato Markdown y
-   manifiestos; inventariar lo que pasa al expediente privado. Mantener operativa
-   la reconstrucción existente mientras se prepara el ejemplo generalizado.
-2. **Separar aplicación y contenido:** repo privado/dataset, carga por API,
-   exportación Blender desde una revisión explícita y demo pública generalizada.
-   Elegir proveedor y persistencia cuando exista un destino de despliegue concreto.
-3. **Primera vista documental:** Markdown privado → importador → proyección SQL →
-   API → tercera pestaña. Lectura de documentos S3 y actualización sin reconstruir
-   React. Mantener estado de las vistas 3D, carga diferida y lectura sin WebGL.
-4. **Documentos de compra:** carga privada, extracción por página, revisión,
-   candidatos y promoción a Markdown; conflictos y cambios de versión visibles.
-5. **Operación y publicación:** comprobar separación, autorización, integridad y
-   recuperación. Publicar solo software/demo; el expediente sigue privado.
+Demo geometry remains reusable, with local IDs, an approximate regional solar
+origin and illustrative data. Real-case originals, operational evidence and
+location records are outside the public repository. Distinctive geometry does
+not guarantee anonymity against shape comparison. A future real dossier needs
+authorization and access control.
 
-Pruebas significativas al implementar: reimportación idempotente, revisión nueva
-visible sin rebuild, ausencia de modificaciones a uploads al reconciliar,
-recuperación tras un corte SQL/S3, referencias y versiones válidas, actualización
-concurrente rechazada si parte de una revisión obsoleta, reconstrucción de la
-proyección y acceso denegado a documentos ajenos. Verificar que repositorio
-público, historial y build no contienen datos del caso privado.
+New originals and derivatives must not automatically enter public sources,
+fixtures, snapshots, binaries, captures or builds. Cleaning the current tree
+does not erase Git history: review history separately and do not rewrite it
+without an explicit coordinated decision.
 
-Esta propuesta no implementa servicios, repositorios nuevos, importadores ni
-migraciones. La tercera vista se desarrolla por separado con el alcance de la
-[POC local](../research/property-dossier.md), sin depender de esos componentes futuros.
+<a id="fases-de-implementación"></a>
+
+## Implementation phases
+
+1. **Contract and classification:** consolidate responsibilities, Markdown format
+   and manifests; inventory private dossier content. Keep reconstruction working
+   while preparing the generalized example.
+2. **Separate application and content:** private repository/dataset, API loading,
+   Blender export from an explicit revision and generalized public demo. Choose
+   provider/persistence when a concrete deployment destination exists.
+3. **First document view:** private Markdown → importer → SQL projection → API →
+   third tab. Read S3 documents and update without rebuilding React. Retain 3D view
+   state, lazy loading and reading without WebGL.
+4. **Purchase documents:** private uploads, per-page extraction, review, candidates
+   and promotion to Markdown; expose conflicts and version changes.
+5. **Operation and publication:** verify separation, authorization, integrity and
+   recovery. Publish only software/demo; the dossier stays private.
+
+Meaningful implementation tests: idempotent reimport, new revision visible without
+rebuild, uploads unchanged by reconciliation, recovery after SQL/S3 interruption,
+valid references/versions, rejection of concurrent updates based on stale
+revisions, projection reconstruction and denial of others' documents. Verify
+public repository, history and build contain no private-case data.
+
+This proposal implements no services, new repositories, importers or migrations.
+The third view develops separately within the [local POC](../research/property-dossier.md),
+without depending on these future components.

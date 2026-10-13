@@ -1,133 +1,238 @@
-# T3: QA del editor de proyecto compartido (2026-10-13)
+<a id="t3-qa-del-editor-de-proyecto-compartido-2026-10-13"></a>
 
-Alcance: miembro standard con permiso `editor` en un proyecto ajeno. Escenas y assets existentes; sin inferencia, generación, render Blender, pagos, correo, datos de producción, merge ni deploy. El escenario usa la escena bundled como geometría de demostración, usuarios `@example.test`, proyectos aislados y bases SQLite temporales. No modifica archivos de modelos.
+# T3: shared-project editor QA (2026-10-13)
 
-## Revisión y contexto
+Scope: standard member with `editor` permission on another user's project.
+Existing scenes/assets; no inference, generation, Blender rendering, payments,
+email, production data, merge or deployment. Scenario uses bundled demo geometry,
+`@example.test` users, isolated projects and temporary SQLite. Model files unchanged.
 
-- Checkout T3 limpio inicial: rama `work`, `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. `fetch origin` y `ls-remote origin refs/heads/main` devolvieron ese mismo SHA. No se descartaron cambios ni se usó reset. Rama de trabajo: `qa/shared-project-editor-20261013`. Checkpoint de implementación: `f304628a3fdc96ba1efbfa3d4b4735a4f53a31ec`; el HEAD final consta en `git-metadata.json` de la evidencia.
-- Atlas limpio inicial: `work@bce92720a7f7e7ee48e02e949485ae3ab1a7b921`; fetch y fast-forward a `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`. Sin cambios de contenido en Atlas.
-- Leídos: ambos AGENTS, atlas/AGENTS, atlas-navigate, source-of-truth, catálogos de repos/relaciones, wiki T3, retrospectiva IMM-02 y workflows `private-projects.md` / `local-asset-workshop.md`.
-- Atlas atribuye T3 a Immolab y separa baseline local del 12/10 de deploy histórico del 04/10. Esta tanda agrega evidencia local; no revalida producción, CI remota, proveedores ni PostgreSQL.
-- No se expuso una herramienta para comprobar/cambiar el modelo efectivo, reasoning o velocidad de esta sesión; esos ajustes no se acreditan por inspección del repo.
+<a id="revisión-y-contexto"></a>
 
-## Inventario previo del rol
+## Revision and context
 
-Derivado de `App.tsx`, `PrivateApp.tsx`, `ApartmentEditor.tsx`, `ProjectScene.tsx`, `AccountHub.tsx`, `api.ts`, `projects.ts` y `server.ts`.
+- Initially clean T3 checkout: `work`, `7a851eb7ab703016d78c102afeaac2a8d97b08f3`.
+  `fetch origin` and `ls-remote origin refs/heads/main` returned the same SHA.
+  No discarded changes/reset. Working branch `qa/shared-project-editor-20261013`.
+  Implementation checkpoint `f304628a3fdc96ba1efbfa3d4b4735a4f53a31ec`; final HEAD
+  is in evidence `git-metadata.json`.
+- Initially clean Atlas: `work@bce92720a7f7e7ee48e02e949485ae3ab1a7b921`; fetched and
+  fast-forwarded to `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`. No Atlas content changes.
+- Read: both AGENTS, atlas/AGENTS, atlas-navigate, source-of-truth, repository/
+  relationship catalogs, T3 wiki, IMM-02 retrospective and workflows
+  `private-projects.md` / `local-asset-workshop.md`.
+- Atlas places T3 in Immolab and distinguishes October 12 local baseline from
+  October 4 historical deployment. This batch adds local evidence without
+  revalidating production, remote CI, providers or PostgreSQL.
+- No tool was exposed to verify/change this session's effective model, reasoning
+  or speed; repository inspection does not establish those settings.
 
-| Ruta | Acciones accesibles y frontera |
+<a id="inventario-previo-del-rol"></a>
+
+## Prior role inventory
+
+Derived from `App.tsx`, `PrivateApp.tsx`, `ApartmentEditor.tsx`, `ProjectScene.tsx`,
+`AccountHub.tsx`, `api.ts`, `projects.ts` and `server.ts`.
+
+| Route | Available actions and boundary |
 | --- | --- |
-| `/login` | Login, validación, error genérico, demo y ajustes. |
-| `/app` | Lista propia/compartida, abrir, crear/cancelar y duplicar. |
-| `/app/projects/:id` | Nombre/notas, guardado explícito por revisión, recuperación 409, duplicado propio. Sólo propietario administra miembros; editor no puede agregar/quitar acceso. |
-| Editor listo | Cambiar/duplicar variantes y layouts; seleccionar/colocar/mover/rotar/duplicar/quitar instancias; undo/redo; cámara 3D/plano/muros/snap; acabados/pisos/aberturas/luces y fecha/hora solar. Divisores son otra acción disponible, excluida del recorrido real de esta tanda. |
-| Inspección del proyecto | Recorrido en primera persona; contexto/sol del edificio; energía solar. Biblioteca personal para adjuntar un asset existente al proyecto. |
-| Fundamentos según documento | Editar preparación/planos/fuentes; seleccionar plantas aceptadas; leer historial/versiones/checkpoints; workshops de vivienda/edificio y aceptar/cancelar/restaurar con los permisos correspondientes. Las acciones de generación están deshabilitadas en este escenario. |
-| `/app/assets` | Biblioteca e historial privados, previsualización/descarga; generación/revisión/retry/cancel disponibles sólo según configuración. Sin activos personales en los fixtures reales de esta tanda. |
-| `/app/credits`, `/app/usage` | Saldo/plan/consumo propio. Checkout deshabilitado. |
-| `/app/generate` | Ruta directa de generación conceptual; excluida y deshabilitada. |
-| `/app/users` | Sólo admin o premium con invitaciones; no aparece para editor standard. Ser admin global no concede acceso privado al proyecto. |
-| `/invite`, `/recover`, `/` | Activación/recovery y demo pública separados; no implican membresía del proyecto. |
+| `/login` | Login, validation, generic error, demo and settings. |
+| `/app` | Own/shared list, open, create/cancel and duplicate. |
+| `/app/projects/:id` | Name/notes, explicit revision save, 409 recovery, own duplicate. Only owner manages members; editor cannot add/remove access. |
+| Ready editor | Change/duplicate variants/layouts; select/place/move/rotate/duplicate/remove instances; undo/redo; 3D/plan/wall/snap camera; finishes/floors/openings/lights and solar date/time. Dividers are available but excluded from this batch's real flows. |
+| Project inspection | First-person walkthrough; building context/sun; solar energy. Personal library can attach an existing asset. |
+| Document-dependent foundations | Edit preparation/plans/sources; select accepted floors; read history/versions/checkpoints; home/building workshops and accept/cancel/restore with appropriate permissions. Generation disabled here. |
+| `/app/assets` | Private library/history, preview/download; generation/revision/retry/cancel depend on configuration. No personal assets in this batch's real fixtures. |
+| `/app/credits`, `/app/usage` | Own balance/plan/usage. Checkout disabled. |
+| `/app/generate` | Direct conceptual-generation route; excluded/disabled. |
+| `/app/users` | Only admin or premium invitations; absent for standard editor. Global admin grants no private project access. |
+| `/invite`, `/recover`, `/` | Activation/recovery and separate public demo; no implied project membership. |
 
-## Motores y límites
+<a id="motores-y-límites"></a>
 
-Playwright 1.63.0, Chromium del sistema **154.0.8037.57**, ejecutable `/usr/bin/chromium`, Linux. WebGL 2 real con ANGLE/SwiftShader; rasterizado por software, sin prueba de GPU física. Navegación, inputs, selectores, clics, un tap móvil, screenshots y efectos persistidos se ejecutaron en navegador.
+## Engines and limits
 
-| Configuración | Viewport CSS | isMobile / hasTouch | Estado |
+Playwright 1.63.0, system Chromium **154.0.8037.57**, `/usr/bin/chromium`, Linux.
+Real WebGL 2 with ANGLE/SwiftShader software rasterization, no physical-GPU test.
+Navigation, inputs, selectors, clicks, one mobile tap, screenshots and persisted
+effects exercised in browser.
+
+| Configuration | CSS viewport | isMobile / hasTouch | Status |
 | --- | --- | --- | --- |
 | Chromium mobile narrow | 360 x 800 | true / true | PASS |
 | Chromium mobile wide | 430 x 932 | true / true | PASS |
 | Chromium desktop | 1440 x 1000 | false / false | PASS |
-| WebKit 26.6 requerido por Playwright (build 2359) | mismos tres tamaños previstos | móvil/desktop | BLOCKED: binario ausente; descargas oficiales CDN y mirror devuelven 403 Domain forbidden |
+| Required Playwright WebKit 26.6 (build 2359) | same three planned sizes | mobile/desktop | BLOCKED: binary absent; official CDN/mirror downloads return 403 Domain forbidden |
 
-Los tamaños móviles son emulación táctil. No se probaron dispositivos físicos iPhone/Android, Safari de sistema ni Firefox. La versión WebKit indicada es la requerida por el paquete, no un motor ejecutado. Los timestamps, versión efectiva y opciones del contexto están adjuntos al reporte de cada test.
+Mobile sizes are touch emulation. No physical iPhone/Android, system Safari or
+Firefox tests. WebKit version is package-required, not executed. Timestamps,
+effective version and context options accompany each test report.
 
-## Matriz de recorridos
+<a id="matriz-de-recorridos"></a>
 
-`C360`, `C430` y `C1440` corresponden a las tres configuraciones Chromium anteriores. Todos los casos reales usan Vite full -> proxy -> entrypoint de API -> Better Auth/SQLite. Los fixtures renuevan usuarios/proyectos por test. Las fallas de transporte se inyectan en el navegador; los casos de pérdida de respuesta y timeout hacen primero `route.fetch()` contra el backend real y verifican el commit en DB.
+## Flow matrix
 
-| Flujo | C360 | C430 | C1440 | Evidencia / efecto comprobado |
+`C360`, `C430`, `C1440` refer to the Chromium configurations above. Real cases use
+full Vite -> proxy -> API entrypoint -> Better Auth/SQLite; users/projects renew
+per test. Browser injects transport failures; lost-response/timeout cases first
+use `route.fetch()` against real backend and verify database commit.
+
+| Flow | C360 | C430 | C1440 | Evidence / verified effect |
 | --- | --- | --- | --- | --- |
-| Login requerido, required fields, password incorrecto y login válido | PASS | PASS | PASS | Error genérico, cookies/sesión del backend real. |
-| Listado propio/compartido y acceso por ID ajeno | PASS | PASS | PASS | Proyecto extraño ausente y pantalla no disponible. |
-| Límites owner/editor y admin sin grant | PASS | PASS | PASS | Compartir no aparece; POST/DELETE de miembros 403; admin ve 404. |
-| Variantes/layouts independientes y acabados | PASS | PASS | PASS | Dos variantes; layouts preservan muebles, pisos, puertas, cortinas y luz de 4000 K. Save/reload y lectura DB. |
-| Notes como texto, nombre vacío y valor numérico inválido | PASS | PASS | PASS | HTML no ejecutado; whitespace no guarda; campo inválido vuelve al valor anterior. |
-| Doble clic de guardar y undo/redo | PASS | PASS | PASS | Una revisión persistida, sin alerta falsa; estados de objetos correctos. |
-| Edición concurrente del owner y 409 | PASS | PASS | PASS | Borrador retenido, botones bloqueados, recarga del owner y posterior revisión 3. |
-| Respuesta perdida después del commit | PASS | PASS | PASS | Abort del transporte; retry da 409, no segundo commit; recarga reconcilia. |
-| Timeout real de respuesta | PASS | PASS | PASS | Espera de 16s contra timeout de app de 15s; mismo resultado persistido/reconciliado. |
-| Error inicial y retry; error de guardado antes del commit | PASS | PASS | PASS | 503 de carga recuperable; draft retenido y revisión intacta antes de retry. |
-| Cancelar link/logout, Atrás/Adelante y aceptar salida | PASS | PASS | PASS | Draft preservado al cancelar; aceptar salida descarta sólo draft, no DB. |
-| Revocar durante edición | PASS | PASS | PASS | PUT rechazado; escena/controles retirados; DB intacta; reload/list no exponen proyecto. |
-| Revocar durante recuperación 409 | PASS | PASS | PASS | GET 404 retira escena previamente cargada; persiste cambio del owner. |
-| Downgrade editor -> viewer y sesión revocada | PASS | PASS | PASS | PUT 403, campos readonly, sin Save; sesión real eliminada y foco lleva a login sin datos privados. |
-| Copia independiente propiedad del editor | PASS | PASS | PASS | Cambios sólo en copia; owner original no cambia; compartir aparece sólo en la copia propia. |
-| Biblioteca/lista de proyectos vacías y cancelar creación | PASS | PASS | PASS | Cero proyectos tras cancelación/invalid required; outage de lista recuperable. |
-| Créditos y consumo propios | PASS | PASS | PASS | Saldo visible, checkout disabled, pantalla de consumo. |
-| Assets existentes: colocar/rotar/duplicar/quitar, plano y contexto | PASS | PASS | PASS | Dos instancias persistidas, tap en móvil, cámara y contexto sin modificar modelo GLB. |
-| Respuesta tardía tras cambiar de proyecto | PASS | PASS | PASS | Commit permitido llega tarde; no reemplaza campos del otro proyecto. |
-| Asset privado adjunto y aislamiento entre layouts | NOT RUN | NOT RUN | NOT RUN | PASS suplementario con mocks existentes en desktop y WebGL disabled; no acreditado con API real por esta tanda. |
-| Preparación multi-floor, upload de planes, aceptar/restaurar checkpoints | NOT RUN | NOT RUN | NOT RUN | Escenario real usa un proyecto legacy listo; no se acreditan estos recorridos UI en esta tanda. |
-| Workshop de generación/retry/cancel, IA/Blender, diseño de geometría | NOT RUN | NOT RUN | NOT RUN | Excluido por mandato; ningún job de generación iniciado. |
-| Walkthrough, edición de energía, fullscreen, descarga de assets personales | NOT RUN | NOT RUN | NOT RUN | Inventariados, no recorridos por este rol aquí; contexto y biblioteca vacía sí inspeccionados. |
-| Toda la matriz en WebKit | BLOCKED | BLOCKED | BLOCKED | Setup del motor, no defecto de producto. |
+| Required login/fields, wrong password and valid login | PASS | PASS | PASS | Generic error, real backend cookies/session. |
+| Own/shared list and foreign project ID access | PASS | PASS | PASS | Foreign project absent/unavailable. |
+| Owner/editor limits and admin without grant | PASS | PASS | PASS | No sharing; member POST/DELETE 403; admin 404. |
+| Independent variants/layouts and finishes | PASS | PASS | PASS | Two variants; layouts preserve furniture/floors/doors/curtains/4000 K light. Save/reload/database read. |
+| Plain-text notes, empty name, invalid numeric value | PASS | PASS | PASS | HTML not executed; whitespace not saved; invalid field restores previous value. |
+| Save double-click and undo/redo | PASS | PASS | PASS | One persisted revision, no false alert; correct object states. |
+| Concurrent owner editing and 409 | PASS | PASS | PASS | Draft retained, buttons blocked, owner reload then revision 3. |
+| Response lost after commit | PASS | PASS | PASS | Transport abort; retry 409 without second commit; reload reconciles. |
+| Real response timeout | PASS | PASS | PASS | 16s wait against app 15s timeout; same persisted/reconciled outcome. |
+| Initial error/retry; save error before commit | PASS | PASS | PASS | Recoverable load 503; retained draft/revision before retry. |
+| Cancel link/logout, Back/Forward, confirm departure | PASS | PASS | PASS | Cancellation preserves draft; departure discards draft only, not database. |
+| Revoke while editing | PASS | PASS | PASS | PUT rejected; scene/controls removed; database intact; reload/list hide project. |
+| Revoke during 409 recovery | PASS | PASS | PASS | GET 404 removes loaded scene; owner's change persists. |
+| Editor -> viewer downgrade and revoked session | PASS | PASS | PASS | PUT 403, readonly fields/no Save; real session deleted; focus leads to login without private data. |
+| Independent editor-owned copy | PASS | PASS | PASS | Only copy changes; original unchanged; sharing only on own copy. |
+| Empty library/project list and cancelled creation | PASS | PASS | PASS | Zero projects after cancellation/invalid required; recoverable list outage. |
+| Own credits/usage | PASS | PASS | PASS | Balance visible, checkout disabled, usage screen. |
+| Existing assets: place/rotate/duplicate/remove, plan/context | PASS | PASS | PASS | Two persisted instances, mobile tap, camera/context without GLB change. |
+| Late response after project change | PASS | PASS | PASS | Allowed commit arrives late without replacing other project's fields. |
+| Attached private asset and layout isolation | NOT RUN | NOT RUN | NOT RUN | Supplementary existing-mock desktop PASS, WebGL disabled; not established with real API here. |
+| Multi-floor preparation, plan upload, checkpoint accept/restore | NOT RUN | NOT RUN | NOT RUN | Ready legacy project; these UI flows not established. |
+| Generation/retry/cancel workshop, AI/Blender, geometry design | NOT RUN | NOT RUN | NOT RUN | Excluded by mandate; no generation job started. |
+| Walkthrough, energy editing, fullscreen, personal-asset download | NOT RUN | NOT RUN | NOT RUN | Inventoried but not exercised for this role; context/empty library inspected. |
+| Entire matrix in WebKit | BLOCKED | BLOCKED | BLOCKED | Engine setup, not product defect. |
 
-Bugs de producto pendientes conocidos en los recorridos ejecutados: ninguno. Bloqueos y superficies NOT RUN se enumeran arriba. No queda cobertura absoluta acreditada. La revocación se detecta al siguiente request del proyecto o reload; no se agregó polling de membresías ni se promete borrar información ya descargada.
+Known pending product bugs in executed flows: none. Blocks/NOT RUN listed above;
+no absolute coverage established. Revocation is detected on next project request
+or reload; no membership polling added or promise to erase downloaded information.
 
-## Bugs corregidos y evidencia anterior
+<a id="bugs-corregidos-y-evidencia-anterior"></a>
 
-1. **Cancelación de history perdía el draft.** Baseline real: `cancel route...` FAIL; URL queda `/app` tras cancelar Atrás. El router raíz consulta `t3:before-navigate` antes de actualizar la ruta; el editor conserva un único guard. Regresión prueba cancelación de Atrás, Adelante, link y logout, además de salida confirmada.
-2. **Revocación conservaba el editor.** Baseline real: `revocation during edit...` FAIL; error genérico y controles todavía presentes tras PUT 404. Ahora retira el proyecto cargado y muestra no disponible; los GET 403/404 tampoco conservan una escena vieja.
-3. **Downgrade a viewer conservaba escritura aparente.** Baseline real: `downgrade to viewer...` FAIL; Save/inputs seguían editables aunque PUT devuelve 403. Ahora descarta la edición no autorizada y obtiene el documento con el rol vigente. El servidor ya rechazaba ambas escrituras: no se cambió autorización backend.
+## Corrected bugs and earlier evidence
 
-Baseline estable: 7 PASS / 3 FAIL en Chromium 360. Primeras ejecuciones también tuvieron errores del propio harness (selector de label que incluye opciones, aserción de ValidityState y respuesta 503 de un solo uso consumida por StrictMode); se corrigieron sin cambiar producto ni debilitar assertions. Las regresiones mantienen retries=0.
+1. **History cancellation lost draft.** Real baseline `cancel route...` FAIL;
+   URL remains `/app` after cancelled Back. Root router consults
+   `t3:before-navigate` before route update; editor retains one guard. Regression
+   covers Back/Forward/link/logout cancellation and confirmed departure.
+2. **Revocation retained editor.** Real baseline `revocation during edit...` FAIL;
+   generic error and controls remain after PUT 404. Loaded project is now removed
+   and unavailable shown; GET 403/404 also cannot retain old scenes.
+3. **Viewer downgrade retained apparent writing.** Real baseline
+   `downgrade to viewer...` FAIL; Save/inputs editable despite PUT 403. Unauthorized
+   edits are discarded and document fetched with current role. Backend already
+   rejected both writes; authorization unchanged.
 
-## Comandos y resultados
+Stable baseline 7 PASS / 3 FAIL in Chromium 360. Initial runs also had harness
+errors: label selector including options, ValidityState assertion, one-use 503
+consumed by StrictMode. Fixed without product changes or weakened assertions.
+Regressions retain retries=0.
 
-En este Cloud el wrapper pnpm inicialmente intentó instalar/validar dependencias en su directorio personal de datos (fuera del workspace). Se utilizaron las dependencias ya instaladas con los flags de pnpm para evitar esa reparación automática. No se cambiaron gates, dependencias ni lockfile.
+<a id="comandos-y-resultados"></a>
+
+## Commands and results
+
+Cloud pnpm wrapper initially tried dependency installation/validation in its
+personal data directory outside workspace. Existing dependencies were used with
+pnpm flags preventing automatic repair. Gates/dependencies/lockfile unchanged.
 
 ```sh
-# Reproducción de los recorridos reales
+# Reproduce real flows
 T3_QA_CHROMIUM=/usr/bin/chromium \
   pnpm --config.manage-package-manager-versions=false \
        --config.verify-deps-before-run=false test:shared-editor \
        --project chromium-mobile-narrow --project chromium-mobile-wide --project chromium-desktop
 
-# Gates completos sobre la revisión final
+# Complete gates on final revision
 pnpm --config.manage-package-manager-versions=false --config.verify-deps-before-run=false check
 pnpm --config.manage-package-manager-versions=false --config.verify-deps-before-run=false build:full
 pnpm --config.manage-package-manager-versions=false --config.verify-deps-before-run=false audit:dist
 ```
 
-- Matriz real: 45 PASS (15 casos x 3 viewports), 0 FAIL, 0 skipped, 0 flaky, retries=0. Recheck del fixture con probe Blender aislada: otros 3 PASS, uno por viewport.
-- `check`: PASS; lint, tipos, 648 tests Node y 35 Python, scene:verify, build demo, audit demo (671 archivos, cero fallos).
-- `build:full`: PASS; audit full PASS (703 archivos, cero fallos).
-- Regresiones existentes `editor.spec.ts` y `private-auth.spec.ts`: 12 PASS, desktop Chromium 1440 x 1000, WebGL disabled, mocks existentes. Config temporal conservada en evidencia. No se usaron como sustituto de los recorridos reales.
-- `git diff --check`: PASS. El audit final detectó una ruta personal en este informe nuevo; se retiró la ruta del documento y se reejecutó el gate sin modificar su política.
-- WARN previos: chunks Vite de más de 500kB, deprecación THREE.Clock, env NO_COLOR/FORCE_COLOR. No se rebajaron umbrales para ocultarlos.
-- WebKit: FAIL del launcher por binario ausente, clasificado BLOCKED; instalación en `/workspace/.cache/t3-browsers` falla con 403 de los hosts oficiales. Sin cambio de permisos/políticas para eludirlo.
-- Health: el recorrido de biblioteca consultó la comprobación de disponibilidad `blender --version`; no ejecutó generación/render ni modificó modelos. El fixture final apunta esa comprobación a un binario inexistente para evitar también esa llamada en próximos arranques.
-- Launcher manual: arranque y `/api/live` 200 comprobados; SIGINT al proceso cerró servidores y retiró su directorio temporal. En esta PTY Cloud, el carácter Ctrl+C no llegó al proceso Node; se usó SIGINT al PID propio. En terminal normal usar Ctrl+C.
+- Real matrix 45 PASS (15 cases x 3 viewports), 0 FAIL/skipped/flaky, retries=0.
+  Fixture recheck with isolated Blender probe: another 3 PASS, one per viewport.
+- `check` PASS: lint/types, 648 Node and 35 Python, scene:verify, demo build/audit
+  (671 files, zero failures).
+- `build:full` PASS; full audit PASS (703 files, zero failures).
+- Existing `editor.spec.ts`/`private-auth.spec.ts`: 12 PASS, desktop Chromium
+  1440 x 1000, WebGL disabled, existing mocks. Temporary config in evidence;
+  no substitution for real flows.
+- `git diff --check` PASS. Final audit detected a personal path in this new
+  report; removed and gate rerun without policy changes.
+- Prior WARN: Vite chunks >500kB, THREE.Clock deprecation, NO_COLOR/FORCE_COLOR.
+  No thresholds lowered to hide them.
+- WebKit launcher FAIL from missing binary, classified BLOCKED; installation in
+  `/workspace/.cache/t3-browsers` fails official-host 403. No bypass policy changes.
+- Health: library flow queried `blender --version`; no generation/rendering/model
+  changes. Final fixture directs probe at nonexistent binary to avoid future call.
+- Manual launcher start and `/api/live` 200 checked; SIGINT closed servers and
+  removed temporary directory. Cloud PTY Ctrl+C did not reach Node; SIGINT sent
+  only to own PID. Normal terminals use Ctrl+C.
 
-## Evidencia y archivos compartidos
+<a id="evidencia-y-archivos-compartidos"></a>
 
-Evidencia local ignorada por Git: `artifacts/qa/shared-editor-20261013/`. Contiene logs/reportes, resultados de browser, PNGs, trazas, config temporal suplementaria y resumen JSON/CSV. Cada trace se abre con `pnpm --filter @t3-designer/web exec playwright show-trace <trace.zip>` (o binario local de Playwright).
+## Evidence and shared files
 
-Muestras inspeccionadas: [desktop guardado](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-variants-lay-be98d-ist-through-save-and-reload-chromium-desktop/saved-editor.png), [plano móvil ancho](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-existing-obj-1e72e-oval-and-context-inspection-chromium-mobile-wide/existing-assets-plan.png), [traza de cancelación móvil](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-cancel-route-d3e0d-ion-preserves-unsaved-draft-chromium-mobile-narrow/trace.zip), [matriz CSV](../../artifacts/qa/shared-editor-20261013/matrix.csv). Estos enlaces son archivos locales de esta sesión, no material publicado en Git.
+Git-ignored local evidence: `artifacts/qa/shared-editor-20261013/`, containing
+logs/reports, browser results, PNGs, traces, temporary supplementary config and
+JSON/CSV summary. Open traces with
+`pnpm --filter @t3-designer/web exec playwright show-trace <trace.zip>` or local binary.
 
-Cambios de producto compartidos que requieren integración con las otras ramas: `apps/web/src/App.tsx` y `apps/web/src/private/PrivateApp.tsx`. Integración de tooling: `package.json`, `apps/web/package.json`, `apps/web/playwright.config.ts` y `apps/web/tsconfig.json`. Archivos nuevos del rol: fixture/spec/config de shared-editor, launcher de demostración y este informe. Sin cambios en modelos, assets, backend, políticas, credenciales ni Atlas.
+Inspected samples: desktop save
+(`../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-variants-lay-be98d-ist-through-save-and-reload-chromium-desktop/saved-editor.png`),
+wide mobile plan
+(`../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-existing-obj-1e72e-oval-and-context-inspection-chromium-mobile-wide/existing-assets-plan.png`),
+mobile cancellation trace
+(`../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-cancel-route-d3e0d-ion-preserves-unsaved-draft-chromium-mobile-narrow/trace.zip`),
+matrix (`../../artifacts/qa/shared-editor-20261013/matrix.csv`). These are local
+session files, not published Git material.
 
-## Checklist manual reproducible
+Shared product changes needing role integration: `apps/web/src/App.tsx` and
+`apps/web/src/private/PrivateApp.tsx`. Tooling: `package.json`,
+`apps/web/package.json`, `apps/web/playwright.config.ts`, `apps/web/tsconfig.json`.
+New role files: shared-editor fixture/spec/config, demo launcher and this report.
+No models/assets/backend/policy/credential/Atlas changes.
 
-1. Desde la raíz del repo, ejecutar `node apps/web/test/shared-editor-demo.ts`. Usa Node >=24 y dependencias del repo. El proceso imprime origen loopback, URL del proyecto, emails ficticios y password de fixture; no pide claves ni muestra links de activación. Todo persiste sólo mientras vive este escenario temporal. Mantener la terminal abierta.
-2. Abrir perfiles/sesiones de navegador separados para `editor`, `owner` y `admin`, usando exclusivamente las credenciales de fixture impresas. En editor, ir a `/login`, entrar, abrir la card Shared editor y comprobar rol Puede editar. No aparece Compartir; admin sin grant ve proyecto no disponible.
-3. En editor, duplicar variante y distribución. Mover una instancia del asset existente y cambiar piso/puerta/luz. Guardar, recargar y alternar los layouts: el original conserva sus opciones. La biblioteca personal está vacía; no iniciar workshops.
-4. Abrir el mismo proyecto en owner y editor. Guardar notas distintas en owner; intentar guardar el editor con revisión anterior. Debe aparecer conflicto, conservar draft y permitir Cargar última versión.
-5. Cambiar notas sin guardar; intentar cerrar sesión, link Todos los proyectos y Atrás/Adelante. Cancelar conserva el draft. Aceptar salida descarta sólo los cambios no guardados.
-6. Desde Compartir en owner, cambiar el acceso del editor a viewer (o quitarlo). Con editor ya abierto, intentar guardar: readonly tras downgrade; proyecto no disponible y sin controles tras revocación. Recargar/listar confirma el mismo límite.
-7. Usar la suite reproducible para pérdida de respuesta, timeout y respuestas tardías: primero hace un commit real y luego interrumpe/retiene la respuesta. No requiere provocar fallas en servicios externos.
-8. Detener con Ctrl+C en terminal normal; si el Cloud no transmite la señal, enviar SIGINT al PID de este launcher únicamente. El cleanup cierra Vite/API y borra las bases ficticias. Un nuevo arranque genera cuentas/proyectos independientes.
+<a id="checklist-manual-reproducible"></a>
 
-## Resumen para integrar después en Atlas
+## Reproducible manual checklist
 
-T3 `qa/shared-project-editor-20261013`, sobre `7a851eb`, recibió fixes locales para cancelación de history y controles tras revocación/downgrade del editor. Evidencia en este informe y artifacts; no pushed/merged/deployed. QA real Chromium móvil/desktop con Better Auth/SQLite, sin inferencia ni creación de modelos. Admin global sin membresía sigue sin acceso privado. WebKit bloqueado por egress oficial; PostgreSQL/producción, modelos aceptados multi-floor y generación no acreditados en esta tanda. Atlas quedó limpio en `27ae86c`; incorporar este resumen en su intake en una sesión posterior, sin confundir estos resultados con deploy histórico del 04/10.
+1. Run `node apps/web/test/shared-editor-demo.ts` from repo root with Node >=24
+   and repo dependencies. It prints loopback origin, project URL, fictional emails
+   and fixture password; requests no keys/activation links. Persistence lasts
+   only for temporary scenario lifetime. Keep terminal open.
+2. Open separate editor/owner/admin browser sessions using printed fixture
+   credentials only. Editor logs in at `/login`, opens Shared editor card and
+   checks edit permission (Spanish UI: Puede editar). Sharing (Compartir) absent;
+   admin without grant sees unavailable project.
+3. Duplicate variant/layout; move existing asset and change floor/door/light.
+   Save/reload/switch layouts; original retains choices. Personal library empty;
+   do not start workshops.
+4. Owner/editor open same project. Owner saves different notes; editor saves stale
+   revision. Conflict must retain draft and offer latest-version reload (Spanish
+   UI: Cargar última versión).
+5. Edit unsaved notes; try logout, all-projects link (Todos los proyectos),
+   Back/Forward. Cancellation retains draft; accepted departure discards unsaved
+   changes only.
+6. Owner changes editor to viewer or removes access in Sharing (Compartir).
+   Open editor save becomes readonly after downgrade; revoked project unavailable
+   without controls. Reload/list confirms boundary.
+7. Use reproducible suite for response loss/timeouts/late responses: real commit
+   followed by held/interrupted response, without external-service failures.
+8. Stop with Ctrl+C normally or SIGINT only to this launcher PID if Cloud does
+   not transmit it. Cleanup closes Vite/API and deletes fictional databases;
+   next start creates independent accounts/projects.
+
+<a id="resumen-para-integrar-después-en-atlas"></a>
+
+## Summary for later Atlas integration
+
+Historical delivery checkpoint: T3 `qa/shared-project-editor-20261013` on
+`7a851eb` received history-cancellation and revoked/downgraded-editor UI fixes.
+Evidence in report/artifacts; at that time not pushed/merged/deployed. Real
+Chromium mobile/desktop QA with Better Auth/SQLite, no inference/model creation.
+Global admin without membership still lacks private access. WebKit blocked by
+official egress; PostgreSQL/production, accepted multi-floor models and generation
+not established here. Atlas clean at `27ae86c`; incorporate summary in later
+intake without confusing results with October 4 deployment.
