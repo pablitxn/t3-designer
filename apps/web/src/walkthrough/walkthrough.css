@@ -23,7 +23,7 @@
 .walk-button:disabled { opacity: .5; cursor: not-allowed; }
 .walk-primary { background: #315b42; color: #fff; border-color: #315b42; width: 100%; padding: 13px; }
 .walk-primary:hover { background: #234b33; }
-.walk-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: #1c302a26; padding: 70px 24px 170px; pointer-events: none; }
+.walk-overlay { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; background: #1c302a26; padding: 70px 24px 170px; pointer-events: none; }
 .walk-start-card { width: min(100%, 390px); background: var(--settings-bg, #fafbf5); border: 1px solid var(--settings-border); border-radius: 16px; padding: 26px; box-shadow: 0 20px 60px #14271e30; pointer-events: auto; }
 .walk-start-card h3 { font-size: 23px; letter-spacing: -.035em; font-weight: 500; margin: 10px 0 22px; }
 .walk-start-card p { font-size: 11px; line-height: 1.7; color: var(--settings-muted); }
