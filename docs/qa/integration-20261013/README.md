@@ -82,3 +82,9 @@ Detener solamente los procesos propios con Ctrl-C. Para desactivar los mocks de 
 ## Predocumentacion para Atlas
 
 Cinco fichas **pendientes de consolidacion**: [anonimo](predocumentation/T3-QA-20261013-ANONYMOUS.md), [admin](predocumentation/T3-QA-20261013-GLOBAL-ADMIN.md), [owner](predocumentation/T3-QA-20261013-PROJECT-OWNER.md), [editor](predocumentation/T3-QA-20261013-SHARED-EDITOR.md), [viewer](predocumentation/T3-QA-20261013-PROJECT-VIEWER.md). Incluyen IDs, SHAs, fixes, decisiones, evidencia, limites y destinos propuestos. Atlas leido en `27ae86c`, sin escrituras. No actualizar evidencia historica de deploy ni afirmar release mediante esta tanda.
+
+## Ultima verificacion de captura
+
+Run [38411681088](https://github.com/pablitxn/t3-designer/actions/runs/38411681088), SHA `f7b13a1`: global, admin, owner, editor, owner-webgl, anonymous-webgl y GitGuardian PASS; viewer conserva un unico FAIL de screenshot desktop de 15 s. Sin fallo de permisos/persistencia acreditado en ese run.
+
+Corte `900c0cfb089ef577b6900fb1317be1e3d45857df` espera `gl.finish()` despues de renderizar el frame real para completar comandos GPU antes del readback. Verifica que existe un renderer congelado y anota nombre/loops si falla. No aumenta el presupuesto screenshot 15 s ni timeout del caso; no cambia modelos, sombras, DPR o input. Viewer afectado: 3/3 PASS local; lint/tipos PASS. Todo queda en GitHub, sin empaquetados pesados. CI sobre esta revision queda pendiente hasta que lo confirme el recibo/PR.
