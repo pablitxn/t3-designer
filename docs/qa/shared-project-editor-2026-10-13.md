@@ -84,7 +84,7 @@ Baseline estable: 7 PASS / 3 FAIL en Chromium 360. Primeras ejecuciones también
 
 ## Comandos y resultados
 
-En este Cloud el wrapper pnpm inicialmente intentó instalar/validar dependencias en `/home/agent/.local/share/pnpm` (fuera del workspace). Se utilizaron las dependencias ya instaladas con los flags de pnpm para evitar esa reparación automática. No se cambiaron gates, dependencias ni lockfile.
+En este Cloud el wrapper pnpm inicialmente intentó instalar/validar dependencias en su directorio personal de datos (fuera del workspace). Se utilizaron las dependencias ya instaladas con los flags de pnpm para evitar esa reparación automática. No se cambiaron gates, dependencias ni lockfile.
 
 ```sh
 # Reproducción de los recorridos reales
@@ -103,7 +103,7 @@ pnpm --config.manage-package-manager-versions=false --config.verify-deps-before-
 - `check`: PASS; lint, tipos, 648 tests Node y 35 Python, scene:verify, build demo, audit demo (671 archivos, cero fallos).
 - `build:full`: PASS; audit full PASS (703 archivos, cero fallos).
 - Regresiones existentes `editor.spec.ts` y `private-auth.spec.ts`: 12 PASS, desktop Chromium 1440 x 1000, WebGL disabled, mocks existentes. Config temporal conservada en evidencia. No se usaron como sustituto de los recorridos reales.
-- `git diff --check`: PASS.
+- `git diff --check`: PASS. El audit final detectó una ruta personal en este informe nuevo; se retiró la ruta del documento y se reejecutó el gate sin modificar su política.
 - WARN previos: chunks Vite de más de 500kB, deprecación THREE.Clock, env NO_COLOR/FORCE_COLOR. No se rebajaron umbrales para ocultarlos.
 - WebKit: FAIL del launcher por binario ausente, clasificado BLOCKED; instalación en `/workspace/.cache/t3-browsers` falla con 403 de los hosts oficiales. Sin cambio de permisos/políticas para eludirlo.
 - Health: el recorrido de biblioteca consultó la comprobación de disponibilidad `blender --version`; no ejecutó generación/render ni modificó modelos. El fixture final apunta esa comprobación a un binario inexistente para evitar también esa llamada en próximos arranques.
@@ -112,6 +112,8 @@ pnpm --config.manage-package-manager-versions=false --config.verify-deps-before-
 ## Evidencia y archivos compartidos
 
 Evidencia local ignorada por Git: `artifacts/qa/shared-editor-20261013/`. Contiene logs/reportes, resultados de browser, PNGs, trazas, config temporal suplementaria y resumen JSON/CSV. Cada trace se abre con `pnpm --filter @t3-designer/web exec playwright show-trace <trace.zip>` (o binario local de Playwright).
+
+Muestras inspeccionadas: [desktop guardado](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-variants-lay-be98d-ist-through-save-and-reload-chromium-desktop/saved-editor.png), [plano móvil ancho](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-existing-obj-1e72e-oval-and-context-inspection-chromium-mobile-wide/existing-assets-plan.png), [traza de cancelación móvil](../../artifacts/qa/shared-editor-20261013/browser-final/shared-editor-cancel-route-d3e0d-ion-preserves-unsaved-draft-chromium-mobile-narrow/trace.zip), [matriz CSV](../../artifacts/qa/shared-editor-20261013/matrix.csv). Estos enlaces son archivos locales de esta sesión, no material publicado en Git.
 
 Cambios de producto compartidos que requieren integración con las otras ramas: `apps/web/src/App.tsx` y `apps/web/src/private/PrivateApp.tsx`. Integración de tooling: `package.json`, `apps/web/package.json`, `apps/web/playwright.config.ts` y `apps/web/tsconfig.json`. Archivos nuevos del rol: fixture/spec/config de shared-editor, launcher de demostración y este informe. Sin cambios en modelos, assets, backend, políticas, credenciales ni Atlas.
 
