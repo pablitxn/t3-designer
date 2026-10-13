@@ -52,7 +52,8 @@
     "qa:admin": "node scripts/qa-global-admin.mjs",
     "audit:public": "node scripts/audit_public_artifacts.mjs",
     "audit:dist": "node scripts/audit_public_artifacts.mjs --build apps/web/dist",
-    "audit:history": "node scripts/audit_public_history.mjs"
+    "audit:history": "node scripts/audit_public_history.mjs",
+    "test:shared-editor": "pnpm --filter @t3-designer/web test:shared-editor"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
