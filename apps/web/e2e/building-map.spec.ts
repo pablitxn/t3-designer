@@ -10,7 +10,7 @@ const tileImage = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAD
 test.use({
   locale: 'en-GB',
   reducedMotion: 'reduce',
-  launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
+  launchOptions: { ...(process.env.T3_ANONYMOUS_EXECUTABLE ? { executablePath: process.env.T3_ANONYMOUS_EXECUTABLE } : {}), args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
 })
 
 test.beforeEach(async ({ page }) => {
