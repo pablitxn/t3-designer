@@ -1,8 +1,8 @@
 # T3 — integracion QA de cinco roles (2026-10-13)
 
-Estado: DRAFT, verificacion de matrices y CI en curso. No aprobado para merge/deploy. Este reporte reemplaza el estado transversal; los informes fuente conservan evidencia historica de sus propias ramas.
+Estado: DRAFT, matrices locales completas; CI requiere diagnostico de admin/viewer. No aprobado para merge/deploy. Este reporte reemplaza el estado transversal; los informes fuente conservan evidencia historica de sus propias ramas.
 
-Base `origin/main`: `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Rama de trabajo `qa/t3-integration-20261013`. Corte de codigo con check completo y seis nuevas regresiones Chromium PASS: `e4cb70fed850f5460b8a116e1e62177869fc9d9c`. [Proveniencia completa](sources.json).
+Base `origin/main`: `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Rama de trabajo `qa/t3-integration-20261013`. Codigo funcional final con check completo: `657060b0b459753c2d52c0643357bc1dd732ba51`; retencion/diagnosticos CI agregados despues. Las matrices iniciadas en `e4cb70f` se completaron y los suites afectados por INTEGRATION-B01 se reejecutaron despues del fix, sin presentar todo como una sola tanda inmutable. [Proveniencia completa](sources.json).
 
 | Rol | PR fuente | SHA verificado |
 | --- | --- | --- |
@@ -26,19 +26,39 @@ Archivos compartidos a revisar: `App.tsx`, `private/PrivateApp.tsx`, `walkthroug
 
 ## Diagnostico de gates fuente
 
-La base pasa `audit:history` (785 blobs, 8 commits). Anonimo, admin, owner y viewer pasan sus auditorias de historial fuente. Editor falla por `personal home directory` en un blob historico de `docs/qa/shared-project-editor-2026-10-13.md`; el informe final ya habia retirado la ruta pero el ancestro seguia alcanzable. La integracion inicial de cinco tips pasa 852 blobs/13 commits. Auditoria sobre revision final pendiente.
+La base pasa `audit:history` (785 blobs, 8 commits). Anonimo, admin, owner y viewer pasan sus auditorias de historial fuente. Editor falla por `personal home directory` en un blob historico de `docs/qa/shared-project-editor-2026-10-13.md`; el informe final ya habia retirado la ruta pero el ancestro seguia alcanzable. La integracion inicial de cinco tips pasa 852 blobs/13 commits. El corte funcional final `657060b` pasa 877 blobs/18 commits; la auditoria de publicacion se repite sobre el informe consolidado.
 
-El SHA original de viewer se reprodujo en un worktree detached: lint/tipos/tests de paquetes pasan, pero el test de links documentales rechaza dos enlaces relativos a artifacts ignorados ausentes. El primer check integrado reproduce esos dos mas cuatro de editor. Se convierten a referencias textuales locales; el gate queda intacto. `pnpm check` integrado pasa: 658 Node + 35 Python, lint, tipos, scene snapshot en lectura, build demo y auditoria de 696 archivos. Build full y auditoria pasan 728 archivos. Los logs remotos de los fallos fuente devolvieron 403; estas causas estan respaldadas por reproduccion local, no por un log remoto descargado.
+El SHA original de viewer se reprodujo en un worktree detached: lint/tipos/tests de paquetes pasan, pero el test de links documentales rechaza dos enlaces relativos a artifacts ignorados ausentes. El primer check integrado reproduce esos dos mas cuatro de editor. Se convierten a referencias textuales locales; el gate queda intacto. `pnpm check` integrado pasa: 658 Node + 35 Python, lint, tipos, scene snapshot en lectura, build demo y auditoria de 696 archivos. Build full final y auditoria pasan 735 archivos; el check final pasa con auditoria demo de 703 archivos. Los counts cambian con los chunks/cache, y se conserva la salida exacta por comando. Los logs remotos de los fallos fuente devolvieron 403; estas causas estan respaldadas por reproduccion local, no por un log remoto descargado.
 
 Owner rechazó primero `artifacts/integration-qa/owner` como ruta de datos: es una proteccion deliberada. La ejecucion correcta usa `artifacts/owner-qa/integration-20261013`; no se amplio el allowlist.
 
+## Defecto adicional reproducido al integrar
+
+**INTEGRATION-B01**: `AssetsExplorer` abortaba el primer fetch en el replay de efectos StrictMode pero retenia la referencia del controlador. El segundo setup no iniciaba lectura y esperaba 3 s al polling; con carga se agotaban las aserciones de 5 s. La referencia se limpia al desmontar, y el nuevo setup inicia inmediatamente. La misma linea defectuosa existe en la base `7a851eb`.
+
+Regresion determinista: solo el intervalo de polling de 3 s se retrasa a 60 s, conservando reloj/scheduler/carga lazy reales; en app base falla `Taller conectado`, en la correccion pasa, sin aumentar timeouts. Evidencia `initial-connection-baseline` y `initial-connection-fixed`. Los intentos previos con reloj completo pausado no alcanzaron la app y no se usan como validacion; un primer fixture tambien tenia una asercion equivocada sobre el boton requerido, corregida antes de usarlo como gate. Un intento de base sin binario Playwright fallo en setup; el harness separado se ajusto al mismo Chromium de sistema sin alterar app base.
+
+Primera suite generica: 103 PASS, 11 FAIL, 2 SKIPPED; fallos de conexion del taller antes de la correccion. Se conservan logs/trazas y se reejecutan esos suites con los mismos gates. No se presentan como simples fallos de entorno. El fixture nuevo tuvo un error de tipos por mezclar Window con timers Node; se tipa como Window de navegador y se reejecuta check completo.
+
+Editor: primera matriz 50 PASS / 1 FAIL (51 casos). Fallo estrecho al abrir la copia: clone 201 persistido, GET nuevo 200 en traza y una lectura inicial abortada tras ~18 s; la UI mostro error de conexion en vez del titulo. Reejecucion del mismo caso en los tres perfiles: 3 PASS con gates originales. Se conserva el fallo y no se atribuye una causa de producto no reproducida. Las 51 combinaciones quedan consolidadas en varias tandas, no una unica corrida 51/51.
+
+## Matrices y evidencia
+
+[Matriz final por flujo/perfil](flow-matrix.csv) y [todas las tandas validas, incluidos fallos previos](run-matrix.csv). Los flags reales de contextos se extraen de las trazas; owner usa contextos secundarios del mismo ancho pero sin emular touch en algunos casos de sharing. El viewer dedicado si usa touch/isMobile en ambos perfiles. Un viewport nominal no se presenta como dispositivo fisico.
+
 ## Evidencia y alcance
 
-Matrices de integracion en curso; no trasladar PASS de los informes originales a este checkout. Evidencia local: `artifacts/integration-qa/`, `artifacts/owner-qa/integration-20261013/`, `artifacts/qa-global-admin/`. DB y session-secret son fixtures locales ignorados; no se incluyen en entregables publicos. Las capturas/trazas locales no estan publicadas en Git.
+Resultados actuales de integracion: anonimo 60 PASS, admin 42 PASS, owner 54 PASS; editor 51 combinaciones PASS consolidadas (50/51 primera tanda + recuperacion 3/3), taller 54 PASS y 12 recorridos reales afectados PASS, owner WebGL 3 PASS. Suite generica corregida 115 PASS / 2 SKIPPED con los gates originales; analytics 31 PASS, demo 3 PASS y cuentas reales 1 PASS. Viewer 54 PASS; WebGL anonimo 21 PASS. Ningun FAIL local pendiente en la matriz final; los fallos iniciales se conservan en la matriz de tandas. No trasladar PASS de informes anteriores automaticamente. Evidencia local: `artifacts/integration-qa/`, `artifacts/owner-qa/integration-20261013/`, `artifacts/qa-global-admin/`. DB y session-secret son fixtures locales ignorados; no se incluyen en entregables publicos. Las capturas/trazas locales no estan publicadas en Git.
 
-Chromium de sistema 154.0.8037.57, Playwright y viewports exactos en cada JSON/browser-context/trace. Emulacion touch: anonimo 320x568 y 430x932; admin 320x740 y 430x932; owner/editor 360x800 y 430x932; viewer 375x812 y 430x932. Desktop 1440x1000. WebGL usa software SwiftShader y assets existentes. No se acredita calidad 3D ni dispositivo fisico.
+Chromium de sistema 154.0.8037.57, Playwright 1.63.0 y viewports exactos en cada JSON/browser-context/trace. Emulacion touch: anonimo 320x568 y 430x932; admin 320x740 y 430x932; owner/editor 360x800 y 430x932; viewer 375x812 y 430x932. Desktop 1440x1000. WebGL usa software SwiftShader y assets existentes. No se acredita calidad 3D ni dispositivo fisico.
 
 WebKit: BLOCKED por descarga 403 conocida, sin reintento de allowlists ni permisos. Safari, Firefox, telefonos fisicos, PostgreSQL, GPU fisica, correos, pagos/proveedores reales, Blender/modelado/render y produccion: NOT RUN. Sin inferencia externa ni solicitudes OpenAI/Codex. No se afirma cobertura absoluta.
+
+## CI publicado y limites de diagnostico
+
+[PR DRAFT #8](https://github.com/pablitxn/t3-designer/pull/8). En `657060b`, run [38397546627](https://github.com/pablitxn/t3-designer/actions/runs/38397546627), pasan `check`, owner, owner-webgl y shared-editor; admin y viewer fallan. El job anonymous-webgl estaba en curso al preparar esta revision. `gh run view --log-failed` devuelve 403 del host de descarga firmado; no se exponen firmas ni se cambia allowlist. Las causas especificas de estos dos fallos de CI aun no estan verificadas. No se marca la integracion lista para merge.
+
+La siguiente revision retiene solo browser-results/results.json y anota errores reales de los JSON para leerlos por API aun si la descarga de logs esta bloqueada. Se excluyen SQLite, session-secret y seeds de los uploads. Los gates originales siguen fallando cuando corresponde. Un primer borrador del diagnostico tuvo un lint por regex ANSI; se usa `stripVTControlCharacters` de Node y el lint especifico pasa. Estado de la revision publicada final: consultar checks del PR y recibo local `artifacts/integration-qa/publication.json`; el reporte no adelanta un PASS de CI.
 
 ## Reproducir y revisar manualmente
 

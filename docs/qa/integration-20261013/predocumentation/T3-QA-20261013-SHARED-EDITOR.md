@@ -2,7 +2,7 @@
 
 Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
 
-Fuente primaria: [informe del rol](../../shared-project-editor-2026-10-13.md), [PR original](https://github.com/pablitxn/t3-designer/pull/6). Rama original `qa/shared-project-editor-20261013`; SHA verificado `7fe34e94419fe4c074937072dc55f85d5b216f3e`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `e4cb70fed850f5460b8a116e1e62177869fc9d9c` (consultar reporte para revision final y correcciones posteriores).
+Fuente primaria: [informe del rol](../../shared-project-editor-2026-10-13.md), [PR original](https://github.com/pablitxn/t3-designer/pull/6). Rama original `qa/shared-project-editor-20261013`; SHA verificado `7fe34e94419fe4c074937072dc55f85d5b216f3e`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
 
 Correcciones: Cancelar Atrás/Adelante/link/logout conserva borrador; 403/404 retiran editor; downgrade refresca permiso viewer; respuestas abortadas o guardados tardios no cambian otro proyecto.
 

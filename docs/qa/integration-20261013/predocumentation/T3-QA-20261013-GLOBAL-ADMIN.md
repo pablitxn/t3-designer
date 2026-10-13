@@ -2,7 +2,7 @@
 
 Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
 
-Fuente primaria: [informe del rol](../../2026-10-13-global-admin.md), [PR original](https://github.com/pablitxn/t3-designer/pull/4). Rama original `qa/t3-global-admin-20261013`; SHA verificado `07d9c16e7707ed10cfdae3f592030ba27f76aa94`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `e4cb70fed850f5460b8a116e1e62177869fc9d9c` (consultar reporte para revision final y correcciones posteriores).
+Fuente primaria: [informe del rol](../../2026-10-13-global-admin.md), [PR original](https://github.com/pablitxn/t3-designer/pull/4). Rama original `qa/t3-global-admin-20261013`; SHA verificado `07d9c16e7707ed10cfdae3f592030ba27f76aa94`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
 
 Correcciones: B01 validacion trimmed de motivos; B02 ocultar suspension de otros admins; B03 recuperar checkout mock pendiente tras reload; B04 cupo atomico personal/shared y rol actualizado; B05 textos largos en mobile.
 

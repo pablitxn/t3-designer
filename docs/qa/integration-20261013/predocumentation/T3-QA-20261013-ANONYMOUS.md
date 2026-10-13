@@ -2,7 +2,7 @@
 
 Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
 
-Fuente primaria: [informe del rol](../../../workflows/anonymous-qa.md), [PR original](https://github.com/pablitxn/t3-designer/pull/3). Rama original `qa/t3-anonymous-20261013`; SHA verificado `cf8fc398aa0d4d3f23a3bf5773296d2a502734be`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `e4cb70fed850f5460b8a116e1e62177869fc9d9c` (consultar reporte para revision final y correcciones posteriores).
+Fuente primaria: [informe del rol](../../../workflows/anonymous-qa.md), [PR original](https://github.com/pablitxn/t3-designer/pull/3). Rama original `qa/t3-anonymous-20261013`; SHA verificado `cf8fc398aa0d4d3f23a3bf5773296d2a502734be`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
 
 Correcciones: Foco del dossier al cerrar; recuperacion de imagenes/versiones de galeria; etiquetas explicitas de sliders; entrada del paseo por encima del minimapa.
 
