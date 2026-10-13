@@ -29,6 +29,12 @@ jobs:
       - run: pnpm test:accounts
       - run: pnpm test:demo
       - run: pnpm test:anonymous
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: portable-browser-evidence
+          path: apps/web/test-results/
+          retention-days: 5
 
   role-regressions:
     needs: check
@@ -60,3 +66,18 @@ jobs:
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm --filter @t3-designer/web exec playwright install --with-deps chromium
       - run: ${{ matrix.command }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: role-${{ matrix.role }}-browser-evidence
+          retention-days: 5
+          path: |
+            artifacts/qa-global-admin/browser/
+            artifacts/qa-global-admin/results.json
+            artifacts/owner-qa/*/browser-results/
+            artifacts/owner-qa/*/results.json
+            artifacts/qa-project-viewer/final/results/
+            artifacts/qa-project-viewer/final/results.json
+            /tmp/t3-shared-editor-results/
+            /tmp/t3-shared-editor-report.json
+            apps/web/test-results/anonymous/
