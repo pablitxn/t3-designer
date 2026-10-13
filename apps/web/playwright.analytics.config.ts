@@ -28,7 +28,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 1000 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    launchOptions: { args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}) },
+    launchOptions: { args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}), ...(process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH } : {}) },
   },
   webServer: [{
     command: `pnpm exec vite build --mode full --outDir ${outputDirectory} --emptyOutDir && pnpm exec vite preview --outDir ${outputDirectory} --host 127.0.0.1 --port ${port} --strictPort`,
