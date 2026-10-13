@@ -435,7 +435,7 @@ def glass_block_screen():
         for j in range(10):
             x=-.3+i*.2;y=.18+j*.20
             box('Translucent glass block',(.188,.188,.070),(x,y,0),'glass-block',.013)
-            # Raised moulded perimeter refracts the light like the existing pavés.
+            # Raised moulded perimeter refracts the light like the existing glass blocks.
             for dx in [-.079,.079]:box('Glass block vertical rim',(.008,.166,.077),(x+dx,y,0),'glass-block',.003)
             for dy in [-.079,.079]:box('Glass block horizontal rim',(.166,.008,.077),(x,y+dy,0),'glass-block',.003)
     for i in range(5):box('Mortar vertical',(.010,2.01,.08),(-.4+i*.2,1.085,0),'cream',.001)

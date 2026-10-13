@@ -1,311 +1,299 @@
-# QA del visitante anonimo - 2026-10-13
+<a id="qa-del-visitante-anonimo---2026-10-13"></a>
 
-QA completada para el alcance ejecutado. Cuatro defectos corregidos; 255 casos
-UI distintos aprobados, con limites y casos no ejecutados declarados. No acredita
-deploy ni pruebas fisicas.
+# Anonymous visitor QA - 2026-10-13
 
-## Revision y entorno
+QA complete for executed scope. Four defects corrected; 255 distinct UI cases
+passed, with declared limits/unexecuted cases. No deployment or physical-device
+validation established.
 
-- T3 inicial/`origin/main`: `7a851eb7ab703016d78c102afeaac2a8d97b08f3`.
-- Rama aislada: `qa/t3-anonymous-20261013`; checkout inicial limpio.
-- Fetch normal y explicito de `refs/heads/main`, `ls-remote` y fast-forward
-  comprobados. No hubo reset, merge de otras ramas, push, PR ni deploy.
-- Atlas inicial: `bce92720a7f7e7ee48e02e949485ae3ab1a7b921`; actualizado por
-  fast-forward a `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`. Sin ediciones de
-  contenido Atlas. Se leyeron AGENTS, atlas-navigate, politica, wiki y entry T3.
-- Cloud Linux, Node 24.19.0, pnpm 12.7.0, Playwright 1.63.0, Chromium del
-  sistema 154.0.8037.57. Chromium fijado 153.0.8010.12 y WebKit 26.6/v2359
-  no pudieron descargarse: proveedores oficiales devuelven 403 Domain forbidden.
-- Emulacion tactil 320x568 y 430x932; desktop 1440x1000. Las suites heredadas
-  que cambian su viewport se documentan aparte; el nombre del proyecto no
-  acredita que una prueba mantuvo ese tamano. No son iPhone/Android fisicos.
-- Backend real loopback/SQLite, directorios de cada corrida separados, sin
-  .env, sin cuentas reales, generacion/pagos/OTLP deshabilitados. Solo assets
-  y dossier ficticio publicados. Errores de red y tiles usan fixtures locales.
+<a id="revision-y-entorno"></a>
 
-## Inventario desde codigo
+## Revision and environment
 
-Leido antes de seleccionar casos: `App.tsx`, `workspace-view.ts`,
-`ApartmentExplorer`, `PublicArrangement`, `useDemoLayout`, `usePublicArrangement`,
-`PublicAssetsExplorer`, `DossierExplorer`, `BuildingExplorer`, `SolarControls`,
-`EnergyWorkbench`, `Walkthrough`, `ApplicationSettings`, `SettingsDialog`,
-`PrivacyControls`, `PrivacyPage` y frontera `PrivateApp`/`AccountForm`.
+- Initial T3/`origin/main`: `7a851eb7ab703016d78c102afeaac2a8d97b08f3`.
+- Isolated `qa/t3-anonymous-20261013`, initially clean checkout. Normal/explicit
+  `refs/heads/main` fetch, ls-remote and fast-forward checked. At this historical
+  checkpoint no reset, other-branch merge, push, PR or deployment.
+- Initial Atlas `bce92720a7f7e7ee48e02e949485ae3ab1a7b921`, fast-forwarded to
+  `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, no content edits. Read AGENTS,
+  atlas-navigate, policy, T3 wiki/entry.
+- Cloud Linux, Node24.19.0, pnpm12.7.0, Playwright1.63.0, system
+  Chromium154.0.8037.57. Pinned Chromium153.0.8010.12/WebKit26.6/v2359 downloads
+  blocked by official providers' 403 Domain forbidden.
+- Touch emulation 320x568/430x932; desktop1440x1000. Existing-suite overrides
+  documented separately; project name does not prove retained viewport. No
+  physical iPhone/Android.
+- Real loopback/SQLite backend, separate run directories, no .env/real accounts,
+  generation/payments/OTLP disabled. Published assets/fictional dossier only.
+  Network errors/tiles use local fixtures.
 
-| Ruta/superficie | Acciones accesibles al visitante |
+<a id="inventario-desde-codigo"></a>
+
+## Code inventory
+
+Read before case selection: `App.tsx`, `workspace-view.ts`, `ApartmentExplorer`,
+`PublicArrangement`, `useDemoLayout`, `usePublicArrangement`, `PublicAssetsExplorer`,
+`DossierExplorer`, `BuildingExplorer`, `SolarControls`, `EnergyWorkbench`,
+`Walkthrough`, `ApplicationSettings`, `SettingsDialog`, `PrivacyControls`,
+`PrivacyPage`, `PrivateApp`/`AccountForm` boundary.
+
+| Route/surface | Visitor actions |
 | --- | --- |
-| `/`, hash desconocido | Edificio por defecto; cinco tabs; enlaces privados y ajustes |
-| `/#apartment` | Perspectiva/planta/reset de camara; ampliar/salir; capas corte, muebles, labels, contexto; ocho habitaciones/vista general; catalogo/detalle/descarga GLB; solar |
-| Mobiliario publico | Elegir/agregar/quitar 21 instancias originales y tres objetos existentes; grupos colapsables; mover/rotar movibles; instalaciones fijas; teclas/flechas/Shift/R; undo/redo/reset; cancelar arrastre/Escape; guardado local automatico y sincronizacion entre tabs |
-| `/#walkthrough` | Visor de referencia; entrar/pausar/reanudar/salir; punto de inicio/reset; fecha/hora/restaurar hora; luces/linterna; altura/FOV/sensibilidad; controles en pantalla; caminar/girar/saltar; puertas cuando hay una puerta interactiva; fullscreen |
-| `/#building` | Perspectiva/mapa/reset/ampliar; vecinos/trayectoria/labels/paneles; localizar/vista completa; cortes edificio/piso/interior; entrar al departamento; controles luz/energia; fuentes/enlaces externos |
-| Solar compartido | Fecha 1900-2100; estaciones; reloj/slider; play/pause; mediodia; noche/dia; DST; orientacion y supuestos |
-| Energia publica | Tabs sol/paneles/consumo/inversion; fecha/slider compartidos; parametros instalacion/clima mensual/perdidas; consumos y tarifas; moneda; resultados/capacidad; guardar/restaurar/descartar escenario local |
-| `/#documentation` | Cinco secciones; tarjetas/estadisticas; busqueda/limpiar/vacio; ocho superficies; observaciones; 13 fichas de fuentes/copia local/guia externa; volver a visores; imprimir |
-| `/#assets` | Tres objetos, cuatro versiones existentes; perspectiva/frente/perfil/visor; historial/select; evidencia/correcciones; producto externo; descarga GLB; dos CTA a `/app/assets` en build full |
-| Ajustes | Idioma auto/es/en/fr; tema sistema/claro/oscuro; unidades metricas/imperiales; privacidad/consentimiento; Escape/fondo/cierre/foco; persistencia y tabs |
-| `/privacy` | Politica, operador ausente/configurado, retorno y navegacion/historial |
-| `/app`, `/app/assets`, demas rutas privadas | Visitante redirigido a `/login`; no biblioteca/proyectos privados |
-| `/login` | Correo/password, validacion nativa, submit/busy/error/reintento; ajustes; volver a demo; registro cerrado/invitacion y ayuda de recuperacion |
-| `/invite`, `/recover` | Enlace ausente/invalido, hash saneado y rechazo. Activacion exitosa y cuentas autenticadas corresponden a otros roles |
+| `/`, unknown hash | Default building, five tabs, private links/settings |
+| `/#apartment` | Perspective/plan/camera reset/expand/exit; cutaway/furniture/labels/context layers; eight rooms/overview; catalog/detail/GLB download/solar |
+| Public furniture | Select/add/remove21 original instances/3 existing objects; collapsible groups; movable rotation/movement, fixed installations; keys/arrows/Shift/R,undo/redo/reset,drag cancel/Escape; local autosave/cross-tab sync |
+| `/#walkthrough` | Reference viewer,enter/pause/resume/exit,spawn/reset,date/time/restore time,lights/torch,height/FOV/sensitivity,screen controls,walk/turn/jump,interactive doors,fullscreen |
+| `/#building` | Perspective/map/reset/expand,neighbors/path/labels/panels,locate/full view,building/floor/interior cuts,enter apartment,light/energy controls,sources/external links |
+| Shared solar | Date1900–2100,seasons,clock/slider,play/pause,noon,night/day,DST,orientation/assumptions |
+| Public energy | Sun/panels/usage/investment tabs,shared date/slider,installation/monthly weather/losses,usage/tariffs/currency,results/capacity,local scenario save/restore/discard |
+| `/#documentation` | Five sections,cards/statistics,search/clear/empty,eight areas,observations,13 source records/local copy/external guide,viewer return/print |
+| `/#assets` | Three objects/four versions,perspective/front/side/viewer,history/select,evidence/corrections,external product,GLB download,two full-build `/app/assets` CTAs |
+| Settings | Auto/es/en/fr,system/light/dark,metric/imperial,privacy/consent,Escape/backdrop/close/focus,persistence/tabs |
+| `/privacy` | Policy,absent/configured operator,return/navigation/history |
+| `/app`, `/app/assets`, other private routes | Redirect visitor `/login`; no private library/projects |
+| `/login` | Email/password,native validation,submit/busy/error/retry,settings,demo return,closed registration/invitation/recovery help |
+| `/invite`, `/recover` | Missing/invalid link,sanitized hash,rejection. Successful activation/authenticated accounts belong to other roles |
 
-## Defectos corregidos
+<a id="defectos-corregidos"></a>
 
-1. Dossier: cerrar una ficha con Escape dejaba el foco en body. Se preserva el
-   opener y se restaura al desmontar el dialogo. Reproduccion independiente en
-   Chromium y regresion Escape/boton/fondo; tambien con copia local en popup.
-2. Galeria: una respuesta perdida/404 para una imagen dejaba un img roto sin
-   estado recuperable. Mensaje y reintento traducidos conservan objeto/version;
-   cambiar vista reinicia el estado de esa imagen. Regresiones de perdida de
-   respuesta, reintento, version y traducciones es/en/fr.
-3. Recorrido: las etiquetas implicitas de altura/FOV/sensibilidad nombraban el
-   output y dejaban los sliders sin nombre accesible. IDs unicos y asociaciones
-   explicitas permiten identificarlos y modificarlos por teclado. Regresion
-   previa FAIL y posterior PASS en los tres viewports.
-4. Recorrido estrecho: el minimapa quedaba por encima de las instrucciones y
-   parte del boton de entrada. Se corrigio el orden de pintura del overlay;
-   el minimapa sigue visible durante la visita. Captura y regresion de hit
-   testing previas FAIL; verificacion final de entrada en los tres tamanos.
+## Corrected defects
 
-Las pruebas previas que fallan por estos defectos se conservan en
-`artifacts/qa-anonymous/bugs-before`, `slider-before` y `overlay-before`. Todos
-existian antes de estos cambios. Los primeros asserts nuevos equivocados
-(default edificio, selectores y labels) se corrigieron en los tests, sin cambiar
-producto. La primera tanda heredada tuvo una recarga HMR durante una ficha de
-ajustes; se repite completa con fuentes estables. Las suites WebGL heredadas
-sobrescribian executablePath: se agrego override opcional para Chromium del
-sistema conservando sus asserts. Esto es setup, no un defecto de producto.
-Los renders de software concurrentes agotaron plazos en casos largos. El
-arrastre en planta paso aislado. Se separaron las pantallas y grupos de
-controles del recorrido en casos independientes, manteniendo los assertions y
-180 segundos por caso. Un salto dispone de hasta 60 segundos para completar sus
-frames; no se saltea la comprobacion de aterrizaje. La primera captura de visor
-de galeria se tomo antes del GLB; fue reemplazada por espera de meshes cargadas,
-gesto de orbita comprobado y captura del visor visible. No se acredita render
-con las capturas vacias previas.
+1. Dossier Escape close left focus on body. Opener preserved/restored on dialog
+   unmount. Independent Chromium reproduction; Escape/button/backdrop and local
+   popup-copy regressions.
+2. Lost/404 gallery image showed broken img without recovery. Translated message/
+   retry retain object/version; view changes reset image state. Lost response/
+   retry/version/es-en-fr regressions.
+3. Implicit height/FOV/sensitivity labels named output, leaving sliders unnamed.
+   Unique IDs/explicit associations enable identification/keyboard changes.
+   Prior FAIL then PASS in three viewports.
+4. Narrow walkthrough minimap over instructions/entry button. Corrected overlay
+   paint order; map remains visible during visit. Earlier capture/hit-test FAIL;
+   final entry checked all sizes.
 
-## Evidencia actual
+Pre-fix evidence `artifacts/qa-anonymous/bugs-before`, `slider-before`,
+`overlay-before`; all defects pre-existed. Incorrect first assertions (default
+building/selectors/labels) fixed in tests without product change. First inherited
+batch HMR reload during settings record; full repeat with stable sources.
+Inherited WebGL executablePath override prevented system Chromium; optional
+system override added, assertions retained. Setup issue, not product bug.
+Concurrent software renders exhausted long-case deadlines; isolated plan drag
+passed. Walkthrough screens/control groups separated into independent cases,
+retaining assertions/180s per case. Jump allowed up to60s for frames, landing
+still checked. Initial gallery-viewer capture preceded GLB; replaced by loaded-mesh
+wait, verified orbit gesture and visible-viewer capture. Empty earlier captures
+establish no rendering.
 
-- `pnpm check`: PASS (lint, tipos, 648 tests Node y 35 Python, scene verify,
-  build, audit dist: 672 archivos, cero fallos). Log final de codigo:
-  `artifacts/qa-anonymous/checks/review-final.log`.
-- Demo de produccion sin backend: 3 PASS. Log:
-  `artifacts/qa-anonymous/checks/demo-final.log`.
-- Suite publica completa: 180 PASS en `final-ui`. Incluye 42 casos nuevos y
-  138 heredados. Los heredados tienen overrides de viewport declarados abajo.
-- WebGL final: 21 PASS en `webgl-atomic`, sobre los tres viewports exactos.
-  Incluye visores cargados y gestos de orbita, movimiento/salto/pausa/retorno,
-  ajustes/validacion/fullscreen denegado, entrada sin solapamiento y GLB fallido.
-- Gate `pnpm test:anonymous`: 60 PASS en `gates-final`, sobre los tres viewports
-  exactos, incluyendo las regresiones de foco/imagenes/sliders.
-- Privacidad/analytics de produccion: 29 PASS en `analytics`; collector, tracker
-  y perfil de operador interceptados con fixtures ficticios. Se excluyeron
-  expresamente las dos pruebas de taller privado/cuentas autenticadas.
-- Mapa: 2 PASS desktop en `map-drag-final`; tiles sinteticos, recenter, zoom,
-  atribucion, 100% de tiles fallidos y reintento. Drag 3D: PASS en esa tanda;
-  drag planta: PASS en `drag-isolated`. Ambos usan 1284x926, sin tactil.
-- Launcher manual: galeria -> login por UI PASS en 430x932 tactil, API live200,
-  biblioteca protegida401. `checks/manual-launcher.json` y captura adjunta.
-- SQLite inspeccionada despues de detener el backend: cero users, sessions,
-  projects, assets, jobs, foundation runs, creditos/pagos y llamadas/uso IA.
-  Cuatro filas de rate-limit corresponden a intentos de acceso ficticios.
-  Conteos: `checks/backend-counts.json`; no se entregan DB ni session secrets.
-- CI simulado: 1 PASS usando la nueva disposicion de evidencias en
-  `apps/web/test-results/anonymous/ui`. Datos/secret locales quedan en un tmp
-  separado y no entran en los artifacts de CI. YAML de ambos proveedores validado.
-- Capturas y traces de cada test bajo `artifacts/qa-anonymous/<corrida>/browser`.
-  `results.json` y `report/index.html` contienen cada resultado, error y adjunto.
-- Recuperacion del environment comprobada a las 10:29 UTC: shell, Git,
-  procesos/API/Vite y escrituras de evidencia siguen disponibles.
+<a id="evidencia-actual"></a>
 
-## Matriz de flujos
+## Recorded evidence
 
-PASS significa ejecucion UI y assertions aprobados; FAIL corresponde a defectos
-reproducidos antes del fix o a una ejecucion identificada como fallida. BLOCKED
-es falta de motor/capacidad. NOT RUN conserva lo excluido o no ejecutado.
-La matriz CSV de casos individuales se entrega junto con evidencias y resultados
-JSON; no se suman reruns como cobertura adicional.
+- `pnpm check` PASS: lint/types,648 Node/35 Python,scene verification/build,
+  672-file/0-failure audit. Final code log `artifacts/qa-anonymous/checks/review-final.log`.
+- Backend-free production demo3PASS: `artifacts/qa-anonymous/checks/demo-final.log`.
+- Complete public suite180PASS in `final-ui`:42 new+138 inherited. Overrides below.
+- Final WebGL21PASS `webgl-atomic`,three exact viewports:loaded viewers/orbit,
+  movement/jump/pause/return,settings/validation/denied fullscreen,clear entry,
+  failed GLB.
+- `pnpm test:anonymous`60PASS `gates-final`,three exact viewports,focus/image/slider
+  regressions.
+- Production privacy/analytics29PASS `analytics`;collector/tracker/operator
+  intercepted fictional fixtures. Two private-workshop/authenticated tests excluded.
+- Map2desktopPASS `map-drag-final`:synthetic tiles,recenter/zoom/attribution,
+  100% failed tiles/retry.3D dragPASS there;plan dragPASS `drag-isolated`.
+  Both1284x926,no touch.
+- Manual gallery->login UI PASS430x932 touch;API live200,protected library401.
+  `checks/manual-launcher.json` and attached capture.
+- After backend stop SQLite zero users/sessions/projects/assets/jobs/foundation
+  runs/credits/payments/AI calls/usage;four fictional-access rate-limit rows.
+  `checks/backend-counts.json`;no database/session-secret delivery.
+- Simulated CI1PASS,new `apps/web/test-results/anonymous/ui` layout. Local data/
+  secrets separate temp,excluded CI artifacts. Both-provider YAML validated.
+- Per-test captures/traces `artifacts/qa-anonymous/<run>/browser`;`results.json`
+  and `report/index.html` record outcomes/errors/attachments.
+- Environment recovery checked10:29UTC:shell/Git/processes/API/Vite/evidence writes
+  remained available.
 
-| Flujo/fixture | 320 tactil | 430 tactil | Desktop | Evidencia/limite |
+<a id="matriz-de-flujos"></a>
+
+## Flow matrix
+
+PASS means executed UI/assertions; FAIL means earlier reproduced defect or
+identified failed execution. BLOCKED means absent engine/capability. NOT RUN
+retains exclusions/unexecuted cases. Individual CSV accompanies evidence/JSON;
+reruns do not add coverage.
+
+| Flow/fixture | 320 touch | 430 touch | Desktop | Evidence/limit |
 | --- | --- | --- | --- | --- |
-| `/`, cinco tabs, link directo, hash desconocido, recarga, back/forward | PASS | PASS | PASS | anonymous: visitor inventory; default edificio |
-| Ajustes auto/es/en/fr, sistema/claro/oscuro, unidades y persistencia | PASS | PASS | PASS | settings/i18n y privacy navigation; overrides heredados abajo |
-| Foco/modal Escape, fondo, Tab/Shift-Tab; storage invalido/denegado | PASS | PASS | PASS | settings, i18n, main gate |
-| Departamento: capas, ocho rooms, vista general, todos los detalles y GLB | PASS | PASS | PASS | anonymous-details; capas/restauracion/detalle seleccion persistida |
-| Muebles: add/remove/presencia, catalogo vacio y grupos colapsables | PASS | PASS | PASS | layout/arrangement + public arrangement; 21 originales + 3 existentes |
-| Giro doble, undo/redo/reset/undo, navegacion/recarga | PASS | PASS | PASS | localStorage comparado; reset no borra preferencias ajenas |
-| Movimientos validos, fuera de perimetro y fijos rechazados | PASS | PASS | PASS | demo-layout; posiciones persistidas; no cambio de modelos |
-| Dos tabs sincronizan movimientos/presencia/reset; contexto nuevo aislado | PASS | PASS | PASS | storage events y contexto nuevo sin layout |
-| Storage corrupto/quota excedida, recuperacion y estado sin guardar | PASS | PASS | PASS | demo-layout, corrupt layout y energy quota fixture |
-| Solar noche/mediodia/estaciones, vacios/rango y DST | PASS | PASS | PASS | date/time, 29/03 gap y 25/10 repeticion |
-| Solar play/pause y pausa al navegar; momento compartido | PASS | PASS | PASS | inputs comparados entre departamento y edificio; momento temporal |
-| Edificio capas/cortes/localizar/entrar al departamento | PASS | PASS | PASS | anonymous-details; controles pressed/checked |
-| Energia: cuatro paneles, guardar/recargar/cero/descartar | PASS | PASS | PASS | energy; guardado explicito y valores persistidos |
-| Energia: capacidad, escenario invalido, inversion extrema, clima/fecha | PASS | PASS | PASS | energy; no cobertura combinatoria de todos los parametros |
-| Energia: todos los combos de monedas/clima mensual/consumo | NOT RUN | NOT RUN | NOT RUN | Codigo inventariado; casos representativos y tests calculos, no todas las combinaciones UI |
-| Dossier cinco secciones/busqueda/limpiar/vacio/copia local | PASS | PASS | PASS | i18n + dossier; contenido ficticio y popup local |
-| Dossier 13 fuentes, Escape/cierre/fondo y foco del opener | PASS | PASS | PASS | FAIL previo corregido; anonymous-details/source dialog |
-| Impresion: media print y seccion elegida | PASS | PASS | PASS | captura print; boton de impresion de app solo desktop |
-| Impresora/dialogo nativo del SO | NOT RUN | NOT RUN | NOT RUN | No impresora ni dispositivo fisico; window.print interceptado |
-| Galeria tres objetos/cuatro versiones/imagenes/evidencia/GLB | PASS | PASS | PASS | 512px naturalWidth, version/historial y descarga exitosa |
-| Imagen perdida/404, retry, version conservada y es/en/fr | PASS | PASS | PASS | FAIL previo corregido; imagen antes/despues y traces |
-| CTA proyectos/taller -> login real con backend | PASS | PASS | PASS | anonymous + launcher; visitante redirigido |
-| Login vacio/email invalido sin request, credenciales ficticias | PASS | PASS | PASS | validacion nativa y 401 real; no cuentas creadas |
-| Login respuesta perdida, busy/doble submit, 429 y cancelacion | PASS | PASS | PASS | un submit, draft retenido, navegacion cancela respuesta tardia |
-| API/session503/retry; cookie expirada/invalida y rutas privadas | PASS | PASS | PASS | 401 reales + fallos inyectados; no datos privados visibles |
-| Invite/recover ausente/invalido/hash saneado | PASS | PASS | PASS | tokens ficticios invalidos, sin activaciones ni correo |
-| Sesion autentica expirada/aislamiento de dos cuentas validas | NOT RUN | NOT RUN | NOT RUN | Otro rol; aqui se comprueba visitante/contextos y cookie invalida |
-| Privacidad link/pagina/retorno/historial/consentimiento local | PASS | PASS | PASS | gate y analytics; analytics incluye 390/375px especificos |
-| Tracker/collector fallidos, DNT/GPC, revocacion/expiracion y tabs | NOT RUN | NOT RUN | PASS | 29 casos de production analytics: 1440x1000 y dos casos 390x844 sin touch; no servicio real |
-| Mapa tiles/zoom/recenter/atribucion/error/retry | NOT RUN | NOT RUN | PASS | 2 casos desktop; tiles ficticios. OSM real no consultado |
-| Arrastre WebGL planta/perspectiva; instalacion fija | NOT RUN | NOT RUN | PASS | 1284x926; mueve instancia existente, no geometria |
-| Visores WebGL, orbita tactil/desktop y modelo no disponible | PASS | PASS | PASS | Tanda atomica final, 180s/caso; esperar render real para captura |
-| Recorrido entrar/mover/saltar/pausar/reanudar/blur/salir | PASS | PASS | PASS | Touch events Chromium y mouse desktop; no prueba fisica |
-| Recorrido ajustes/fecha invalida/sliders/reset/luces/linterna | PASS | PASS | PASS | Nombres accesibles corregidos; sin persistir diseño |
-| Entrada legible encima del minimapa, mapa visible activo | PASS | PASS | PASS | FAIL previo, CSS corregido; hit testing real y captura |
-| Fullscreen/captura mouse denegados: fallback de UI | PASS | PASS | PASS | Denegacion intencional, no acredita permiso nativo |
-| Pointer Lock/fullscreen nativos exitosos | NOT RUN | NOT RUN | NOT RUN | No se atribuye la denegacion inyectada al producto |
-| Correr/agacharse/puertas durante recorrido real | NOT RUN | NOT RUN | NOT RUN | Controles inventariados; no todos ejercitados en este rol |
-| WebKit | BLOCKED | BLOCKED | BLOCKED | WebKit26.6/v2359, descarga oficial403 Domain forbidden |
-| Hardware GPU/iPhone/Android fisicos | NOT RUN | NOT RUN | NOT RUN | Chromium headless/SwiftShader y emulacion |
-| Crear/modificar modelos, fidelidad, IA, pagos/correo/deploy | NOT RUN | NOT RUN | NOT RUN | Excluidos por mandato |
+| `/`,five tabs,direct link,unknown hash,reload,back/forward | PASS | PASS | PASS | anonymous visitor inventory;default building |
+| Auto/es/en/fr,system/light/dark,units/persistence | PASS | PASS | PASS | settings/i18n/privacy;inherited overrides below |
+| Modal focus/Escape/backdrop/Tab/Shift-Tab;invalid/denied storage | PASS | PASS | PASS | settings/i18n/main gate |
+| Apartment layers/eight rooms/overview/all details/GLB | PASS | PASS | PASS | anonymous-details;restored layers/persisted detail selection |
+| Furniture add/remove/presence,empty catalog/collapsible groups | PASS | PASS | PASS | layout/arrangement/public arrangement;21 originals+3existing |
+| Double rotation,undo/redo/reset/undo,navigation/reload | PASS | PASS | PASS | localStorage comparison;reset retains other preferences |
+| Valid movement,out-of-bound/fixed rejection | PASS | PASS | PASS | demo-layout,persisted positions,no model changes |
+| Two-tab movement/presence/reset sync;new context isolated | PASS | PASS | PASS | storage events/new context without layout |
+| Corrupt/quota-exceeded storage,recovery/unsaved state | PASS | PASS | PASS | demo-layout/corrupt layout/energy quota fixture |
+| Solar night/noon/seasons,empty/range/DST | PASS | PASS | PASS | date/time,29/03 gap,25/10 repeat |
+| Solar play/pause/navigation pause,shared instant | PASS | PASS | PASS | apartment/building inputs;temporary time |
+| Building layers/cuts/locate/enter apartment | PASS | PASS | PASS | anonymous-details,pressed/checked controls |
+| Energy four panels/save/reload/zero/discard | PASS | PASS | PASS | explicit save/persisted values |
+| Energy capacity/invalid/extreme investment/weather/date | PASS | PASS | PASS | representative,not full parameter combinations |
+| All currency/monthly weather/usage combinations | NOT RUN | NOT RUN | NOT RUN | code inventory/representative cases/calculation tests,not all UI combos |
+| Dossier five sections/search/clear/empty/local copy | PASS | PASS | PASS | i18n/dossier,fictional content/local popup |
+| 13 sources/Escape/close/backdrop/opener focus | PASS | PASS | PASS | prior FAIL corrected,source dialog |
+| Print media/selected section | PASS | PASS | PASS | print capture;app print button desktop only |
+| Printer/native OS dialog | NOT RUN | NOT RUN | NOT RUN | no physical printer/device;window.print intercepted |
+| Gallery3objects/4versions/images/evidence/GLB | PASS | PASS | PASS | naturalWidth512,version/history/successful download |
+| Lost/404 image/retry/preserved version/es-en-fr | PASS | PASS | PASS | prior FAIL corrected,before/after images/traces |
+| Project/workshop CTA->real backend login | PASS | PASS | PASS | anonymous/launcher visitor redirect |
+| Empty/invalid email no-request login,fictional credentials | PASS | PASS | PASS | native validation/real401,no accounts created |
+| Lost login response/busy/double-submit/429/cancel | PASS | PASS | PASS | one submit,draft retained,late response cancelled by navigation |
+| API/session503/retry,expired/invalid cookie/private routes | PASS | PASS | PASS | real401/injected failure,no visible private data |
+| Missing/invalid invite/recover/sanitized hash | PASS | PASS | PASS | invalid fictional tokens,no activation/email |
+| Authentic expired session/two valid accounts isolation | NOT RUN | NOT RUN | NOT RUN | other role;visitor/contexts/invalid cookie checked |
+| Privacy link/page/return/history/local consent | PASS | PASS | PASS | gate/analytics;analytics390/375px cases |
+| Failed tracker/collector,DNT/GPC,revoke/expire/tabs | NOT RUN | NOT RUN | PASS | 29production cases1440x1000,two390x844 no-touch;no real service |
+| Map tiles/zoom/recenter/attribution/error/retry | NOT RUN | NOT RUN | PASS | 2desktop cases,fictional tiles,no real OSM |
+| WebGL plan/perspective drag,fixed installation | NOT RUN | NOT RUN | PASS | 1284x926;existing instance movement,no geometry |
+| WebGL viewers,touch/desktop orbit,unavailable model | PASS | PASS | PASS | final atomic batch,180s/case,real-render wait |
+| Walkthrough enter/move/jump/pause/resume/blur/exit | PASS | PASS | PASS | Chromium touch events/desktop mouse,no physical device |
+| Settings/invalid date/sliders/reset/lights/torch | PASS | PASS | PASS | accessible names corrected,no design persistence |
+| Entry above minimap,active map visible | PASS | PASS | PASS | prior FAIL/CSS fix,real hit-testing/capture |
+| Denied fullscreen/mouse capture:UI fallback | PASS | PASS | PASS | intentional denial,no native permission establishment |
+| Successful native Pointer Lock/fullscreen | NOT RUN | NOT RUN | NOT RUN | injected denial not attributed to product |
+| Run/crouch/doors in real walkthrough | NOT RUN | NOT RUN | NOT RUN | inventoried,not all exercised for this role |
+| WebKit | BLOCKED | BLOCKED | BLOCKED | WebKit26.6/v2359,official403 Domain forbidden |
+| Physical GPU/iPhone/Android | NOT RUN | NOT RUN | NOT RUN | headless SwiftShader/emulation |
+| Model creation/modification/fidelity,AI,payment/email/deploy | NOT RUN | NOT RUN | NOT RUN | excluded by mandate |
 
-Overrides de viewport (no se confunden con los nombres de proyecto):
+Viewport overrides, distinct from project names:
 
-- `apartment-viewer`: 1284x926; caso estrecho 605x926.
-- `arrangement-controls`: 1284x926; caso estrecho 605x926.
-- `building-studio`, demo-layout multi-tab, public-assets, energy mobile y
-  i18n mobile: 390x844 en sus casos especificos.
-- settings narrow: 320x568. i18n international-date-line usa un contexto
-  separado por defecto 1280x720 sin touch.
-- Casos nuevos `anonymous*` conservan 320x568/430x932/1440x1000; el contexto de
-  aislamiento adicional tiene 1280x720 sin touch. Metadata de cada caso adjunta
-  engine, viewport, maxTouchPoints y coarse-pointer.
-- Analytics: 1440x1000 general y 390x844 para los dos casos mobile, sin
-  emulacion tactil. Se corre una vez por caso, sin multiplicar la cobertura.
-- WebGL es SwiftShader con DPR0.5 y sombras deshabilitadas para interaccion;
-  no acredita FPS, rendimiento hardware, iluminacion exacta ni fidelidad.
+- `apartment-viewer`, `arrangement-controls`:1284x926,narrow605x926.
+- `building-studio`,demo-layout multi-tab,public-assets,energy mobile,i18n mobile:
+  390x844 in specific cases.
+- settings narrow320x568;i18n international-date-line separate default1280x720
+  no-touch context.
+- New `anonymous*` retain320x568/430x932/1440x1000;extra isolation context1280x720
+  no-touch. Metadata includes engine/viewport/maxTouchPoints/coarse-pointer.
+- Analytics1440x1000 generally,two390x844 mobile no-touch;one execution per case.
+- SwiftShader WebGL DPR0.5/shadows disabled for interaction;no FPS/hardware/
+  exact-lighting/fidelity claim.
 
-## Escenario manual aislado
+<a id="escenario-manual-aislado"></a>
+
+## Isolated manual scenario
 
 ```sh
-source /workspace/.cloud-setup/activate.sh # Solo en este environment Cloud
+source /workspace/.cloud-setup/activate.sh # Only in this Cloud environment
 cd /workspace/t3-designer
 node scripts/qa-anonymous.mjs
 ```
 
-El launcher muestra el directorio temporal. La web local usa puerto 4190 y API
-8790; se pueden cambiar con `T3_ANONYMOUS_WEB_PORT`/`T3_ANONYMOUS_API_PORT`.
-No lee .env, no crea usuario, no necesita clave ni enlace de activacion y no
-llama IA. Usar un perfil/incognito nuevo para empezar con almacenamiento vacio.
-Ctrl-C detiene solo sus dos procesos. No borrar datos ajenos; sus directorios
-temporales son distintos de `artifacts/cloud-dev` y de produccion.
+Launcher displays temp directory. Web4190/API8790,overrides
+`T3_ANONYMOUS_WEB_PORT`/`T3_ANONYMOUS_API_PORT`. No .env/user creation/key/activation
+link/AI. New profile/incognito for empty storage. Ctrl-C stops only its two
+processes. Do not delete others' data;temp directories separate from
+`artifacts/cloud-dev`/production.
 
-Pruebas reproducibles:
+Reproducible tests:
 
 ```sh
 T3_ANONYMOUS_EXECUTABLE=/usr/bin/chromium pnpm --filter @t3-designer/web exec playwright test --config playwright.anonymous.config.ts
 T3_ANONYMOUS_EXECUTABLE=/usr/bin/chromium T3_ANONYMOUS_WEBGL=1 pnpm --filter @t3-designer/web exec playwright test --config playwright.anonymous.config.ts
 ```
 
-Omitir `T3_ANONYMOUS_EXECUTABLE` para los binarios oficiales instalados. WebKit:
-`T3_ANONYMOUS_BROWSER=webkit` y seleccionar `anonymous-webgl.spec.ts` o
-`anonymous.spec.ts`; las suites heredadas de mapa/drag usan flags Chromium.
-Nunca interpretar su falta de binario como un fallo de la aplicacion.
+Omit `T3_ANONYMOUS_EXECUTABLE` for installed official binaries. WebKit:
+`T3_ANONYMOUS_BROWSER=webkit`,select `anonymous-webgl.spec.ts` or `anonymous.spec.ts`;
+inherited map/drag suites use Chromium flags. Missing binary is not app failure.
 
-Checklist manual corto:
+Short manual checklist:
 
-1. En viewport estrecho, recorrer las cinco tabs y back/forward; abrir ajustes,
-   cambiar idioma/tema/unidades, cerrar y recargar.
-2. Departamento: agregar STRANDMON, quitar una instalacion, rotar la mesa,
-   undo/redo/reset/undo, recargar y contrastar otra pestana y otro incognito.
-3. Solar: 29/03/2026 02:30, 25/10/2026 02:30, noche y play; cambiar de vista y
-   verificar pausa. Energia: guardar cuatro paneles, cambiar a cero, descartar,
-   recargar y comprobar guardado.
-4. Dossier: buscar un termino existente/inexistente, abrir fuentes, Escape y
-   Tab para comprobar retorno de foco; copia local e impresion.
-5. Galeria: DYVLINGE v1/v2 y tres vistas; descargar GLB. Con la red deshabilitada
-   para front.png, comprobar mensaje; restaurar red y reintentar.
-6. Recorrido con assets existentes: entrar, controles tactiles, pausa, luces,
-   linterna, reset/salir. No iniciar generacion ni alterar geometria.
-7. CTA privado: login, formulario vacio, correo invalido y credenciales
-   ficticias; volver a demo y verificar que no se expusieron datos privados.
+1. Narrow viewport,five tabs/back/forward,settings/language/theme/units,close/reload.
+2. Apartment add STRANDMON/remove installation/rotate table/undo/redo/reset/undo;
+   reload/compare another tab/incognito.
+3. Solar29/03/2026 02:30,25/10/2026 02:30,night/play;view change pauses. Energy
+   save four panels,set zero/discard/reload/check saved state.
+4. Dossier existing/missing search,open source,Escape/Tab restores focus;local
+   copy/print.
+5. DYVLINGE v1/v2,three gallery views,GLB download. Block front.png network,
+   check message,restore/retry.
+6. Existing-asset walkthrough enter/touch/pause/lights/torch/reset/exit. No
+   generation/geometry changes.
+7. Private CTA/login/empty form/invalid email/fictional credentials;demo return,
+   no private data exposed.
 
-## Retorno para Atlas (sin escrituras)
+<a id="retorno-para-atlas-sin-escrituras"></a>
 
-T3 pertenece a Immolab. Atlas documenta baseline a3579ee del 12/10 y deploy
-historico ade9bf2/20a426f del 04/10; esta QA sobre main 7a851eb y rama local
-no revalida aquel deploy. Integrar despues resultados UI, limites de motores,
-cuatro fixes y SHA finales en el intake de T3. No se consultaron servicios reales,
-GitOps, DNS, pagos, correo ni proveedor IA. No hay cambio de arquitectura ni
-nueva decision de producto.
+## Atlas handoff (without writes)
 
+T3 belongs to Immolab. Atlas documents October12 a3579ee baseline and October4
+ade9bf2/20a426f deployment; this QA on main7a851eb/local branch does not revalidate
+it. Later integrate UI results/engine limits/four fixes/final SHAs into T3 intake.
+No real services/GitOps/DNS/payments/email/AI consulted. No architecture change or
+new product decision.
 
-## Comandos y cierre de revision
+<a id="comandos-y-cierre-de-revision"></a>
 
-Todos los comandos de esta instancia se ejecutaron tras activar las herramientas
-con `source /workspace/.cloud-setup/activate.sh`.
+## Commands and revision closure
 
-| Comando | Resultado | Evidencia |
+All instance commands after `source /workspace/.cloud-setup/activate.sh`.
+
+| Command | Result | Evidence |
 | --- | --- | --- |
-| `pnpm check` | PASS, 648 Node + 35 Python; lint/tipos/scene/build/audit | checks/review-final.log |
-| `pnpm lint`, `pnpm typecheck` despues de separar casos WebGL | PASS | checks/atomic-lint.log, checks/atomic-webgl-types.log |
+| `pnpm check` | PASS648Node+35Python,lint/types/scene/build/audit | checks/review-final.log |
+| `pnpm lint`,`pnpm typecheck` after WebGL case separation | PASS | checks/atomic-lint.log,checks/atomic-webgl-types.log |
 | `pnpm audit:history` | PASS | checks/history.log |
-| Config anonymous completa (antes del slider final) | 180 PASS | final-ui/results.json |
-| `pnpm test:anonymous` | 60 PASS; backend real, sin .env | gates-final/results.json |
-| `pnpm test:anonymous:webgl` | 21 PASS; cronologia en log final | webgl-atomic/results.json/run.log; duracion final exacta en JSON |
-| building-map + demo-drag desktop | mapa 2 y drag3D PASS; top timeout concurrente | map-drag-final/results.json |
-| demo-drag top aislado | 1 PASS, assertions originales | drag-isolated/results.json |
-| Demo production sin backend | 3 PASS | checks/demo-final.log, demo-final/test-results/.last-run.json |
-| Analytics publicos con config externa/Chromium del sistema | 29 PASS; 2 privados excluidos del mandato | analytics/results.json |
-| CI=1, nuevo artifact layout, preview perdido/retry | 1 PASS; 0 sqlite/session-secret en artifacts | checks/ci-scenario.log |
-| Launcher `node scripts/qa-anonymous.mjs` y UI | PASS; API200 / privado401 | checks/manual-launcher.json |
-| YAML CI GitHub/GitLab y `git diff --check` | PASS | parse local y salida Git sin errores |
-| `pnpm check:all` completo | NOT RUN | Incluye otros roles y sus suites; no se omiten de los gates existentes |
+| Full anonymous config before final slider | 180PASS | final-ui/results.json |
+| `pnpm test:anonymous` | 60PASS,real backend/no.env | gates-final/results.json |
+| `pnpm test:anonymous:webgl` | 21PASS,final log chronology | webgl-atomic/results.json/run.log;exact duration JSON |
+| building-map+demo-drag desktop | map2/3DdragPASS;concurrent top timeout | map-drag-final/results.json |
+| isolated demo-drag top | 1PASS,original assertions | drag-isolated/results.json |
+| Backend-free production demo | 3PASS | checks/demo-final.log,demo-final/test-results/.last-run.json |
+| Public analytics external config/system Chromium | 29PASS;2private excluded | analytics/results.json |
+| CI=1,new artifact layout,lost preview/retry | 1PASS,0sqlite/session-secret in artifacts | checks/ci-scenario.log |
+| `node scripts/qa-anonymous.mjs`/UI | PASS,API200/private401 | checks/manual-launcher.json |
+| GitHub/GitLab YAML/`git diff --check` | PASS | local parse/clean Git output |
+| Complete `pnpm check:all` | NOT RUN | other roles/suites remain in gates |
 
-La cobertura distinta se calcula sin sumar repeticiones: 138 casos heredados +
-60 del gate anonimo + 21 WebGL + 4 mapa/drag + 29 analytics + 3 production-demo
-= **255 PASS**. La ejecucion final seleccionada tiene cero FAIL. Los FAIL de
-reproducciones previas y de setup se preservan y se explican arriba; no se ocultan
-ni se atribuyen a una regression de estos cambios.
+Deduplicated138inherited+60anonymous+21WebGL+4map/drag+29analytics+3production-demo
+= **255 PASS**. Selected final execution zeroFAIL. Prior reproduction/setup FAIL
+retained/explained,not hidden or attributed to a regression from these changes.
 
-Codigo probado y guardado en commits locales:
+Tested code saved in local commits:
 
-- `154ace41b93caba56d55d0502544ca0ea039f18f`: galeria recuperable y foco dossier.
-- `d7eabd944e0d556c784edb018be39e1eb2988795`: sliders con nombres accesibles.
-- `4a0a7e7`: overlay del recorrido encima del minimapa.
-- `4894431c49f4433db35e7fd97be080aac5ad6c89`: tests, configuracion, CI y escenario
-  manual. El commit posterior de cierre solo completa este informe. SHA final,
-  hashes de entrega y patch de commits figuran en el manifest de evidencia.
+- `154ace41b93caba56d55d0502544ca0ea039f18f`:recoverable gallery/dossier focus.
+- `d7eabd944e0d556c784edb018be39e1eb2988795`:accessible slider names.
+- `4a0a7e7`:walkthrough overlay above minimap.
+- `4894431c49f4433db35e7fd97be080aac5ad6c89`:tests/config/CI/manual scenario.
+  Subsequent closure commit only completes report. Final SHA/delivery hashes/
+  commit patch in evidence manifest.
 
-La disposicion nueva de CI se probo en modo CI; las bases y el secret del backend
-quedan fuera de test-results. No se cambio ningun gate anterior: los tests nuevos
-requieren su API propia y se separan del config web-only; los comandos anonimos
-se agregan a check:all y el gate rapido se agrega a ambos proveedores CI. WebGL
-conserva assertions y limite de 180s por caso; puede ser lento en software.
+New CI layout tested in CI mode;backend databases/secret outside test-results.
+No previous gate changed:new tests need own API/separate web-only config;
+anonymous commands added check:all,fast gate both CI providers. WebGL retains
+assertions/180s per case,may be slow in software.
 
-Archivos compartidos a integrar con otros roles:
+Shared integration files:
 
-- `src/walkthrough/Walkthrough.tsx` y `walkthrough.css`: tambien los usa el visor
-  privado; se probaron aqui con assets publicos, no con proyectos autenticados.
-- `src/components/DossierExplorer.tsx`, `PublicAssetsExplorer.tsx`, `assets.css`
-  y `src/i18n/locales/{en,es,fr}/public-assets.ts`.
-- Root `package.json`, `.github/workflows/ci.yml`, `.gitlab-ci.yml`,
-  `apps/web/playwright.config.ts` y los overrides de navegador en
-  `building-map.spec.ts`/`demo-drag.spec.ts`. Resolver estos pequenos solapamientos
-  al integrar ramas; no hubo merge ni publicacion en esta tarea.
+- `src/walkthrough/Walkthrough.tsx`,`walkthrough.css`:private viewer also uses;
+  here tested public assets,not authenticated projects.
+- `src/components/DossierExplorer.tsx`,`PublicAssetsExplorer.tsx`,`assets.css`,
+  `src/i18n/locales/{en,es,fr}/public-assets.ts`.
+- Root `package.json`,`.github/workflows/ci.yml`,`.gitlab-ci.yml`,
+  `apps/web/playwright.config.ts`,building-map.spec.ts/demo-drag.spec.ts browser
+  overrides. Resolve small overlaps on integration;historical task had no merge/publication.
 
-Entregables en `artifacts/qa-anonymous/delivery`:
+Deliverables `artifacts/qa-anonymous/delivery`:
 
-- `cases.csv`: cada caso, motor, viewport principal real/configurado, touch,
-  resultado, duracion y paths de sus evidencias. Los contexts secundarios y
-  overrides heredados estan declarados en este informe.
-- `summary.json`: conteo deduplicado y limites.
-- `evidence.zip`: capturas seleccionadas, traces de todos los casos nuevos,
-  JSON de corridas finales y logs. Excluye DB y session secrets temporales.
-- `commits.patch`: commits locales para integracion sin publicar PR.
-- `manifest.json`: rama/SHA y SHA256 de las entregas.
+- `cases.csv`:case/engine/actual or configured main viewport/touch/result/duration/
+  evidence paths;secondary contexts/inherited overrides in report.
+- `summary.json`:deduplicated counts/limits.
+- `evidence.zip`:selected captures,all new-case traces,final-run JSON/logs;
+  excludes temporary database/session secrets.
+- `commits.patch`:local integration commits without PR publication at checkpoint.
+- `manifest.json`:branch/SHA and delivery SHA256.
 
-No quedan defectos reproducidos de este alcance sin corregir. Permanecen los
-BLOCKED/NOT RUN de la matriz: WebKit, dispositivos reales, controles no
-recorridos, todos los combos energeticos, acceso de cuentas validas, impresion
-fisica, Pointer Lock/fullscreen exitosos y servicios/modelado excluidos.
+No reproduced in-scope defect remains uncorrected. Matrix BLOCKED/NOT RUN remain:
+WebKit/physical devices/unexercised controls/all energy combinations/valid accounts/
+physical printing/successful Pointer Lock-fullscreen/excluded services-modeling.
