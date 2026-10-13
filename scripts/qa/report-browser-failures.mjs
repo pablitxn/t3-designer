@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import { stripVTControlCharacters } from 'node:util'
 
 // CI diagnostics only. Read Playwright's saved results; never change test status.
 // Annotations remain readable through GitHub's API when log downloads are blocked.
@@ -7,7 +8,7 @@ const property = value => escape(value).replaceAll(',', '%2C').replaceAll(':', '
 let failures = 0
 function report(title, error) {
   if (failures++ >= 30) return
-  const message = String(error?.message ?? error?.stack ?? error ?? 'Unknown browser failure').replace(/\u001b\[[0-9;]*m/g, '').slice(0, 4000)
+  const message = stripVTControlCharacters(String(error?.message ?? error?.stack ?? error ?? 'Unknown browser failure')).slice(0, 4000)
   console.log(`::error title=${property(title)}::${escape(message)}`)
 }
 function visit(suites) {
