@@ -35,6 +35,8 @@ export async function startSharedEditorScenario() {
   const admin = await accounts.acceptInvitation({ token: first.token, email: 'admin@example.test', name: 'QA admin', password })
   const env = { ...process.env, NODE_ENV: 'development', T3_DATABASE_URL: '', T3_AUTH_SECRET: secret,
     T3_BILLING_MODE: 'disabled', T3_INFERENCE_PROVIDER: 'openai', T3_GENERATION_ENABLED: 'false',
+    // Health may probe --version; keep even that probe away from the real Blender binary.
+    BLENDER_BIN: join(directory, 'disabled-blender'),
     OPENAI_API_KEY: '', CODEX_API_KEY: '', OTEL_SDK_DISABLED: 'true', OTEL_EXPORTER_OTLP_ENDPOINT: '', OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: '',
     T3_PUBLIC_URL: origin, T3_API_HOST: '127.0.0.1', T3_API_PORT: String(apiPort), T3_TRUSTED_PROXY_IPS: '',
     T3_ACCOUNT_DATA_DIR: join(directory, 'accounts'), T3_ASSET_DATA_DIR: join(directory, 'assets') }
