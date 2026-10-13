@@ -1,7 +1,8 @@
 # QA del visitante anonimo - 2026-10-13
 
-Estado de trabajo: cierre de QA en curso. Las pruebas WebGL finales se enumeran
-abajo; este informe no acredita deploy ni pruebas fisicas.
+QA completada para el alcance ejecutado. Cuatro defectos corregidos; 255 casos
+UI distintos aprobados, con limites y casos no ejecutados declarados. No acredita
+deploy ni pruebas fisicas.
 
 ## Revision y entorno
 
@@ -91,6 +92,9 @@ con las capturas vacias previas.
   `artifacts/qa-anonymous/checks/demo-final.log`.
 - Suite publica completa: 180 PASS en `final-ui`. Incluye 42 casos nuevos y
   138 heredados. Los heredados tienen overrides de viewport declarados abajo.
+- WebGL final: 21 PASS en `webgl-atomic`, sobre los tres viewports exactos.
+  Incluye visores cargados y gestos de orbita, movimiento/salto/pausa/retorno,
+  ajustes/validacion/fullscreen denegado, entrada sin solapamiento y GLB fallido.
 - Gate `pnpm test:anonymous`: 60 PASS en `gates-final`, sobre los tres viewports
   exactos, incluyendo las regresiones de foco/imagenes/sliders.
 - Privacidad/analytics de produccion: 29 PASS en `analytics`; collector, tracker
@@ -154,11 +158,11 @@ JSON; no se suman reruns como cobertura adicional.
 | Tracker/collector fallidos, DNT/GPC, revocacion/expiracion y tabs | NOT RUN | NOT RUN | PASS | 29 casos de production analytics: 1440x1000 y dos casos 390x844 sin touch; no servicio real |
 | Mapa tiles/zoom/recenter/atribucion/error/retry | NOT RUN | NOT RUN | PASS | 2 casos desktop; tiles ficticios. OSM real no consultado |
 | Arrastre WebGL planta/perspectiva; instalacion fija | NOT RUN | NOT RUN | PASS | 1284x926; mueve instancia existente, no geometria |
-| Visores WebGL, orbita tactil/desktop y modelo no disponible | EN CURSO | EN CURSO | EN CURSO | Tanda atomica final, 180s/caso; esperar render real para captura |
-| Recorrido entrar/mover/saltar/pausar/reanudar/blur/salir | EN CURSO | EN CURSO | EN CURSO | Touch events Chromium y mouse desktop; no prueba fisica |
-| Recorrido ajustes/fecha invalida/sliders/reset/luces/linterna | EN CURSO | EN CURSO | EN CURSO | Nombres accesibles corregidos; sin persistir diseño |
-| Entrada legible encima del minimapa, mapa visible activo | EN CURSO | EN CURSO | EN CURSO | FAIL previo, CSS corregido; hit testing real y captura |
-| Fullscreen/captura mouse denegados: fallback de UI | EN CURSO | EN CURSO | EN CURSO | Denegacion intencional, no acredita permiso nativo |
+| Visores WebGL, orbita tactil/desktop y modelo no disponible | PASS | PASS | PASS | Tanda atomica final, 180s/caso; esperar render real para captura |
+| Recorrido entrar/mover/saltar/pausar/reanudar/blur/salir | PASS | PASS | PASS | Touch events Chromium y mouse desktop; no prueba fisica |
+| Recorrido ajustes/fecha invalida/sliders/reset/luces/linterna | PASS | PASS | PASS | Nombres accesibles corregidos; sin persistir diseño |
+| Entrada legible encima del minimapa, mapa visible activo | PASS | PASS | PASS | FAIL previo, CSS corregido; hit testing real y captura |
+| Fullscreen/captura mouse denegados: fallback de UI | PASS | PASS | PASS | Denegacion intencional, no acredita permiso nativo |
 | Pointer Lock/fullscreen nativos exitosos | NOT RUN | NOT RUN | NOT RUN | No se atribuye la denegacion inyectada al producto |
 | Correr/agacharse/puertas durante recorrido real | NOT RUN | NOT RUN | NOT RUN | Controles inventariados; no todos ejercitados en este rol |
 | WebKit | BLOCKED | BLOCKED | BLOCKED | WebKit26.6/v2359, descarga oficial403 Domain forbidden |
@@ -231,6 +235,77 @@ Checklist manual corto:
 T3 pertenece a Immolab. Atlas documenta baseline a3579ee del 12/10 y deploy
 historico ade9bf2/20a426f del 04/10; esta QA sobre main 7a851eb y rama local
 no revalida aquel deploy. Integrar despues resultados UI, limites de motores,
-dos fixes y SHA finales en el intake de T3. No se consultaron servicios reales,
+cuatro fixes y SHA finales en el intake de T3. No se consultaron servicios reales,
 GitOps, DNS, pagos, correo ni proveedor IA. No hay cambio de arquitectura ni
 nueva decision de producto.
+
+
+## Comandos y cierre de revision
+
+Todos los comandos de esta instancia se ejecutaron tras activar las herramientas
+con `source /workspace/.cloud-setup/activate.sh`.
+
+| Comando | Resultado | Evidencia |
+| --- | --- | --- |
+| `pnpm check` | PASS, 648 Node + 35 Python; lint/tipos/scene/build/audit | checks/review-final.log |
+| `pnpm lint`, `pnpm typecheck` despues de separar casos WebGL | PASS | checks/atomic-lint.log, checks/atomic-webgl-types.log |
+| `pnpm audit:history` | PASS | checks/history.log |
+| Config anonymous completa (antes del slider final) | 180 PASS | final-ui/results.json |
+| `pnpm test:anonymous` | 60 PASS; backend real, sin .env | gates-final/results.json |
+| `pnpm test:anonymous:webgl` | 21 PASS; cronologia en log final | webgl-atomic/results.json/run.log; duracion final exacta en JSON |
+| building-map + demo-drag desktop | mapa 2 y drag3D PASS; top timeout concurrente | map-drag-final/results.json |
+| demo-drag top aislado | 1 PASS, assertions originales | drag-isolated/results.json |
+| Demo production sin backend | 3 PASS | checks/demo-final.log, demo-final/test-results/.last-run.json |
+| Analytics publicos con config externa/Chromium del sistema | 29 PASS; 2 privados excluidos del mandato | analytics/results.json |
+| CI=1, nuevo artifact layout, preview perdido/retry | 1 PASS; 0 sqlite/session-secret en artifacts | checks/ci-scenario.log |
+| Launcher `node scripts/qa-anonymous.mjs` y UI | PASS; API200 / privado401 | checks/manual-launcher.json |
+| YAML CI GitHub/GitLab y `git diff --check` | PASS | parse local y salida Git sin errores |
+| `pnpm check:all` completo | NOT RUN | Incluye otros roles y sus suites; no se omiten de los gates existentes |
+
+La cobertura distinta se calcula sin sumar repeticiones: 138 casos heredados +
+60 del gate anonimo + 21 WebGL + 4 mapa/drag + 29 analytics + 3 production-demo
+= **255 PASS**. La ejecucion final seleccionada tiene cero FAIL. Los FAIL de
+reproducciones previas y de setup se preservan y se explican arriba; no se ocultan
+ni se atribuyen a una regression de estos cambios.
+
+Codigo probado y guardado en commits locales:
+
+- `154ace41b93caba56d55d0502544ca0ea039f18f`: galeria recuperable y foco dossier.
+- `d7eabd944e0d556c784edb018be39e1eb2988795`: sliders con nombres accesibles.
+- `4a0a7e7`: overlay del recorrido encima del minimapa.
+- `4894431c49f4433db35e7fd97be080aac5ad6c89`: tests, configuracion, CI y escenario
+  manual. El commit posterior de cierre solo completa este informe. SHA final,
+  hashes de entrega y patch de commits figuran en el manifest de evidencia.
+
+La disposicion nueva de CI se probo en modo CI; las bases y el secret del backend
+quedan fuera de test-results. No se cambio ningun gate anterior: los tests nuevos
+requieren su API propia y se separan del config web-only; los comandos anonimos
+se agregan a check:all y el gate rapido se agrega a ambos proveedores CI. WebGL
+conserva assertions y limite de 180s por caso; puede ser lento en software.
+
+Archivos compartidos a integrar con otros roles:
+
+- `src/walkthrough/Walkthrough.tsx` y `walkthrough.css`: tambien los usa el visor
+  privado; se probaron aqui con assets publicos, no con proyectos autenticados.
+- `src/components/DossierExplorer.tsx`, `PublicAssetsExplorer.tsx`, `assets.css`
+  y `src/i18n/locales/{en,es,fr}/public-assets.ts`.
+- Root `package.json`, `.github/workflows/ci.yml`, `.gitlab-ci.yml`,
+  `apps/web/playwright.config.ts` y los overrides de navegador en
+  `building-map.spec.ts`/`demo-drag.spec.ts`. Resolver estos pequenos solapamientos
+  al integrar ramas; no hubo merge ni publicacion en esta tarea.
+
+Entregables en `artifacts/qa-anonymous/delivery`:
+
+- `cases.csv`: cada caso, motor, viewport principal real/configurado, touch,
+  resultado, duracion y paths de sus evidencias. Los contexts secundarios y
+  overrides heredados estan declarados en este informe.
+- `summary.json`: conteo deduplicado y limites.
+- `evidence.zip`: capturas seleccionadas, traces de todos los casos nuevos,
+  JSON de corridas finales y logs. Excluye DB y session secrets temporales.
+- `commits.patch`: commits locales para integracion sin publicar PR.
+- `manifest.json`: rama/SHA y SHA256 de las entregas.
+
+No quedan defectos reproducidos de este alcance sin corregir. Permanecen los
+BLOCKED/NOT RUN de la matriz: WebKit, dispositivos reales, controles no
+recorridos, todos los combos energeticos, acceso de cuentas validas, impresion
+fisica, Pointer Lock/fullscreen exitosos y servicios/modelado excluidos.
