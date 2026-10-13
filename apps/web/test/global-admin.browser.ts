@@ -123,7 +123,7 @@ test('Billing: pending checkout survives reload, retries once, cancel preserves 
   await login(page, f); await page.goto(`${f.origin}/app/credits`)
   await expect(page.getByTestId('credit-balance')).toHaveText('1000')
   await page.getByRole('button', { name: 'Elegir suscripción', exact: true }).click({ clickCount: 2 })
-  expect((await f.database.db.selectFrom('t3_billing_order').selectAll().where('userId', '=', f.admin.id).execute()).length).toBe(1)
+  await expect.poll(async () => (await f.database.db.selectFrom('t3_billing_order').selectAll().where('userId', '=', f.admin.id).execute()).length).toBe(1)
   await page.reload()
   await expect(page.getByRole('button', { name: 'Simular pago de prueba', exact: true })).toBeVisible()
   await expect(page.getByTestId('credit-balance')).toHaveText('1000')

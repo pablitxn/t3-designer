@@ -8,7 +8,7 @@ const property = value => escape(value).replaceAll(',', '%2C').replaceAll(':', '
 let failures = 0
 function report(title, error) {
   if (failures++ >= 30) return
-  const message = stripVTControlCharacters(String(error?.message ?? error?.stack ?? error ?? 'Unknown browser failure')).slice(0, 4000)
+  const message = stripVTControlCharacters(String(error?.stack ?? error?.message ?? error ?? 'Unknown browser failure')).slice(0, 4000)
   console.log(`::error title=${property(title)}::${escape(message)}`)
 }
 function visit(suites) {
