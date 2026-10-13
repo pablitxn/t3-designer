@@ -214,9 +214,9 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
           <button className="walk-text-button" onClick={() => setMoment(initialMoment ?? { date: snapshot.solar.date, minutes: snapshot.solar.selected.minutes })}>{c.savedSun}</button>
           <label className="walk-check"><input type="checkbox" checked={artificialLights} onChange={event => setArtificialLights(event.target.checked)} />{c.artificial}</label>
           <label className="walk-check"><input type="checkbox" checked={torch} onChange={event => setTorch(event.target.checked)} />{c.torch}</label>
-          <label>{c.height} <output>{formatLength(eyeHeight)}</output><input type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
-          <label>{c.fov} <output>{fov}°</output><input type="range" min="50" max="95" step="1" value={fov} onChange={event => setFov(Number(event.target.value))} /></label>
-          <label>{c.sensitivity} <output>{sensitivity.toFixed(1)}×</output><input type="range" min=".3" max="2" step=".1" value={sensitivity} onChange={event => setSensitivity(Number(event.target.value))} /></label>
+          <label>{c.height} <output>{formatLength(eyeHeight)}</output><input aria-label={c.height} type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
+          <label>{c.fov} <output>{fov}°</output><input aria-label={c.fov} type="range" min="50" max="95" step="1" value={fov} onChange={event => setFov(Number(event.target.value))} /></label>
+          <label>{c.sensitivity} <output>{sensitivity.toFixed(1)}×</output><input aria-label={c.sensitivity} type="range" min=".3" max="2" step=".1" value={sensitivity} onChange={event => setSensitivity(Number(event.target.value))} /></label>
           <label className="walk-check"><input type="checkbox" checked={screenControls} onChange={event => setScreenControls(event.target.checked)} />{c.controls}</label>
         </fieldset>
         </div>

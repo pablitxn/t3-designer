@@ -18,6 +18,7 @@
     "test",
     "vite.config.ts",
     "e2e",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "playwright.viewer.config.ts"
   ]
 }
