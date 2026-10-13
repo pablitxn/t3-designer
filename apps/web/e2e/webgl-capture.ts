@@ -12,12 +12,15 @@ export async function captureWebGL(page: Page, info: TestInfo, name: string, sel
     return canvases.map(canvas => {
       const state = _roots.get(canvas)?.store.getState()
       if (!state?.gl) return null
-      const previous = state.frameloop
+      const previous = { loop: state.frameloop as 'always' | 'demand' | 'never', active: state.internal.active as boolean }
+      // Canvas.configure can restore frameloop after a queued React update.
+      // The scheduler's active flag keeps callbacks and drawing stopped too.
+      state.internal.active = false
       state.setFrameloop('never')
       state.gl.render(state.scene, state.camera)
       // render() queues GPU work; finish the real frame before readback.
       state.gl.getContext().finish()
-      return previous as 'always' | 'demand' | 'never'
+      return previous
     })
   })
   if (!loops.some(loop => loop !== null)) throw new Error('No active Fiber renderer was frozen for capture')
@@ -36,7 +39,11 @@ export async function captureWebGL(page: Page, info: TestInfo, name: string, sel
       const { _roots } = await import(resource.name)
       canvases.forEach((canvas, index) => {
         const state = _roots.get(canvas)?.store.getState()
-        if (state && previous[index]) { state.setFrameloop(previous[index]); state.invalidate() }
+        if (state && previous[index]) {
+          state.setFrameloop(previous[index]!.loop)
+          state.internal.active = previous[index]!.active
+          state.invalidate()
+        }
       })
     }, loops)
   }
