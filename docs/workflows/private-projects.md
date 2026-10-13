@@ -48,6 +48,8 @@ another premium member. Paying a subscription does not grant invitation rights.
 Premium members can invite at most 10 people per link and keep 20 unredeemed
 places outstanding; administrators can keep 1,000. Link expiry is configurable
 from 1 to 30 days. Standard members cannot create invitations.
+The outstanding limit counts both unused personal invitations and remaining
+places in active shared links. Acceptance, revocation or expiry frees places.
 
 Deliver invitation
 links privately: possession of an unused link plus its bound email permits

@@ -5,7 +5,8 @@ import { betterAuth } from 'better-auth'
 import { hashPassword } from 'better-auth/crypto'
 import { getMigrations } from 'better-auth/db/migration'
 import { z } from 'zod'
-import type { AppDatabase, AccountUserRow } from './app-database.ts'
+import type { Transaction } from 'kysely'
+import type { AppDatabase, AccountUserRow, AppTables } from './app-database.ts'
 import { CreditService, CreditError, type CreditConfig } from './credits.ts'
 
 export interface User { id: string; email: string; name: string; role: 'admin' | 'user'; tier?: 'standard' | 'premium'; canInvite?: boolean }
@@ -163,12 +164,27 @@ export async function createAccounts(options: {
     if (!actor.canInvite) throw new AccountError(403, 'Solo administradores e invitados premium pueden invitar.')
     return actor
   }
+  async function allocateInvitations(transaction: Transaction<AppTables>, creator: string, places: number, now: string) {
+    // Serialize both personal and shared allocation on the same account row.
+    const actor = await transaction.updateTable('user').set({ updatedAt: database.authDate() }).where('id', '=', creator)
+      .returning(['role', 'suspended']).executeTakeFirst()
+    const gift = await transaction.selectFrom('t3_credit_account').select('tier').where('userId', '=', creator).executeTakeFirst()
+    if (!actor || actor.suspended || (actor.role !== 'admin' && gift?.tier !== 'premium')) throw new AccountError(403, 'No tenés permiso para invitar.')
+    const personal = await transaction.selectFrom('t3_invitation').select('id').where('createdBy', '=', creator)
+      .where('usedAt', 'is', null).where('revokedAt', 'is', null).where('expiresAt', '>', now).execute()
+    const shared = await transaction.selectFrom('t3_invite_link').select(['maxUses', 'uses']).where('createdBy', '=', creator)
+      .where('revokedAt', 'is', null).where('expiresAt', '>', now).execute()
+    if (personal.length + shared.reduce((sum, item) => sum + item.maxUses - item.uses, 0) + places > (actor.role === 'admin' ? 1000 : 20)) {
+      throw new AccountError(429, 'Agotaste el cupo de invitaciones pendientes. Revocá una invitación anterior para liberar cupos.')
+    }
+  }
   async function invitation(email: string, creator: string | null, bootstrap = false, tier: 'standard' | 'premium' = 'standard') {
     const normalizedEmail = parseInput(emailSchema, email.trim())
     const token = randomBytes(32).toString('base64url')
     const now = new Date().toISOString()
     const row = { id: randomUUID(), tokenHash: digest(token), email: normalizedEmail, role: bootstrap ? 'admin' : 'user', tier: bootstrap ? 'premium' : tier, createdBy: creator, createdAt: now, expiresAt: new Date(Date.now() + 24 * 60 * 60_000).toISOString(), usedAt: null }
     await db.transaction().execute(async transaction => {
+      if (creator) await allocateInvitations(transaction, creator, 1, now)
       if (await transaction.selectFrom('user').select('id').where('email', '=', normalizedEmail).executeTakeFirst()) throw new AccountError(409, 'Esa persona ya tiene una cuenta.')
       if (bootstrap) {
         if (await transaction.selectFrom('user').select('id').executeTakeFirst()) throw new AccountError(409, 'Ya hay usuarios. El bootstrap está cerrado.')
@@ -241,13 +257,7 @@ export async function createAccounts(options: {
     const link = { id: randomUUID(), tokenHash: digest(token), createdBy: actor.id, tier, createdAt: now.toISOString(),
       expiresAt: new Date(now.getTime() + (input.expiresInDays ?? 7) * 86400000).toISOString(), revokedAt: null, maxUses: input.maxUses, uses: 0 }
     await db.transaction().execute(async tx => {
-      // This write serializes invite allocation across processes on both dialects.
-      await tx.updateTable('user').set({ updatedAt: database.authDate() }).where('id', '=', actor.id).execute()
-      const outstanding = await tx.selectFrom('t3_invite_link').select(['maxUses', 'uses']).where('createdBy', '=', actor.id)
-        .where('revokedAt', 'is', null).where('expiresAt', '>', now.toISOString()).execute()
-      if (outstanding.reduce((sum, item) => sum + item.maxUses - item.uses, 0) + input.maxUses > (actor.role === 'admin' ? 1000 : 20)) {
-        throw new AccountError(429, 'Agotaste el cupo de invitaciones pendientes. Revocá un enlace anterior para liberar cupos.')
-      }
+      await allocateInvitations(tx, actor.id, input.maxUses, now.toISOString())
       await tx.insertInto('t3_invite_link').values(link).execute()
     })
     const visible = { id: link.id, createdBy: link.createdBy, tier: link.tier, createdAt: link.createdAt, expiresAt: link.expiresAt, revokedAt: link.revokedAt, maxUses: link.maxUses, uses: link.uses }
