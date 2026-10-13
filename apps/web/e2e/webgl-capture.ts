@@ -1,4 +1,5 @@
-import type { Page, TestInfo } from '@playwright/test'
+import { writeFile } from 'node:fs/promises'
+import type { CDPSession, Page, TestInfo } from '@playwright/test'
 
 /** Freeze existing rendered frames only during capture, then restore their loops.
  * Inputs, geometry, shadows, DPR and assertions are unchanged. This avoids
@@ -27,7 +28,33 @@ export async function captureWebGL(page: Page, info: TestInfo, name: string, sel
   try {
     await info.attach('capture-mode', { body: JSON.stringify({ temporaryFrameFreeze: true, previousLoops: loops, geometryChanged: false, quality3DValidated: false }), contentType: 'application/json' })
     const path = info.outputPath(`${name}.png`)
-    if (selector) await page.locator(selector).screenshot({ path, timeout: 15_000 })
+    if (!selector && page.context().browser()?.browserType().name() === 'chromium') {
+      // Use lossless speed-oriented PNG encoding for the same viewport pixels.
+      // The protocol request retains the original 15-second capture deadline.
+      let session: CDPSession | undefined
+      let timeout: ReturnType<typeof setTimeout> | undefined
+      let phase = 'font readiness'
+      try {
+        const deadline = new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error(`Viewport PNG ${phase} exceeded 15000ms`)), 15_000) })
+        await Promise.race([page.evaluate(() => document.fonts.ready), deadline])
+        phase = 'session setup'
+        session = await page.context().newCDPSession(page)
+        const backend = { fromSurface: true, engine: page.context().browser()!.version(), channel: info.project.use.launchOptions?.channel ?? 'custom-executable', customExecutable: !!info.project.use.launchOptions?.executablePath, viewport: page.viewportSize(), touch: !!info.project.use.hasTouch }
+        await info.attach('capture-backend', { body: JSON.stringify(backend), contentType: 'application/json' })
+        // Keep the actual engine visible through annotations when log downloads fail.
+        if (process.env.GITHUB_ACTIONS === 'true' && name === 'walkthrough-live') console.log(`::notice title=Viewer browser runtime::${JSON.stringify(backend)}`)
+        phase = 'surface readback'
+        const capture = session.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false, optimizeForSpeed: true })
+        const { data } = await Promise.race([capture, deadline])
+        const png = Buffer.from(data, 'base64')
+        const viewport = page.viewportSize(), scale = info.project.use.deviceScaleFactor ?? 1
+        if (!viewport || png.length < 24 || png.subarray(1, 4).toString() !== 'PNG'
+          || png.readUInt32BE(16) !== viewport.width * scale || png.readUInt32BE(20) !== viewport.height * scale) {
+          throw new Error('Browser capture did not preserve the configured viewport dimensions')
+        }
+        await writeFile(path, png)
+      } finally { clearTimeout(timeout); await session?.detach() }
+    } else if (selector) await page.locator(selector).screenshot({ path, timeout: 15_000 })
     else await page.screenshot({ path, fullPage: false, timeout: 15_000 })
     await info.attach(name, { path, contentType: 'image/png' })
   } catch (error) {

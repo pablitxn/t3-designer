@@ -9,7 +9,8 @@ export default defineConfig({
   outputDir: `${evidenceDir}/results`,
   reporter: [['list'], ['json', { outputFile: `${evidenceDir}/results.json` }]],
   use: { locale: 'es-AR', actionTimeout: 15_000, screenshot: 'on', trace: { mode: 'on', screenshots: false, snapshots: true, sources: true },
-    launchOptions: { ...(executablePath ? { executablePath } : {}), args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] } },
+    // Match Cloud's full Chromium headless mode; CI already installs this binary.
+    launchOptions: { ...(executablePath ? { executablePath } : { channel: 'chromium' }), args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] } },
   projects: [
     { name: 'chromium-mobile-375', use: { browserName: 'chromium', viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 } },
     { name: 'chromium-mobile-430', use: { browserName: 'chromium', viewport: { width: 430, height: 932 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 } },
