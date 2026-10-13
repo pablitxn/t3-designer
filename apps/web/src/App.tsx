@@ -36,6 +36,7 @@ export default function App() {
       if (event.isTrusted && nextPath !== currentLocation.current.path
         && !window.dispatchEvent(new CustomEvent('t3:before-navigate', { cancelable: true }))) {
         window.history.pushState(null, '', currentLocation.current.url)
+        event.stopImmediatePropagation()
         return
       }
       currentLocation.current = { path: nextPath, url: window.location.pathname + window.location.search + window.location.hash }
