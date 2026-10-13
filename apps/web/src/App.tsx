@@ -28,7 +28,14 @@ const PublicAssetsExplorer = lazy(() => import('./components/PublicAssetsExplore
 export default function App() {
   const [path, setPath] = useState(window.location.pathname)
   useEffect(() => {
-    const onNavigation = () => setPath(window.location.pathname)
+    const onNavigation = (event: PopStateEvent) => {
+      // Ask mounted editors before any router can replace their unsaved draft.
+      if (event.isTrusted && !window.dispatchEvent(new CustomEvent('t3:before-history-navigate', { cancelable: true }))) {
+        event.stopImmediatePropagation()
+        return
+      }
+      setPath(window.location.pathname)
+    }
     window.addEventListener('popstate', onNavigation)
     return () => window.removeEventListener('popstate', onNavigation)
   }, [])

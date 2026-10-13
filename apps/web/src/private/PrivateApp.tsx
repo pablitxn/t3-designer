@@ -181,18 +181,18 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
     if (!dirty) return
     const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = '' }
     const beforeNavigate = (event: Event) => { if (!window.confirm(copy.current.discard)) event.preventDefault() }
-    const onHistoryNavigation = (event: PopStateEvent) => {
-      // Programmatic navigation already ran the cancellable guard above.
-      if (!event.isTrusted || window.location.pathname === `/app/projects/${id}`) return
+    const currentURL = window.location.pathname + window.location.search + window.location.hash
+    const onHistoryNavigation = (event: Event) => {
+      if (window.location.pathname === `/app/projects/${id}`) return
       if (!window.confirm(copy.current.discard)) {
-        window.history.pushState(null, '', `/app/projects/${id}`)
-        window.dispatchEvent(new PopStateEvent('popstate'))
+        event.preventDefault()
+        window.history.pushState(null, '', currentURL)
       }
     }
     window.addEventListener('beforeunload', beforeUnload)
     window.addEventListener('t3:before-navigate', beforeNavigate)
-    window.addEventListener('popstate', onHistoryNavigation)
-    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate); window.removeEventListener('popstate', onHistoryNavigation) }
+    window.addEventListener('t3:before-history-navigate', onHistoryNavigation)
+    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate); window.removeEventListener('t3:before-history-navigate', onHistoryNavigation) }
   }, [dirty, id])
   function change(next: Project) {
     if (busy || project?.role === 'viewer') return
