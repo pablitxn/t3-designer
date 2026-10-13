@@ -10,7 +10,7 @@ test.use({
   // Continuous screencasts compete with explicit software WebGL screenshots.
   // Keep action/DOM/source traces and the full desktop/mobile PNGs below.
   trace: { mode: 'retain-on-failure', screenshots: false, snapshots: true, sources: true },
-  launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] },
+  launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'], ...(process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH } : {}) },
 })
 
 const projectId = 'ec426d26-dc06-49e5-bb2c-d6e8cb51d043'
