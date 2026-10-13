@@ -18,7 +18,8 @@
     "test:accounts": "node --test test/private-auth.browser.ts",
     "dev:full": "vite --mode full",
     "build:full": "vite build --mode full",
-    "test:demo": "playwright test --config playwright.demo.config.ts"
+    "test:demo": "playwright test --config playwright.demo.config.ts",
+    "test:shared-editor": "playwright test --config playwright.shared-editor.config.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

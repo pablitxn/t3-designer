@@ -173,26 +173,22 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
   const generation = useRef(0)
   const load = useCallback(async (signal?: AbortSignal) => {
     setError(''); setNotice('')
-    try { const { project } = await request<{ project: Project }>(`/api/projects/${id}`, { signal }); setProject(project); setDirty(false); setConflict(false) }
-    catch (reason) { if (!signal?.aborted) setError(reason instanceof PrivateApiError && [403, 404].includes(reason.status) ? copy.current.projectUnavailable : copy.current.unavailable) }
+    try { const { project } = await request<{ project: Project }>(`/api/projects/${id}`, { signal }); if (!signal?.aborted) { setProject(project); setDirty(false); setConflict(false) } }
+    catch (reason) {
+      if (signal?.aborted) return
+      const denied = reason instanceof PrivateApiError && [403, 404].includes(reason.status)
+      if (denied) { setProject(null); setDirty(false); setConflict(false) }
+      setError(denied ? copy.current.projectUnavailable : copy.current.unavailable)
+    }
   }, [id])
   useEffect(() => { const abort = new AbortController(); void load(abort.signal); return () => { generation.current++; abort.abort() } }, [load])
   useEffect(() => {
     if (!dirty) return
     const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = '' }
     const beforeNavigate = (event: Event) => { if (!window.confirm(copy.current.discard)) event.preventDefault() }
-    const onHistoryNavigation = (event: PopStateEvent) => {
-      // Programmatic navigation already ran the cancellable guard above.
-      if (!event.isTrusted || window.location.pathname === `/app/projects/${id}`) return
-      if (!window.confirm(copy.current.discard)) {
-        window.history.pushState(null, '', `/app/projects/${id}`)
-        window.dispatchEvent(new PopStateEvent('popstate'))
-      }
-    }
     window.addEventListener('beforeunload', beforeUnload)
     window.addEventListener('t3:before-navigate', beforeNavigate)
-    window.addEventListener('popstate', onHistoryNavigation)
-    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate); window.removeEventListener('popstate', onHistoryNavigation) }
+    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate) }
   }, [dirty, id])
   function change(next: Project) {
     if (busy || project?.role === 'viewer') return
@@ -213,7 +209,19 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
     if (project.foundations && !ProjectFoundationsSchema.safeParse(project.foundations).success) { setError(f.invalidFields); return }
     setBusy(true); setError(''); setNotice(''); const version = generation.current
     try { const data = await mutate<{ project: Project }>(`/api/projects/${id}`, { revision: project.revision, name: project.name.trim(), notes: project.notes, ...(project.scene ? { scene: project.scene } : {}), ...(project.foundations ? { foundations: project.foundations } : {}), ...(project.foundationModels?.levels.length ? { levels: project.foundationModels.levels, activeLevelId: project.foundationModels.activeLevelId } : {}) }, 'PUT'); if (generation.current === version) { setProject(data.project); setDirty(false); setConflict(false); setNotice(c.saved) } }
-    catch (reason) { if (generation.current === version) { const stale = reason instanceof PrivateApiError && reason.status === 409; setConflict(stale); setError(stale ? c.conflict : c.genericError) } } finally { setBusy(false) }
+    catch (reason) {
+      if (generation.current === version) {
+        if (reason instanceof PrivateApiError && [403, 404].includes(reason.status)) {
+          // Membership may have been removed or changed to viewer during editing.
+          setProject(null); setDirty(false); setConflict(false)
+          if (reason.status === 403) await load()
+          else setError(c.projectUnavailable)
+        } else {
+          const stale = reason instanceof PrivateApiError && reason.status === 409
+          setConflict(stale); setError(stale ? c.conflict : c.genericError)
+        }
+      }
+    } finally { setBusy(false) }
   }
   async function duplicate() { if (busy) return; setBusy(true); setError(''); try { const data = await mutate<{ project: Project }>(`/api/projects/${id}/clone`, {}); goTo(`/app/projects/${data.project.id}`) } catch { setError(c.genericError) } finally { setBusy(false) } }
   if (!project) return <><Feedback message={error} error />{error ? <button className={button} onClick={() => { void load() }}>{c.retry}</button> : <p role="status" className={muted}>{c.loading}</p>}</>

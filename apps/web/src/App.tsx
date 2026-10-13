@@ -27,8 +27,20 @@ const PublicAssetsExplorer = lazy(() => import('./components/PublicAssetsExplore
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname)
+  const currentLocation = useRef({ path: window.location.pathname, url: window.location.pathname + window.location.search + window.location.hash })
   useEffect(() => {
-    const onNavigation = () => setPath(window.location.pathname)
+    const onNavigation = (event: PopStateEvent) => {
+      const nextPath = window.location.pathname
+      // Ask the mounted editor before any route listener can discard its draft.
+      // Programmatic navigation already dispatched this guard in goTo().
+      if (event.isTrusted && nextPath !== currentLocation.current.path
+        && !window.dispatchEvent(new CustomEvent('t3:before-navigate', { cancelable: true }))) {
+        window.history.pushState(null, '', currentLocation.current.url)
+        return
+      }
+      currentLocation.current = { path: nextPath, url: window.location.pathname + window.location.search + window.location.hash }
+      setPath(nextPath)
+    }
     window.addEventListener('popstate', onNavigation)
     return () => window.removeEventListener('popstate', onNavigation)
   }, [])
