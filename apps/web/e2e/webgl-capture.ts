@@ -1,4 +1,5 @@
-import type { Page, TestInfo } from '@playwright/test'
+import { writeFile } from 'node:fs/promises'
+import type { CDPSession, Page, TestInfo } from '@playwright/test'
 
 /** Freeze existing rendered frames only during capture, then restore their loops.
  * Inputs, geometry, shadows, DPR and assertions are unchanged. This avoids
@@ -27,7 +28,20 @@ export async function captureWebGL(page: Page, info: TestInfo, name: string, sel
   try {
     await info.attach('capture-mode', { body: JSON.stringify({ temporaryFrameFreeze: true, previousLoops: loops, geometryChanged: false, quality3DValidated: false }), contentType: 'application/json' })
     const path = info.outputPath(`${name}.png`)
-    if (selector) await page.locator(selector).screenshot({ path, timeout: 15_000 })
+    if (!selector && page.context().browser()?.browserType().name() === 'chromium') {
+      // Use lossless speed-oriented PNG encoding for the same viewport pixels.
+      // The protocol request retains the original 15-second capture deadline.
+      let session: CDPSession | undefined
+      let timeout: ReturnType<typeof setTimeout> | undefined
+      try {
+        const deadline = new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error('Viewport PNG readback exceeded 15000ms')), 15_000) })
+        await Promise.race([page.evaluate(() => document.fonts.ready), deadline])
+        session = await page.context().newCDPSession(page)
+        const capture = session.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false, optimizeForSpeed: true })
+        const { data } = await Promise.race([capture, deadline])
+        await writeFile(path, Buffer.from(data, 'base64'))
+      } finally { clearTimeout(timeout); await session?.detach() }
+    } else if (selector) await page.locator(selector).screenshot({ path, timeout: 15_000 })
     else await page.screenshot({ path, fullPage: false, timeout: 15_000 })
     await info.attach(name, { path, contentType: 'image/png' })
   } catch (error) {
