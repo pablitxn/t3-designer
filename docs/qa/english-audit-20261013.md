@@ -181,3 +181,35 @@ unresolved because fixing it by rewriting published history or weakening the gat
 is outside this task. Earlier matrix “pending” records publication-time status;
 this observation supersedes it for PR6. The stacked draft PR's own CI must be
 reported against its published head, not inferred from source or integration runs.
+
+## Reconciliation with verified integration CI repair
+
+Integration head `9e96569076e36929ea47fd0ea17d937db54f6d8d` was fetched and independently
+verified against PR8 metadata. Its hosted run
+[38432168616](https://github.com/pablitxn/t3-designer/actions/runs/38432168616)
+completed SUCCESS across global check, all six role jobs and GitGuardian. This
+supersedes the earlier integration failures for that revision, while preserving
+the original failed-run evidence above.
+
+The English branch merges that head with
+`chore(integration): reconcile verified viewer CI repair`. At merge completion,
+all 21 language-change files matched `c733589` byte-for-byte; the capture helper,
+viewer configuration and English integration follow-up matched `9e96569` exactly.
+There were no conflicts. This audit update is appended afterward. Integration
+branch and PR8 metadata remain untouched by the language task.
+
+Combined-tree local `pnpm check` passed, including 658 Node tests and 35 Python
+unit tests without Blender. Full build/distribution audit, bounded English check,
+new-commit syntax check against `9e96569` and whitespace check passed. Demo audit
+checked 710 files; full audit checked 742. The combined published head must pass
+its own hosted CI; the base's successful run is not that verification.
+
+Final source-PR outcomes: PR3, PR4 and PR7 global checks passed. PR6 failed the
+already-reproduced historical privacy gate. PR5 run38425919217 failed
+`pnpm test:e2e:fast`; its pre-language run38392073624 failed the same stage.
+Application/package/CI trees and all pre-existing package commands are identical
+between PR5's original and language heads. Exact browser assertions remain
+unavailable: generic exit-code annotations, no retained artifacts, signed-log
+403. This proves a pre-existing failing stage, not identical individual assertion
+causes. No language regression or gate relaxation is inferred. Both source
+failures remain coordination items outside this language-only correction.
