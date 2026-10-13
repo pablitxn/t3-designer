@@ -28,7 +28,12 @@ async function controlRenderer(page: Page, selector: string) {
     let state = _roots.get(canvas)?.store.getState()
     while (!state?.gl) { await new Promise<void>(resolve => requestAnimationFrame(() => resolve())); state = _roots.get(canvas)?.store.getState() }
     // Software-rendered interaction check only; no geometry/fidelity assessment.
-    state.setDpr(.5); state.gl.shadowMap.enabled = false; state.invalidate()
+    // Canvas.configure re-applies its declared DPR/shadows after pose updates.
+    // Keep the existing software-only budget stable without changing geometry.
+    const setDpr = state.setDpr
+    state.set({ setDpr: () => setDpr(.5) })
+    Object.defineProperty(state.gl.shadowMap, 'enabled', { configurable: true, enumerable: true, get: () => false, set: () => {} })
+    state.setDpr(.5); state.invalidate()
   })
   if (selector === '.workshop-model') {
     await page.locator(`${selector} canvas`).scrollIntoViewIfNeeded()
@@ -167,6 +172,13 @@ test('public walkthrough movement, jump, pause/resume and return never write pri
     })
     observer.observe(element, { attributes: true, attributeOldValue: true, attributeFilter: ['data-grounded'] })
   })
+  // Verify that pose-triggered React updates did not silently restore quality.
+  expect(await visit.locator('canvas').evaluate(async canvas => {
+    const resource = performance.getEntriesByType('resource').find(entry => entry.name.includes('/@react-three_fiber.js'))!
+    const { _roots } = await import(resource.name)
+    const state = _roots.get(canvas).store.getState()
+    return { dpr: state.viewport.dpr, rendererDpr: state.gl.getPixelRatio(), shadows: state.gl.shadowMap.enabled }
+  })).toEqual({ dpr: .5, rendererDpr: .5, shadows: false })
   await visit.getByRole('button', { name: 'Jump', exact: true }).click()
   await expect(visit.locator('.walk-map')).toHaveAttribute('data-qa-grounded-history', /false/)
   // Physics advances on real rendered frames; slow software WebGL can take
