@@ -334,7 +334,7 @@ export function AssetsExplorer() {
             onCancel={() => { if (selectedJob) void action(selectedJob.id, () => assetApi.cancel(selectedJob.id)) }}
             onRetry={() => { if (selectedJob) void retry(selectedJob) }}
             onView={viewResult} onNew={() => { urlInput.current?.focus(); urlInput.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }}>
-            {selectedJob?.status === 'needs_input' && <AnswerForm key={selectedJob.id} job={selectedJob} disabled={!connected || busy !== null} onAnswer={input => action(selectedJob.id, () => assetApi.answer(selectedJob.id, input))} />}
+            {selectedJob?.status === 'needs_input' && <AnswerForm key={selectedJob.id} job={selectedJob} disabled={!connected || busy !== null} onAnswer={input => chargedAction(selectedJob.id, selectedJob.parentAssetId ? 'revision' : 'asset', `answer:${selectedJob.id}:${JSON.stringify(input)}`, key => assetApi.answer(selectedJob.id, input, key))} />}
           </WorkshopActivity>}
         </div>
       <section className="workshop-library" aria-label={t('library.title')}>

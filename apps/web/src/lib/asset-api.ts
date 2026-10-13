@@ -47,5 +47,5 @@ export const assetApi = {
   revise: (id: string, input: RevisionInput, key: string = crypto.randomUUID()) => request<{ job: Job }>(`/assets/${encodeURIComponent(id)}/revisions`, input, undefined, key),
   cancel: (id: string) => request<{ job: Job }>(`/jobs/${encodeURIComponent(id)}/cancel`, {}),
   retry: (id: string, key: string = crypto.randomUUID()) => request<{ job: Job }>(`/jobs/${encodeURIComponent(id)}/retry`, {}, undefined, key),
-  answer: (id: string, input: AnswersInput) => request<{ job: Job }>(`/jobs/${encodeURIComponent(id)}/answers`, input, undefined, crypto.randomUUID()),
+  answer: (id: string, input: AnswersInput, key: string = crypto.randomUUID()) => request<{ job: Job }>(`/jobs/${encodeURIComponent(id)}/answers`, input, undefined, key),
 }
