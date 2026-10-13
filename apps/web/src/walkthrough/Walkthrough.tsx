@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useTranslation } from 'react-i18next'
 import { PCFShadowMap, PerspectiveCamera, PointLight } from 'three'
@@ -65,6 +65,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
   snapshot: ProjectSnapshot; onClose: () => void; initialMoment?: { date: string; minutes: number }; reference?: boolean; context?: WalkFoundationContext
 }) {
   const { locale } = useLocale()
+  const settingsId = useId()
   const { formatLength } = useUnits(), c = walkCopy[locale]
   const { t } = useTranslation('workspace')
   const roomName = (room: ProjectSnapshot['apartment']['rooms'][number]) => reference ? roomLabel(t, room.id) : room.name
@@ -214,9 +215,9 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
           <button className="walk-text-button" onClick={() => setMoment(initialMoment ?? { date: snapshot.solar.date, minutes: snapshot.solar.selected.minutes })}>{c.savedSun}</button>
           <label className="walk-check"><input type="checkbox" checked={artificialLights} onChange={event => setArtificialLights(event.target.checked)} />{c.artificial}</label>
           <label className="walk-check"><input type="checkbox" checked={torch} onChange={event => setTorch(event.target.checked)} />{c.torch}</label>
-          <label>{c.height} <output>{formatLength(eyeHeight)}</output><input type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
-          <label>{c.fov} <output>{fov}°</output><input type="range" min="50" max="95" step="1" value={fov} onChange={event => setFov(Number(event.target.value))} /></label>
-          <label>{c.sensitivity} <output>{sensitivity.toFixed(1)}×</output><input type="range" min=".3" max="2" step=".1" value={sensitivity} onChange={event => setSensitivity(Number(event.target.value))} /></label>
+          <label htmlFor={`${settingsId}-height`}>{c.height} <output htmlFor={`${settingsId}-height`}>{formatLength(eyeHeight)}</output><input id={`${settingsId}-height`} type="range" min="1.2" max="1.9" step=".05" value={eyeHeight} onChange={event => { const height = Number(event.target.value); setEyeHeight(height); if (!entered) setSpawnHeight(height) }} /></label>
+          <label htmlFor={`${settingsId}-fov`}>{c.fov} <output htmlFor={`${settingsId}-fov`}>{fov}°</output><input id={`${settingsId}-fov`} type="range" min="50" max="95" step="1" value={fov} onChange={event => setFov(Number(event.target.value))} /></label>
+          <label htmlFor={`${settingsId}-sensitivity`}>{c.sensitivity} <output htmlFor={`${settingsId}-sensitivity`}>{sensitivity.toFixed(1)}×</output><input id={`${settingsId}-sensitivity`} type="range" min=".3" max="2" step=".1" value={sensitivity} onChange={event => setSensitivity(Number(event.target.value))} /></label>
           <label className="walk-check"><input type="checkbox" checked={screenControls} onChange={event => setScreenControls(event.target.checked)} />{c.controls}</label>
         </fieldset>
         </div>
