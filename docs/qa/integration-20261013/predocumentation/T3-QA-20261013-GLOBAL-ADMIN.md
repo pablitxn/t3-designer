@@ -1,17 +1,19 @@
-# T3-QA-20261013-GLOBAL-ADMIN — Administrador global
+<a id="t3-qa-20261013-global-admin--administrador-global"></a>
 
-Estado: **pendiente de consolidacion**. Esta ficha es predocumentacion en el repo del producto; no es una entrada aprobada ni un protocolo nuevo de Atlas.
+# T3-QA-20261013-GLOBAL-ADMIN — Global administrator
 
-Fuente primaria: [informe del rol](../../2026-10-13-global-admin.md), [PR original](https://github.com/pablitxn/t3-designer/pull/4). Rama original `qa/t3-global-admin-20261013`; SHA verificado `07d9c16e7707ed10cfdae3f592030ba27f76aa94`. Base compartida `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integracion `qa/t3-integration-20261013`; corte de codigo probado `657060b0b459753c2d52c0643357bc1dd732ba51` (consultar reporte para revision final y correcciones posteriores).
+Status: **pending consolidation**. This is an intake draft in the product repository, not an approved Atlas entry or new protocol.
 
-Correcciones: B01 validacion trimmed de motivos; B02 ocultar suspension de otros admins; B03 recuperar checkout mock pendiente tras reload; B04 cupo atomico personal/shared y rol actualizado; B05 textos largos en mobile.
+Primary source: [role report](../../2026-10-13-global-admin.md), [original PR](https://github.com/pablitxn/t3-designer/pull/4). Original branch `qa/t3-global-admin-20261013`; verified SHA `07d9c16e7707ed10cfdae3f592030ba27f76aa94`. Shared base `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integration `qa/t3-integration-20261013`; tested code checkpoint `657060b0b459753c2d52c0643357bc1dd732ba51` (see report for final revision and later corrections).
 
-Decisiones al consolidar: El rol admin global no da acceso a proyectos ajenos. Billing solo disabled/mock; cupo de invitaciones bajo transaccion y revalidacion del invitador.
+Corrections: B01 trimmed reason validation; B02 hide other-admin suspension; B03 recover pending mock checkout after reload; B04 atomic personal/shared quota and current role; B05 long mobile text.
 
-Evidencia: Informe original: 42 UI en tres perfiles y regresion concurrente de cupo. Integracion: ver matriz y check de 658 Node. [Reporte integrado](../README.md). Los informes por rol son evidencia historica de sus propias revisiones; sus limites y fechas se mantienen. Capturas/trazas son archivos locales ignorados y se identifican por ruta/indice, sin afirmar que esten publicados en Git.
+Consolidation decisions: Global admin role grants no access to others' projects. Billing only disabled/mock; invitation quota is transactional with inviter revalidation.
 
-Pendientes y limites: WebKit bloqueado; recovery UI, PostgreSQL, pagos/webhooks y correo real sin ejecutar. Respuesta perdida de invitacion requiere revocar/recrear el token de una sola entrega.
+Evidence: Original report: 42 UI cases in three profiles and concurrent quota regression. Integration: see matrix and 658 Node check. [Integrated report](../README.md). Role reports are historical evidence of their own revisions; dates and limits remain. Captures/traces are ignored local files identified by path/index, not claimed published in Git.
 
-Destinos Atlas propuestos, sujetos a revision posterior: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` para recepcion, `atlas/wiki/t3-designer.md` para estado sintetico, una entrada fechada en `atlas/entries/` para decisiones/evidencia y `atlas/catalog/sources.yaml` para las fuentes aprobadas. No actualizar deploy historico ni afirmar release/produccion con QA local. Atlas consultado en `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, sin escrituras en esta tanda.
+Pending items and limits: WebKit blocked; recovery UI, PostgreSQL, payments/webhooks and real email not run. Lost invitation responses require revoking/recreating the single-delivery token.
 
-Corte posterior de estabilizacion UI/renderer `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pausa sin repaint continuo, captura de frame real con loop restaurado y transicion de salto observada desde antes del input. Evidencia y limites de CI en el reporte integrado; estado pendiente de consolidacion sin escrituras Atlas.
+Proposed Atlas destinations, subject to later review: `atlas/inbox/2026-10-13-t3-designer-qa-intake.md` for receipt, `atlas/wiki/t3-designer.md` for summarized state, a dated `atlas/entries/` entry for decisions/evidence and `atlas/catalog/sources.yaml` for approved sources. Do not update historical deployment or claim release/production from local QA. Atlas consulted at `27ae86c83cd4822e6f7c23c70a1b9397ffd39d9f`, without writes in this batch.
+
+Later UI/renderer stabilization checkpoint `67ad9ec8c1770788a7b6f34f34316bca67ccb26e`: pause without continuous repaint, capture real frame with restored loop and observe jump transition from before input. CI evidence/limits are in the integrated report; consolidation remains pending with no Atlas writes.
