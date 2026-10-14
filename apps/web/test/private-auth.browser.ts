@@ -23,7 +23,7 @@ test('activation, login, project persistence, sharing and revocation through the
   const apiPort = address.port
   available.close(); await once(available, 'close')
   const vite = await createServer({
-    mode: 'full', configFile: join(root, 'apps/web/vite.config.ts'), root: join(root, 'apps/web'),
+    mode: 'full', cacheDir: join(directory, 'vite-cache'), configFile: join(root, 'apps/web/vite.config.ts'), root: join(root, 'apps/web'),
     server: { host: '127.0.0.1', port: 0, strictPort: true, proxy: { '/api': `http://127.0.0.1:${apiPort}` } },
   })
   await vite.listen()
@@ -43,7 +43,7 @@ test('activation, login, project persistence, sharing and revocation through the
     }, { timeout: 20_000 }).toBe(200)
     await promisify(execFile)(process.execPath, [join(root, 'apps/api/src/account-cli.ts'), 'bootstrap', 'owner@example.test'], { env })
     const activation = (await readFile(join(directory, 'accounts/bootstrap-link.txt'), 'utf8')).trim()
-    browser = await chromium.launch({ args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}) })
+    browser = await chromium.launch({ args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}), ...(process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH } : {}) })
     const owner = await browser.newContext({ locale: 'es-AR' })
     const guest = await browser.newContext({ locale: 'es-AR' })
     const page = await owner.newPage()

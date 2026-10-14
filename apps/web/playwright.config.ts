@@ -6,8 +6,8 @@ const baseURL = `http://127.0.0.1:${port}`
 export default defineConfig({
   testDir: './e2e',
   // Analytics has a separate production-only server/configuration.
-  // Visitor integration tests own a real, disposable API in their configuration.
-  testIgnore: ['**/analytics.spec.ts', '**/demo.spec.ts', '**/anonymous*.spec.ts'],
+  // Role suites own their disposable API and separate configurations.
+  testIgnore: ['**/analytics.spec.ts', '**/demo.spec.ts', '**/anonymous*.spec.ts', '**/shared-editor.spec.ts', '**/project-viewer.spec.ts', '**/owner-qa.spec.ts', '**/owner-webgl.spec.ts'],
   // Concurrent work in this checkout must not delete another run's traces.
   outputDir: process.env.CI ? 'test-results/i18n' : `/tmp/t3-designer-i18n-results-${process.pid}`,
   fullyParallel: true,
@@ -22,7 +22,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // Exercise the documented fallback without depending on a host GPU.
-    launchOptions: { args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}) },
+    launchOptions: { args: ['--disable-webgl'], ...(process.env.T3_PLAYWRIGHT_CHANNEL ? { channel: process.env.T3_PLAYWRIGHT_CHANNEL } : {}), ...(process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.T3_PLAYWRIGHT_EXECUTABLE_PATH } : {}) },
   },
   webServer: {
     command: `pnpm dev:full --host 127.0.0.1 --port ${port} --strictPort`,

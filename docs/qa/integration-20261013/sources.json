@@ -1,0 +1,67 @@
+{
+  "base": "7a851eb7ab703016d78c102afeaac2a8d97b08f3",
+  "sources": [
+    {
+      "role": "anonymous",
+      "branch": "qa/t3-anonymous-20261013",
+      "sha": "cf8fc398aa0d4d3f23a3bf5773296d2a502734be",
+      "report": "docs/workflows/anonymous-qa.md",
+      "pr": "https://github.com/pablitxn/t3-designer/pull/3",
+      "commits": [
+        "154ace41b93caba56d55d0502544ca0ea039f18f fix: recover public gallery previews and dossier focus",
+        "d7eabd944e0d556c784edb018be39e1eb2988795 fix: label walkthrough range controls explicitly",
+        "4a0a7e7acb1dd6be1f39647d7d52a9a620d9918c fix: keep walkthrough entry above the minimap",
+        "4894431c49f4433db35e7fd97be080aac5ad6c89 test: add isolated anonymous UI QA and review scenario",
+        "cf8fc398aa0d4d3f23a3bf5773296d2a502734be docs: finalize anonymous QA matrix and review evidence"
+      ]
+    },
+    {
+      "role": "admin",
+      "branch": "qa/t3-global-admin-20261013",
+      "sha": "07d9c16e7707ed10cfdae3f592030ba27f76aa94",
+      "report": "docs/qa/2026-10-13-global-admin.md",
+      "pr": "https://github.com/pablitxn/t3-designer/pull/4",
+      "commits": [
+        "6c2b96b06c90710c4117cc8f354cc935a48b8cfe fix: validate global account administration and recover mock checkouts",
+        "07d9c16e7707ed10cfdae3f592030ba27f76aa94 docs: record global admin QA matrix and reproducible local scenario"
+      ]
+    },
+    {
+      "role": "owner",
+      "branch": "qa/t3-owner-20261013-cloud",
+      "sha": "bc01ee5b98f858784353d533ac957944706af199",
+      "report": "docs/qa/owner-20261013.md",
+      "pr": "https://github.com/pablitxn/t3-designer/pull/5",
+      "commits": [
+        "0b5a4aeb413df924dcc0dd1ab1911f7a35e3f91e fix: preserve owner drafts when cancelling history navigation",
+        "07cd81cface746a061c5c33287ad85d718fbcb9d fix: confirm and replay asset answers; add isolated owner UI QA",
+        "fcfba71947b949584a41535b65630e89de793bc0 docs: record owner UI coverage, evidence and integration overlap",
+        "d260d40551a686442841ad674a34cb80c8dfed33 docs: distinguish setup viewports from tested application screens",
+        "bc01ee5b98f858784353d533ac957944706af199 docs: normalize owner QA matrix line endings"
+      ]
+    },
+    {
+      "role": "editor",
+      "branch": "qa/shared-project-editor-20261013",
+      "sha": "7fe34e94419fe4c074937072dc55f85d5b216f3e",
+      "report": "docs/qa/shared-project-editor-2026-10-13.md",
+      "pr": "https://github.com/pablitxn/t3-designer/pull/6",
+      "commits": [
+        "f304628a3fdc96ba1efbfa3d4b4735a4f53a31ec fix: preserve shared editor drafts and refresh revoked access",
+        "2e81f2506e4108760d59f7729aa7dbc282bb1539 test: isolate workshop health probe and record shared editor QA",
+        "7fe34e94419fe4c074937072dc55f85d5b216f3e docs: keep shared editor QA evidence portable"
+      ]
+    },
+    {
+      "role": "viewer",
+      "branch": "qa/t3-project-viewer-20261013",
+      "sha": "85d2374363ed94242f24fb2c6cfc262c94ce355c",
+      "report": "docs/qa/project-viewer-2026-10-13.md",
+      "pr": "https://github.com/pablitxn/t3-designer/pull/7",
+      "commits": [
+        "c1de9b0ba1f05cdda676fd10fa96216ef5f353d9 fix: keep shared project viewers isolated across access and session changes",
+        "85d2374363ed94242f24fb2c6cfc262c94ce355c docs: record project viewer UI matrix and integration boundaries"
+      ]
+    }
+  ]
+}

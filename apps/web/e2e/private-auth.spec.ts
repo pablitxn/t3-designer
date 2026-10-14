@@ -62,13 +62,15 @@ test('recovers a password with a one-use fragment token and returns to sign-in',
 })
 
 test('session expiry clears mounted private data before showing sign-in', async ({ page }) => {
+  let expired = false
   await page.route('**/api/**', route => {
     const path = new URL(route.request().url()).pathname
-    if (path === '/api/me') return route.fulfill({ json: { user } })
+    if (path === '/api/me') return route.fulfill(expired ? { status: 401, json: { error: 'Unauthorized' } } : { json: { user } })
     return route.fulfill({ json: { projects: [{ id: 'project-private', name: 'Private project title', notes: '', role: 'owner', ownerId: user.id, revision: 1, createdAt: '2026-10-04T10:00:00Z', updatedAt: '2026-10-04T10:00:00Z' }] } })
   })
   await page.goto('/app')
   await expect(page.getByRole('heading', { name: 'Private project title' })).toBeVisible()
+  expired = true
   await page.evaluate(() => window.dispatchEvent(new Event('t3:session-expired')))
   await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()

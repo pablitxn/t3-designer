@@ -48,6 +48,12 @@ browser:
     - pnpm test:accounts
     - pnpm test:demo
     - pnpm test:anonymous
+    - pnpm test:anonymous:webgl
+    - pnpm test:admin
+    - pnpm test:owner
+    - T3_QA_WEBGL=true pnpm test:owner
+    - pnpm test:shared-editor --project chromium-mobile-narrow --project chromium-mobile-wide --project chromium-desktop
+    - pnpm test:viewer
   artifacts:
     when: always
     paths: [apps/web/test-results/]
