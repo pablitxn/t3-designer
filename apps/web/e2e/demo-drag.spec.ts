@@ -6,7 +6,7 @@ import { arrangementCard, selectedArrangementId } from './arrangement-helpers'
 // The shared apartment/solar scene spends up to 50s preparing software WebGL.
 // Keep the real geometry and camera, and use the same bounded CI budget locally.
 test.setTimeout(180_000)
-test.use({ locale: 'es-AR', viewport: { width: 1284, height: 926 }, launchOptions: { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] } })
+test.use({ locale: 'es-AR', viewport: { width: 1284, height: 926 }, launchOptions: { ...(process.env.T3_ANONYMOUS_EXECUTABLE ? { executablePath: process.env.T3_ANONYMOUS_EXECUTABLE } : {}), args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--enable-webgl', '--ignore-gpu-blocklist'] } })
 
 for (const mode of ['top', '3d'] as const) test(`public ${mode} WebGL drag saves furniture and refuses fixed installations`, { tag: '@webgl' }, async ({ page }) => {
   const errors: string[] = []

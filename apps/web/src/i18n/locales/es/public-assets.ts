@@ -8,6 +8,7 @@ export default {
   curated: 'Selección pública del taller · 3 de octubre de 2026. Son aproximaciones independientes, no modelos oficiales de IKEA.',
   history: 'Historial guardado', historyHelp: 'Cada entrada corresponde a una versión guardada. Las correcciones pendientes siguen indicadas junto al modelo.',
   generated: 'Creado', front: 'Frente', side: 'Perfil', perspective: 'Perspectiva',
+  imageFailed: 'No se pudo cargar esta imagen. Podés reintentar o elegir otra vista.', retryImage: 'Reintentar imagen',
   draftHelp: 'Las medidas exteriores provienen de la ficha de producto archivada. La forma, los detalles y los materiales todavía necesitan revisión visual.',
   measurements: 'Ficha IKEA consultada el 3 de octubre de 2026',
   correction: 'Necesita otra corrección', correctionHelp: 'La revisión visual de esta versión todavía señala diferencias en el asiento, el volumen del respaldo y la unión con la base. No se considera una réplica fiel.',
