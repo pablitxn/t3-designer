@@ -262,3 +262,24 @@ test('switching history discards delayed events from the previous creation on a 
   await expect(page.locator('.workshop-activity')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })
+
+test('initial workshop connection completes without waiting for the polling interval after StrictMode replay', async ({ page }) => {
+  // Delay only workshop polling; React's lazy loading and scheduler stay real.
+  await page.addInitScript(() => {
+    const browserWindow: Window = window
+    const interval = browserWindow.setInterval.bind(browserWindow)
+    browserWindow.setInterval = (handler, delay, ...args) => interval(handler, delay === 3000 ? 60_000 : delay, ...args)
+  })
+  await page.route('**/api/**', route => {
+    const path = new URL(route.request().url()).pathname
+    if (path === '/api/me') return route.fulfill({ json: { user: account } })
+    if (path === '/api/credits') return route.fulfill({ json: creditFixture })
+    if (path === '/api/health') return route.fulfill({ json: health })
+    if (path === '/api/jobs') return route.fulfill({ json: { jobs: [] } })
+    if (path === '/api/assets') return route.fulfill({ json: { assets: [] } })
+    return route.fulfill({ status: 404, json: { error: 'Unknown fixture route' } })
+  })
+  await page.goto('/app/assets')
+  await expect(page.getByText('Taller conectado', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Crear objeto 3D' })).toBeEnabled()
+})

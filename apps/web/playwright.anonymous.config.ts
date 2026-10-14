@@ -54,7 +54,7 @@ export default defineConfig({
     },
     {
       command: `pnpm exec vite --mode full --host 127.0.0.1 --port ${port} --strictPort`, url: baseURL, reuseExistingServer: false,
-      env: { T3_API_PROXY_URL: `http://127.0.0.1:${apiPort}` },
+      env: { T3_VITE_CACHE_DIR: join(dataDirectory, 'vite-cache'), T3_API_PROXY_URL: `http://127.0.0.1:${apiPort}` },
     },
   ],
 })

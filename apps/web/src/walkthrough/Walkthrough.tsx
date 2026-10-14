@@ -168,7 +168,7 @@ export function Walkthrough({ snapshot, onClose, initialMoment, reference = fals
     <div className="walk-layout">
       <div className="walk-stage" data-testid="walk-stage">
         <WebGLGuard fallback={fallback}>
-          <Canvas shadows={{ type: PCFShadowMap }} dpr={[1, 1.5]} camera={{ fov, near: .04, far: 600 }} fallback={fallback} tabIndex={0} aria-label={c.title}
+          <Canvas frameloop={active ? 'always' : 'demand'} shadows={{ type: PCFShadowMap }} dpr={[1, 1.5]} camera={{ fov, near: .04, far: 600 }} fallback={fallback} tabIndex={0} aria-label={c.title}
             onCreated={({ gl }) => { canvas.current = gl.domElement; gl.domElement.tabIndex = 0; setReady(true) }}>
             <WalkthroughWorld snapshot={snapshot} sun={solar.sun} artificialLights={artificialLights} doorStates={doorStates} context={context} />
             <WalkController world={initialWorld} collisionWorld={world} spawn={spawn} resetKey={reset} active={active} input={input} eyeHeight={eyeHeight} sensitivity={sensitivity} onPose={setPose} onPause={pause} onInteract={interact} />

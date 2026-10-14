@@ -171,28 +171,50 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
   const [showEnergy, setShowEnergy] = useState(false)
   const [walking, setWalking] = useState(false)
   const generation = useRef(0)
+  const denyAccess = useCallback(() => {
+    generation.current++
+    setProject(null); setDirty(false); setConflict(false); setNotice(''); setError(copy.current.projectUnavailable)
+  }, [])
   const load = useCallback(async (signal?: AbortSignal) => {
     setError(''); setNotice('')
-    try { const { project } = await request<{ project: Project }>(`/api/projects/${id}`, { signal }); setProject(project); setDirty(false); setConflict(false) }
-    catch (reason) { if (!signal?.aborted) setError(reason instanceof PrivateApiError && [403, 404].includes(reason.status) ? copy.current.projectUnavailable : copy.current.unavailable) }
-  }, [id])
+    try { const { project } = await request<{ project: Project }>(`/api/projects/${id}`, { signal }); if (!signal?.aborted) { setProject(project); setDirty(false); setConflict(false) } }
+    catch (reason) { if (!signal?.aborted) { if (reason instanceof PrivateApiError && [403, 404].includes(reason.status)) denyAccess(); else setError(copy.current.unavailable) } }
+  }, [id, denyAccess])
   useEffect(() => { const abort = new AbortController(); void load(abort.signal); return () => { generation.current++; abort.abort() } }, [load])
+  useEffect(() => {
+    const role = project?.role
+    if (role !== 'viewer' && role !== 'editor') return
+    const abort = new AbortController()
+    let latest = 0
+    const recheck = () => {
+      if (document.hidden) return
+      const sequence = ++latest
+      // PrivateApp checks session identity on focus and on the same interval.
+      // A background 401 using the previous account's cookie must not expire
+      // the new account while its current session check is still in flight.
+      void request<{ project: Project }>(`/api/projects/${id}`, { signal: abort.signal }, false).then(({ project: current }) => {
+        if (abort.signal.aborted || sequence !== latest) return
+        // Preserve a member's local draft and viewer navigation. A changed role
+        // takes effect immediately; a changed revision stays a save conflict
+        // while the editor has unsaved changes.
+        if (current.role !== role) { generation.current++; setDirty(false); setConflict(false); setNotice('') }
+        setProject(previous => previous && previous.role === current.role && (dirty || previous.revision === current.revision) ? previous : current)
+      }).catch(reason => {
+        if (!abort.signal.aborted && sequence === latest && reason instanceof PrivateApiError && [403, 404].includes(reason.status)) denyAccess()
+      })
+    }
+    window.addEventListener('focus', recheck)
+    document.addEventListener('visibilitychange', recheck)
+    const interval = setInterval(recheck, 60_000)
+    return () => { abort.abort(); clearInterval(interval); window.removeEventListener('focus', recheck); document.removeEventListener('visibilitychange', recheck) }
+  }, [id, project?.role, dirty, denyAccess])
   useEffect(() => {
     if (!dirty) return
     const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = '' }
     const beforeNavigate = (event: Event) => { if (!window.confirm(copy.current.discard)) event.preventDefault() }
-    const onHistoryNavigation = (event: PopStateEvent) => {
-      // Programmatic navigation already ran the cancellable guard above.
-      if (!event.isTrusted || window.location.pathname === `/app/projects/${id}`) return
-      if (!window.confirm(copy.current.discard)) {
-        window.history.pushState(null, '', `/app/projects/${id}`)
-        window.dispatchEvent(new PopStateEvent('popstate'))
-      }
-    }
     window.addEventListener('beforeunload', beforeUnload)
     window.addEventListener('t3:before-navigate', beforeNavigate)
-    window.addEventListener('popstate', onHistoryNavigation)
-    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate); window.removeEventListener('popstate', onHistoryNavigation) }
+    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('t3:before-navigate', beforeNavigate) }
   }, [dirty, id])
   function change(next: Project) {
     if (busy || project?.role === 'viewer') return
@@ -213,7 +235,19 @@ function ProjectEditor({ id, c }: { id: string; c: PrivateCopy }) {
     if (project.foundations && !ProjectFoundationsSchema.safeParse(project.foundations).success) { setError(f.invalidFields); return }
     setBusy(true); setError(''); setNotice(''); const version = generation.current
     try { const data = await mutate<{ project: Project }>(`/api/projects/${id}`, { revision: project.revision, name: project.name.trim(), notes: project.notes, ...(project.scene ? { scene: project.scene } : {}), ...(project.foundations ? { foundations: project.foundations } : {}), ...(project.foundationModels?.levels.length ? { levels: project.foundationModels.levels, activeLevelId: project.foundationModels.activeLevelId } : {}) }, 'PUT'); if (generation.current === version) { setProject(data.project); setDirty(false); setConflict(false); setNotice(c.saved) } }
-    catch (reason) { if (generation.current === version) { const stale = reason instanceof PrivateApiError && reason.status === 409; setConflict(stale); setError(stale ? c.conflict : c.genericError) } } finally { setBusy(false) }
+    catch (reason) {
+      if (generation.current === version) {
+        if (reason instanceof PrivateApiError && [403, 404].includes(reason.status)) {
+          // Membership may have been removed or changed to viewer during editing.
+          setProject(null); setDirty(false); setConflict(false)
+          if (reason.status === 403) await load()
+          else setError(c.projectUnavailable)
+        } else {
+          const stale = reason instanceof PrivateApiError && reason.status === 409
+          setConflict(stale); setError(stale ? c.conflict : c.genericError)
+        }
+      }
+    } finally { setBusy(false) }
   }
   async function duplicate() { if (busy) return; setBusy(true); setError(''); try { const data = await mutate<{ project: Project }>(`/api/projects/${id}/clone`, {}); goTo(`/app/projects/${data.project.id}`) } catch { setError(c.genericError) } finally { setBusy(false) } }
   if (!project) return <><Feedback message={error} error />{error ? <button className={button} onClick={() => { void load() }}>{c.retry}</button> : <p role="status" className={muted}>{c.loading}</p>}</>
@@ -259,6 +293,7 @@ export default function PrivateApp() {
   const projectId = /^\/app\/projects\/([a-zA-Z0-9-]+)\/?$/.exec(path)?.[1]
   const mounted = useRef(true)
   const sessionEpoch = useRef(0)
+  const sessionCheckSequence = useRef(0)
   const authenticated = useRef(false)
   const currentCopy = useRef(c)
   useEffect(() => { currentCopy.current = c }, [c])
@@ -268,19 +303,30 @@ export default function PrivateApp() {
   useEffect(() => { document.title = `${accountPage ? recovery ? c.resetPassword : invitation ? c.acceptInvite : c.signIn : c.workspace} · T3 Designer` }, [accountPage, invitation, recovery, c])
   const checkSession = useCallback(async (signal?: AbortSignal) => {
     const epoch = sessionEpoch.current
-    try { const data = await request<{ user: AccountUser }>('/api/me', { signal }, false); if (!signal?.aborted && mounted.current && epoch === sessionEpoch.current) { authenticated.current = true; setUser(data.user); setStatus('ready') } }
-    catch (reason) { if (signal?.aborted || !mounted.current || epoch !== sessionEpoch.current) return; if (reason instanceof PrivateApiError && reason.status === 401) { authenticated.current = false; setUser(null); setStatus('ready') } else if (authenticated.current) setError(currentCopy.current.unavailable); else setStatus('unavailable') }
+    const sequence = ++sessionCheckSequence.current
+    try { const data = await request<{ user: AccountUser }>('/api/me', { signal }, false); if (!signal?.aborted && mounted.current && epoch === sessionEpoch.current && sequence === sessionCheckSequence.current) { authenticated.current = true; setUser(data.user); setStatus('ready'); setError('') } }
+    catch (reason) { if (signal?.aborted || !mounted.current || epoch !== sessionEpoch.current || sequence !== sessionCheckSequence.current) return; if (reason instanceof PrivateApiError && reason.status === 401) { authenticated.current = false; setUser(null); setStatus('ready') } else if (authenticated.current) setError(currentCopy.current.unavailable); else setStatus('unavailable') }
   }, [])
   useEffect(() => { mounted.current = true; const abort = new AbortController(); void checkSession(abort.signal); return () => { mounted.current = false; abort.abort() } }, [checkSession])
-  useEffect(() => { function expired() { sessionEpoch.current++; authenticated.current = false; setUser(null); setStatus('ready'); setError(c.expired); goTo('/login', true, true) } window.addEventListener('t3:session-expired', expired); return () => window.removeEventListener('t3:session-expired', expired) }, [c.expired])
+  useEffect(() => {
+    function expired() {
+      // Clear mounted private data immediately, then check the current cookie.
+      // A late 401 from another tab's previous account is not proof that the
+      // account now signed in has expired as well.
+      sessionEpoch.current++; authenticated.current = false; setUser(null); setStatus('loading'); setError(c.expired)
+      void checkSession()
+    }
+    window.addEventListener('t3:session-expired', expired)
+    return () => window.removeEventListener('t3:session-expired', expired)
+  }, [c.expired, checkSession])
   useEffect(() => { if (status === 'ready' && !user && !accountPage) goTo('/login', true, true) }, [status, user, accountPage])
   useEffect(() => { if (!user) return; const onFocus = () => { if (!document.hidden) void checkSession() }; window.addEventListener('focus', onFocus); const interval = setInterval(onFocus, 60_000); return () => { window.removeEventListener('focus', onFocus); clearInterval(interval) } }, [user, checkSession])
-  async function signOut() { if (busy || !window.dispatchEvent(new CustomEvent('t3:before-navigate', { cancelable: true }))) return; setBusy(true); setError(''); try { await mutate('/api/account/sign-out', {}); sessionEpoch.current++; authenticated.current = false; setUser(null); goTo('/login', true, true) } catch { setError(c.genericError) } finally { setBusy(false) } }
+  async function signOut() { if (busy || !window.dispatchEvent(new CustomEvent('t3:before-navigate', { cancelable: true }))) return; setBusy(true); setError(''); try { await mutate('/api/account/sign-out', {}); sessionEpoch.current++; authenticated.current = false; setUser(null); setStatus('ready'); goTo('/login', true, true) } catch { setError(c.genericError) } finally { setBusy(false) } }
   return <main className="tw:min-h-dvh tw:bg-[var(--settings-surface)] tw:text-[color:var(--settings-text)]"><header className="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4 tw:border-0 tw:border-b tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:px-5 tw:py-5 tw:md:px-8"><a className="tw:text-lg tw:font-semibold tw:tracking-tight tw:text-inherit tw:no-underline" href="/">T3 Designer <span className={`${muted} tw:ml-2 tw:text-xs tw:font-normal tw:tracking-normal`}>{c.workspace}</span></a><div className="tw:flex tw:items-center tw:gap-3"><a href="/#apartment" className={`${muted} tw:text-xs tw:no-underline tw:hover:underline`}>{c.demo} ↗</a><ApplicationSettings key={user?.id ?? 'guest'} sections={user ? [{
       id: 'usage', label: getUsageCopy(language).title, description: getUsageCopy(language).intro,
       icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="M4 4v16h16M8 15v-4m5 4V6m5 9v-7" /></svg>,
       content: <Suspense fallback={<p role="status">{c.loading}</p>}><UsagePage key={user.id} language={language} embedded /></Suspense>,
     }] : []} />{user && <button className={button} disabled={busy} onClick={() => { void signOut() }}>{busy ? c.pending : c.signOut}</button>}</div></header>
-    {status === 'loading' ? <p className={`${muted} tw:p-10 tw:text-center`} role="status">{c.loading}</p> : status === 'unavailable' ? <div className="tw:mx-auto tw:max-w-lg tw:p-8"><Feedback message={c.unavailable} error /><button className={button} onClick={() => { setStatus('loading'); void checkSession() }}>{c.retry}</button></div> : accountPage ? <><div className="tw:mx-auto tw:max-w-5xl tw:px-5"><Feedback message={error} /></div><AccountForm key={path} invitation={invitation} recovery={recovery} token={token} c={c} language={language} onSignedIn={account => { sessionEpoch.current++; authenticated.current = true; setUser(account); setError('') }} onRecovered={() => { sessionEpoch.current++; authenticated.current = false; setUser(null); setError(c.recoveryDone) }} /></> : user ? <div className="tw:grid tw:min-h-[calc(100dvh-85px)] tw:lg:grid-cols-[220px_minmax(0,1fr)]"><aside className="tw:border-0 tw:border-b tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:p-5 tw:lg:border-r tw:lg:border-b-0"><p className="tw:mb-1 tw:mt-1 tw:truncate tw:text-sm tw:font-medium">{user.name}</p><p className={`${muted} tw:mb-6 tw:mt-1 tw:truncate tw:text-xs`}>{user.email}</p><CreditBadge key={user.id} language={language} /><nav aria-label={c.workspace} className="tw:flex tw:flex-wrap tw:gap-2 tw:lg:flex-col">{([{ href: '/app', label: c.projects }, { href: '/app/assets', label: c.assets }, { href: '/app/credits', label: a.credits }, { href: '/app/usage', label: getUsageCopy(language).title }, ...(user.role === 'admin' || user.canInvite ? [{ href: '/app/users', label: user.role === 'admin' ? c.users : a.invitations }] : [])]).map(item => <RouteLink key={item.href} href={item.href} current={path === item.href || (item.href === '/app' && !!projectId)} className={`tw:rounded-lg tw:px-3 tw:py-3 tw:text-sm tw:no-underline tw:transition-colors ${path === item.href || (item.href === '/app' && !!projectId) ? 'tw:bg-[var(--settings-accent-soft)] tw:font-medium tw:text-[color:var(--settings-accent)]' : `${muted} tw:hover:bg-[var(--settings-surface)]`}`}>{item.label}</RouteLink>)}</nav></aside><div className="tw:min-w-0 tw:px-5 tw:py-8 tw:md:px-8"><Feedback message={error} error />{projectId ? <ProjectEditor key={`${user.id}:${projectId}`} id={projectId} c={c} /> : path === '/app/assets' ? <Suspense fallback={<p role="status">{c.loading}</p>}><AssetsExplorer key={user.id} /></Suspense> : path === '/app/generate' ? <Suspense fallback={<p role="status">{c.loading}</p>}><ProjectGenerator key={user.id} c={c} language={language} /></Suspense> : path === '/app/usage' ? <Suspense fallback={<p role="status">{c.loading}</p>}><UsagePage key={user.id} language={language} /></Suspense> : path === '/app/credits' ? <CreditWallet key={user.id} c={c} language={language} /> : path === '/app/users' && (user.role === 'admin' || user.canInvite) ? <People key={user.id} c={c} user={user} language={language} /> : <Projects key={user.id} c={c} language={language} />}</div></div> : null}
+    {status === 'loading' ? <p className={`${muted} tw:p-10 tw:text-center`} role="status">{c.loading}</p> : status === 'unavailable' ? <div className="tw:mx-auto tw:max-w-lg tw:p-8"><Feedback message={c.unavailable} error /><button className={button} onClick={() => { setStatus('loading'); void checkSession() }}>{c.retry}</button></div> : accountPage ? <><div className="tw:mx-auto tw:max-w-5xl tw:px-5"><Feedback message={error} /></div><AccountForm key={path} invitation={invitation} recovery={recovery} token={token} c={c} language={language} onSignedIn={account => { sessionEpoch.current++; authenticated.current = true; setUser(account); setStatus('ready'); setError('') }} onRecovered={() => { sessionEpoch.current++; authenticated.current = false; setUser(null); setStatus('ready'); setError(c.recoveryDone) }} /></> : user ? <div className="tw:grid tw:min-h-[calc(100dvh-85px)] tw:lg:grid-cols-[220px_minmax(0,1fr)]"><aside className="tw:min-w-0 tw:border-0 tw:border-b tw:border-solid tw:border-[var(--settings-border)] tw:bg-[var(--settings-bg)] tw:p-5 tw:lg:border-r tw:lg:border-b-0"><p className="tw:mb-1 tw:mt-1 tw:truncate tw:text-sm tw:font-medium">{user.name}</p><p className={`${muted} tw:mb-6 tw:mt-1 tw:truncate tw:text-xs`}>{user.email}</p><CreditBadge key={user.id} language={language} /><nav aria-label={c.workspace} className="tw:flex tw:flex-wrap tw:gap-2 tw:lg:flex-col">{([{ href: '/app', label: c.projects }, { href: '/app/assets', label: c.assets }, { href: '/app/credits', label: a.credits }, { href: '/app/usage', label: getUsageCopy(language).title }, ...(user.role === 'admin' || user.canInvite ? [{ href: '/app/users', label: user.role === 'admin' ? c.users : a.invitations }] : [])]).map(item => <RouteLink key={item.href} href={item.href} current={path === item.href || (item.href === '/app' && !!projectId)} className={`tw:rounded-lg tw:px-3 tw:py-3 tw:text-sm tw:no-underline tw:transition-colors ${path === item.href || (item.href === '/app' && !!projectId) ? 'tw:bg-[var(--settings-accent-soft)] tw:font-medium tw:text-[color:var(--settings-accent)]' : `${muted} tw:hover:bg-[var(--settings-surface)]`}`}>{item.label}</RouteLink>)}</nav></aside><div className="tw:min-w-0 tw:px-5 tw:py-8 tw:md:px-8"><Feedback message={error} error />{projectId ? <ProjectEditor key={`${user.id}:${projectId}`} id={projectId} c={c} /> : path === '/app/assets' ? <Suspense fallback={<p role="status">{c.loading}</p>}><AssetsExplorer key={user.id} /></Suspense> : path === '/app/generate' ? <Suspense fallback={<p role="status">{c.loading}</p>}><ProjectGenerator key={user.id} c={c} language={language} /></Suspense> : path === '/app/usage' ? <Suspense fallback={<p role="status">{c.loading}</p>}><UsagePage key={user.id} language={language} /></Suspense> : path === '/app/credits' ? <CreditWallet key={user.id} c={c} language={language} /> : path === '/app/users' && (user.role === 'admin' || user.canInvite) ? <People key={user.id} c={c} user={user} language={language} /> : <Projects key={user.id} c={c} language={language} />}</div></div> : null}
   </main>
 }

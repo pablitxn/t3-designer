@@ -43,15 +43,20 @@
     "test:demo": "pnpm --filter @t3-designer/web test:demo",
     "test:anonymous": "pnpm --filter @t3-designer/web exec playwright test anonymous.spec.ts anonymous-details.spec.ts --config playwright.anonymous.config.ts",
     "test:anonymous:webgl": "T3_ANONYMOUS_WEBGL=1 pnpm --filter @t3-designer/web exec playwright test anonymous-webgl.spec.ts --config playwright.anonymous.config.ts",
-    "check:all": "pnpm audit:history && pnpm check && pnpm test:e2e && pnpm test:analytics && pnpm test:accounts && pnpm test:demo && pnpm test:anonymous && pnpm test:anonymous:webgl",
+    "check:all": "pnpm audit:history && pnpm check && pnpm test:e2e && pnpm test:analytics && pnpm test:accounts && pnpm test:demo && pnpm test:anonymous && pnpm test:anonymous:webgl && pnpm test:admin && pnpm test:shared-editor && pnpm test:owner && pnpm test:viewer",
     "account": "pnpm --filter @t3-designer/api account",
     "codex:check": "pnpm --filter @t3-designer/api codex:check",
     "codex:session": "node --env-file-if-exists=.env apps/api/src/codex-session-cli.ts",
     "test:accounts": "pnpm --filter @t3-designer/web test:accounts",
+    "test:admin": "pnpm --filter @t3-designer/web exec playwright test --config playwright.admin.config.ts",
+    "qa:admin": "node scripts/qa-global-admin.mjs",
+    "test:viewer": "pnpm --filter @t3-designer/web test:viewer",
     "audit:english": "node scripts/audit_english.mjs",
     "audit:public": "node scripts/audit_public_artifacts.mjs",
     "audit:dist": "node scripts/audit_public_artifacts.mjs --build apps/web/dist",
-    "audit:history": "node scripts/audit_public_history.mjs"
+    "audit:history": "node scripts/audit_public_history.mjs",
+    "test:shared-editor": "pnpm --filter @t3-designer/web test:shared-editor",
+    "test:owner": "pnpm --filter @t3-designer/web exec playwright test --config playwright.owner.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
