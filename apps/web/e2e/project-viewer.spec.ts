@@ -44,9 +44,16 @@ async function browserFetch(page: Page, path: string, method = 'GET', body?: unk
     return { status: response.status, headers: Object.fromEntries(response.headers), text: method === 'HEAD' ? '' : await response.text() }
   }, { path, method, body })
 }
+async function disableWebGL(page: Page) {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext
+    Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', { value: function (kind: string, ...args: unknown[]) { return /webgl/i.test(kind) ? null : Reflect.apply(original, this, [kind, ...args]) } })
+  })
+}
 
 for (const role of ['user', 'admin'] as const) for (const tier of ['standard', 'premium'] as const) {
   test(`${tier} ${role} with viewer membership stays read-only and loses access on revocation`, async ({ page, scenario }, info) => {
+    await disableWebGL(page)
     // Seed only this disposable account; authorization still runs through real HTTP handlers.
     await scenario.database.db.updateTable('user').set({ role }).where('id', '=', scenario.users.viewer.id).execute()
     await scenario.accounts.credits.setTier(scenario.users.viewer.id, tier)
@@ -415,10 +422,7 @@ test('walkthrough renders existing assets, moves, pauses, cancels input and keep
 })
 
 test('WebGL-unavailable walkthrough shows fallback and a usable return', async ({ page, scenario }, info) => {
-  await page.addInitScript(() => {
-    const original = HTMLCanvasElement.prototype.getContext
-    Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', { value: function (kind: string, ...args: unknown[]) { return /webgl/i.test(kind) ? null : Reflect.apply(original, this, [kind, ...args]) } })
-  })
+  await disableWebGL(page)
   await login(page, scenario); await openReady(page, scenario)
   await page.getByRole('button', { name: /Recorrer esta versión/ }).click()
   const walk = page.getByTestId('walkthrough')
