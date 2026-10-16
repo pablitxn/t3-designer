@@ -2,6 +2,9 @@
 
 This index groups the project’s technical method, generalized demo data, optional backend, and contributor workflows.
 
+- [Current five-role non-3D QA (2026-10-16)](qa/current-20261016.md): merged SHA/CI, isolated browser coverage, mocks and remaining acceptance gates.
+- [Five-role integration receipt (2026-10-13)](qa/integration-20261013/README.md): historical batches and source provenance, with a current-status pointer.
+- [Structured Atlas handoff (2026-10-16)](qa/intake-20261016.md): product-owned evidence awaiting Atlas-owner consolidation.
 - [Deployment](deployment.md): static hosting and generic container contracts.
 - [Local backend](local-backend.md): optional Docker/native setup, administrator bootstrap and persistent storage.
 - [Site configuration](site-configuration.md): public operator notice and optional analytics.

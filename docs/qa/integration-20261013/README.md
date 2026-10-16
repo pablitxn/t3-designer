@@ -2,6 +2,16 @@
 
 # T3 — five-role QA integration (2026-10-13)
 
+Current-status pointer (observed 2026-10-16): aggregate [PR8](https://github.com/pablitxn/t3-designer/pull/8)
+merged on 2026-10-14 at `eaa25386e98352145fae4bcc7c52af9aae42c702`.
+[Main CI run38543975722](https://github.com/pablitxn/t3-designer/actions/runs/38543975722)
+completed successfully across all seven application jobs. PR3 and PR9 are also
+merged; source PRs4-7 are closed and superseded by PR8. The draft/pending labels
+below describe the dated delivery checkpoints, not current PR state. See the
+[current non-3D validation](../current-20261016.md) and
+[Atlas handoff](../intake-20261016.md) for scope and remaining gates. Historical
+matrices, captures and failures retain their original provenance.
+
 Status at the recorded checkpoint: DRAFT, local matrices complete; CI requires
 admin/viewer diagnosis. Not approved for merge/deployment. This report supersedes
 the cross-role status; source reports retain their branches' historical evidence.
