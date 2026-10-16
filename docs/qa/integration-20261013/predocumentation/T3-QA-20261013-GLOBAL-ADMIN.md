@@ -2,6 +2,12 @@
 
 # T3-QA-20261013-GLOBAL-ADMIN — Global administrator
 
+Current-status pointer (2026-10-16): the aggregate delivery is merged at
+`eaa25386e98352145fae4bcc7c52af9aae42c702`; see
+[current validation](../../current-20261016.md) and the
+[structured Atlas handoff](../../intake-20261016.md). This draft preserves its
+original checkpoint evidence. Atlas consolidation remains a separate owner task.
+
 Status: **pending consolidation**. This is an intake draft in the product repository, not an approved Atlas entry or new protocol.
 
 Primary source: [role report](../../2026-10-13-global-admin.md), [original PR](https://github.com/pablitxn/t3-designer/pull/4). Original branch `qa/t3-global-admin-20261013`; verified SHA `07d9c16e7707ed10cfdae3f592030ba27f76aa94`. Shared base `7a851eb7ab703016d78c102afeaac2a8d97b08f3`. Integration `qa/t3-integration-20261013`; tested code checkpoint `657060b0b459753c2d52c0643357bc1dd732ba51` (see report for final revision and later corrections).

@@ -1,5 +1,16 @@
 # English engineering content audit — T3 Designer, 2026-10-13
 
+Current-status pointer (observed 2026-10-16): [PR9](https://github.com/pablitxn/t3-designer/pull/9)
+merged on 2026-10-14 at `ffaee5f08fba7fd40b5c15adf8f51dad8c6be17b`.
+Subsequent aggregate [PR8](https://github.com/pablitxn/t3-designer/pull/8) merged
+at main `eaa25386e98352145fae4bcc7c52af9aae42c702`; its
+[main CI](https://github.com/pablitxn/t3-designer/actions/runs/38543975722) passed
+all seven application jobs. PR3 is merged; PRs4-7 are closed and superseded by
+PR8. Statements below about drafts, pending CI, branch ownership and “no merge”
+are historical audit checkpoints. They do not describe present PR state or
+establish deployment, comprehensive English compliance or provider quality.
+See [current validation](current-20261016.md) for this task's narrower scope.
+
 This audit covers repository-authored instructions, Markdown documentation,
 comments/docstrings and test descriptions, plus today's QA source PRs3–7 and the
 separate stacked language PR. Product behavior, API identifiers/contracts, fixture
