@@ -45,6 +45,63 @@ async function browserFetch(page: Page, path: string, method = 'GET', body?: unk
   }, { path, method, body })
 }
 
+for (const role of ['user', 'admin'] as const) for (const tier of ['standard', 'premium'] as const) {
+  test(`${tier} ${role} with viewer membership stays read-only and loses access on revocation`, async ({ page, scenario }, info) => {
+    // Seed only this disposable account; authorization still runs through real HTTP handlers.
+    await scenario.database.db.updateTable('user').set({ role }).where('id', '=', scenario.users.viewer.id).execute()
+    await scenario.accounts.credits.setTier(scenario.users.viewer.id, tier)
+    await login(page, scenario)
+    const me = await page.request.get(`${scenario.origin}/api/me`)
+    expect((await me.json()).user).toMatchObject({ id: scenario.users.viewer.id, role, tier })
+    await openReady(page, scenario)
+    await expect(page.getByLabel(/^Notas del proyecto/)).toHaveAttribute('readonly')
+    await expect(page.getByRole('button', { name: 'Guardar cambios', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Compartir proyecto', exact: true })).toHaveCount(0)
+    await page.getByRole('combobox', { name: 'Planta', exact: true }).selectOption('upper')
+    await page.getByRole('combobox', { name: 'Distribuciones', exact: true }).selectOption('qa-alternate')
+    const originals = await details(page, 'Planos y fuentes originales')
+    await expect(originals.getByRole('img', { name: scenario.plan.name })).toBeVisible()
+    await expect(originals.locator('input[type=file]')).toHaveCount(0)
+    await originals.locator('summary').first().click()
+    const checkpoints = await details(page, 'Puntos de recuperación del proyecto')
+    await expect(checkpoints).toContainText('Antes de reemplazar el edificio')
+    await expect(checkpoints.getByRole('button', { name: 'Restaurar este proyecto' })).toHaveCount(0)
+    await checkpoints.locator('summary').first().click()
+    const id = scenario.ready.id
+    const checkpoint = await scenario.database.db.selectFrom('t3_project_checkpoint').select('id').where('projectId', '=', id).executeTakeFirstOrThrow()
+    const creditsBefore = JSON.parse((await browserFetch(page, '/api/credits')).text)
+    const operations: [string, string, unknown][] = [
+      [`/api/projects/${id}`, 'PUT', { revision: 1, notes: 'Forbidden viewer edit' }],
+      [`/api/projects/${id}/members`, 'POST', { email: scenario.users.outsider.email, role: 'editor' }],
+      [`/api/projects/${id}/members/${scenario.users.viewer.id}`, 'DELETE', {}],
+      [`/api/projects/${id}/checkpoints/${checkpoint.id}/restore`, 'POST', { revision: 1 }],
+      [`/api/projects/${id}/foundation-agent`, 'POST', { target: 'dwelling', revision: 1, message: 'Forbidden generation' }],
+    ]
+    for (const [path, method, body] of operations) expect((await browserFetch(page, path, method, body)).status, path).toBe(403)
+    expect((await browserFetch(page, `/api/projects/${id}/members`)).status).toBe(403)
+    expect(JSON.parse((await browserFetch(page, '/api/credits')).text)).toEqual(creditsBefore)
+    expect(scenario.store.userJobs(scenario.users.viewer.id)).toEqual([])
+    await fits(page)
+    await page.screenshot({ path: info.outputPath(`${tier}-${role}-viewer.png`), fullPage: true })
+    await page.reload()
+    await expect(page.getByLabel(/^Notas del proyecto/)).toHaveAttribute('readonly')
+    await scenario.revoke()
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+    await expect(page.getByRole('alert')).toHaveText(unavailable)
+    await expect(page.getByLabel(/^Notas del proyecto/)).toHaveCount(0)
+    for (const path of [`/api/projects/${id}`, scenario.attached.url, `/api/projects/${id}/references/${scenario.plan.id}/image`]) {
+      expect((await browserFetch(page, path)).status, path).toBe(404)
+    }
+    await scenario.restoreAccess()
+    await page.getByRole('button', { name: 'Reintentar', exact: true }).click()
+    await expect(page.getByLabel(/^Notas del proyecto/)).toHaveAttribute('readonly')
+    await page.goto(`${scenario.origin}/app/projects/${scenario.foreign.id}`)
+    await expect(page.getByRole('alert')).toHaveText(unavailable)
+    await expect(page.getByText(scenario.foreign.name)).toHaveCount(0)
+    await unchanged(scenario)
+  })
+}
+
 test('listing, reviewed bases, plans, histories, floors, variants, context and energy remain read-only', async ({ page, scenario }, info) => {
   const errors: string[] = [], writes: string[] = []
   page.on('pageerror', error => errors.push(error.message))

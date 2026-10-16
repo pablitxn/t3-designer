@@ -139,7 +139,7 @@ export async function startViewerScenario({ webPort = 0 } = {}) {
   agentDb.close()
   for (const project of [ready, empty]) await database.db.insertInto('t3_project_member').values({ projectId: project.id, userId: users.viewer.id, role: 'viewer', createdAt: new Date().toISOString() }).execute()
   let closed = false
-  return { origin, directory, users, ready: document, empty, foreign, plan, asset, attached, versions, projects, database, store,
+  return { origin, directory, users, ready: document, empty, foreign, plan, asset, attached, versions, projects, accounts, database, store,
     revoke: () => database.db.deleteFrom('t3_project_member').where('projectId', '=', ready.id).where('userId', '=', users.viewer.id).execute(),
     restoreAccess: () => database.db.insertInto('t3_project_member').values({ projectId: ready.id, userId: users.viewer.id, role: 'viewer', createdAt: new Date().toISOString() }).execute(),
     expire: () => database.db.deleteFrom('session').where('userId', '=', users.viewer.id).execute(),
